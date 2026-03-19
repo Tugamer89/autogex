@@ -4,6 +4,11 @@ on:
   release:
     types: [published, created, released]
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Inserisci il tag della release'
+        required: true
+        default: 'v0.1.0'
 
 permissions:
   contents: write
@@ -28,5 +33,6 @@ jobs:
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe
         with:
           files: target/*.jar
+          tag_name: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

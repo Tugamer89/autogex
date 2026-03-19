@@ -40,8 +40,7 @@ public class DFA implements Automaton {
         for (char symbol : input.toCharArray()) {
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
             
-            // Se non c'è una transizione definita per questo carattere, l'automa si "rompe"
-            // (La stringa viene rifiutata).
+            // Se non c'è una transizione definita per questo carattere, la stringa viene rifiutata
             if (stateTransitions == null || !stateTransitions.containsKey(symbol)) {
                 return false;
             }

@@ -1,6 +1,10 @@
 package it.tugamer89.autogex.models;
 
+import it.tugamer89.autogex.core.State;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DFATest {
@@ -36,5 +40,51 @@ class DFATest {
         assertFalse(dfa.accepts("1"), "Non deve accettare 1");
         assertFalse(dfa.accepts("1111111"), "Non deve accettare solo 1");
         assertFalse(dfa.accepts(""), "Non deve accettare la stringa vuota");
+    }
+
+    @Test
+    void testDFAGetters() {
+        // Testa i metodi getter
+        DFA dfa = new DFA.Builder()
+                .addState("q0", false)
+                .addState("q1", true)
+                .setInitialState("q0")
+                .addTransition("q0", 'a', "q1")
+                .build();
+
+        Set<State> states = dfa.getStates();
+        assertEquals(2, states.size(), "Dovrebbero esserci esattamente 2 stati");
+
+        State initial = dfa.getInitialState();
+        assertNotNull(initial);
+        assertEquals("q0", initial.getName(), "Lo stato iniziale deve essere q0");
+
+        Set<State> finalStates = dfa.getFinalStates();
+        assertEquals(1, finalStates.size(), "Dovrebbe esserci un solo stato finale");
+        assertTrue(finalStates.iterator().next().isFinal(), "Lo stato in finalStates deve essere finale");
+    }
+
+    @Test
+    void testBuilderThrowsIllegalArgumentExceptionForMissingState() {
+        // Testa che venga lanciata un'eccezione se si aggiunge una transizione con stati non esistenti
+        DFA.Builder builder = new DFA.Builder().addState("q0", false);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            builder.addTransition("q0", 'a', "q1"); // "q1" non è mai stato aggiunto
+        });
+
+        assertTrue(exception.getMessage().contains("Stato non trovato"), "Il messaggio di errore deve indicare lo stato mancante");
+    }
+
+    @Test
+    void testBuilderThrowsIllegalStateExceptionForMissingInitialState() {
+        // Testa che non si possa costruire un DFA senza aver impostato lo stato iniziale
+        DFA.Builder builder = new DFA.Builder()
+                .addState("q0", false)
+                .addState("q1", true);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, builder::build);
+
+        assertTrue(exception.getMessage().contains("stato iniziale"), "Il messaggio di errore deve menzionare lo stato iniziale");
     }
 }

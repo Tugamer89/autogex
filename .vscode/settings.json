@@ -2,5 +2,6 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "tugamer89",
         "projectKey": "Tugamer89_autogex"
-    }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

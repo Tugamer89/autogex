@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "daily"
 
-  # Versioni delle Actions nei file .yml
+  # Versioni delle Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

@@ -2,7 +2,11 @@ name: Release Artifacts
 
 on:
   release:
-    types: [published]
+    types: [published, created, released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   upload-jar:

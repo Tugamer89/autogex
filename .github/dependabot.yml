@@ -1,8 +1,13 @@
 version: 2
 updates:
+  # Dipendenze Java nel pom.xml
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
-    assignees:
-      - "Tugamer89"
+
+  # Versioni delle Actions nei file .yml
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"

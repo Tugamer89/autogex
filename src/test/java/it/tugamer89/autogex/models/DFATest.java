@@ -11,7 +11,7 @@ class DFATest {
 
     @Test
     void testDFAAcceptsStringsWithAtLeastOneZero() {
-        // Automa dell'Esempio 2.1.3
+        // Esempio 2.1.3
         // Accetta le stringhe che contengono almeno un '0'
         DFA dfa = new DFA.Builder()
                 .addState("q0", false)
@@ -29,16 +29,17 @@ class DFATest {
                 .addTransition("q2", '1', "q0")
                 .build();
 
-        // Stringhe che contengono almeno uno zero
+        // ACCETTATE
         assertTrue(dfa.accepts("0"), "Deve accettare un singolo 0");
         assertTrue(dfa.accepts("100"), "Deve accettare 100");
         assertTrue(dfa.accepts("11110"), "Deve accettare 11110");
         assertTrue(dfa.accepts("10101"), "Deve accettare 10101");
 
-        // Stringhe senza zeri
+        // RIFIUTATE
         assertFalse(dfa.accepts("11"), "Non deve accettare 11");
         assertFalse(dfa.accepts("1"), "Non deve accettare 1");
         assertFalse(dfa.accepts("1111111"), "Non deve accettare solo 1");
+        assertFalse(dfa.accepts("10a"), "Non deve accettare 10a");
         assertFalse(dfa.accepts(""), "Non deve accettare la stringa vuota");
     }
 

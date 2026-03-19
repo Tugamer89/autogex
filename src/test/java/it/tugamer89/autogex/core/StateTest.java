@@ -10,10 +10,13 @@ class StateTest {
         State s1 = new State("q0", false);
         State s2 = new State("q0", false);
         State s3 = new State("q1", true);
+        Object nullObject = null;
 
         assertEquals(s1, s2, "Stati con stesso nome e flag final devono essere uguali");
         assertEquals(s1.hashCode(), s2.hashCode(), "Stati uguali devono avere stesso hashCode");
         assertNotEquals(s1, s3, "Stati diversi non devono essere uguali");
+        assertNotEquals(s1, nullObject, "Stato non deve essere uguale a null");
+        assertNotEquals(s1, new Object(), "Stato non deve essere uguale a un oggetto di classe diversa");
     }
 
     @Test

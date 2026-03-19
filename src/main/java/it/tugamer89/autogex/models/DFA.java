@@ -1,6 +1,7 @@
 package it.tugamer89.autogex.models;
 
-import it.tugamer89.autogex.core.Automaton;
+import it.tugamer89.autogex.core.AbstractAutomaton;
+import it.tugamer89.autogex.core.AbstractAutomatonBuilder;
 import it.tugamer89.autogex.core.State;
 
 import java.util.*;
@@ -8,30 +9,15 @@ import java.util.*;
 /**
  * Automa a Stati Finiti Deterministico (DFA).
  */
-public class DFA implements Automaton {
-    private final Set<State> states;
-    private final State initialState;
-    private final Set<State> finalStates;
+public class DFA extends AbstractAutomaton {
     
-    // Funzione di transizione: δ(q, σ) = q'
     // Mappa: Stato Partenza -> (Mappa: Carattere -> Stato Arrivo)
     private final Map<State, Map<Character, State>> transitionTable;
 
     private DFA(Builder builder) {
-        this.states = Set.copyOf(builder.states.values());
-        this.initialState = builder.initialState;
-        this.finalStates = Set.copyOf(builder.finalStates);
+        super(builder);
         this.transitionTable = Map.copyOf(builder.transitionTable);
     }
-
-    @Override
-    public Set<State> getStates() { return states; }
-
-    @Override
-    public State getInitialState() { return initialState; }
-
-    @Override
-    public Set<State> getFinalStates() { return finalStates; }
 
     @Override
     public boolean accepts(String input) {
@@ -55,23 +41,12 @@ public class DFA implements Automaton {
     /**
      * Pattern Builder per costruire il DFA in modo fluente.
      */
-    public static class Builder {
-        private final Map<String, State> states = new HashMap<>();
-        private final Set<State> finalStates = new HashSet<>();
+    public static class Builder extends AbstractAutomatonBuilder<Builder, DFA> {
+        
         private final Map<State, Map<Character, State>> transitionTable = new HashMap<>();
-        private State initialState;
 
-        public Builder addState(String name, boolean isFinal) {
-            State state = new State(name, isFinal);
-            states.put(name, state);
-            if (isFinal) {
-                finalStates.add(state);
-            }
-            return this;
-        }
-
-        public Builder setInitialState(String name) {
-            this.initialState = states.get(name);
+        @Override
+        protected Builder self() {
             return this;
         }
 
@@ -84,13 +59,12 @@ public class DFA implements Automaton {
             }
 
             transitionTable.computeIfAbsent(from, k -> new HashMap<>()).put(symbol, to);
-            return this;
+            return self();
         }
 
+        @Override
         public DFA build() {
-            if (initialState == null) {
-                throw new IllegalStateException("Lo stato iniziale deve essere impostato.");
-            }
+            validate();
             return new DFA(this);
         }
     }

@@ -38,6 +38,10 @@ public class DFA extends AbstractAutomaton {
         return finalStates.contains(currentState);
     }
 
+    public Map<State, Map<Character, State>> getTransitionTable() {
+        return transitionTable;
+    }
+
     /**
      * Pattern Builder per costruire il DFA in modo fluente.
      */

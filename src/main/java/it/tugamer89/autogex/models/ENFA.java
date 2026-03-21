@@ -70,6 +70,10 @@ public class ENFA extends AbstractAutomaton {
         return currentStates.stream().anyMatch(finalStates::contains);
     }
 
+    public Map<State, Map<Character, Set<State>>> getTransitionTable() {
+        return transitionTable;
+    }
+
     /**
      * Pattern Builder per costruire l'ENFA in modo fluente.
      */

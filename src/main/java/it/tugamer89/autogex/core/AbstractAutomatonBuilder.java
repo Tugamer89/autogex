@@ -3,12 +3,12 @@ package it.tugamer89.autogex.core;
 import java.util.*;
 
 /**
- * Builder astratto basato sul Curiously Recurring Template Pattern (CRTP).
- * Permette di condividere la logica di creazione degli stati tra tutti i Builder
- * specifici (DFA, NFA, ENFA) mantenendo il "method chaining" fluido.
+ * Abstract builder based on the Curiously Recurring Template Pattern (CRTP).
+ * Allows sharing state creation logic among all specific Builders
+ * (DFA, NFA, ENFA) while maintaining fluid method chaining.
  *
- * @param <B> Il tipo del Builder concreto (es. DFA.Builder)
- * @param <A> Il tipo dell'Automa da costruire (es. DFA)
+ * @param <B> The concrete Builder type (e.g., DFA.Builder)
+ * @param <A> The Automaton type to build (e.g., DFA)
  */
 public abstract class AbstractAutomatonBuilder<B extends AbstractAutomatonBuilder<B, A>, A extends Automaton> {
     
@@ -17,8 +17,10 @@ public abstract class AbstractAutomatonBuilder<B extends AbstractAutomatonBuilde
     protected State initialState;
 
     /**
-     * Metodo astratto che ogni Builder concreto deve implementare restituendo 'this'.
-     * Serve a garantire che il chaining restituisca il tipo corretto.
+     * Abstract method that each concrete Builder must implement by returning 'this'.
+     * Ensures that chaining returns the correct type.
+     *
+     * @return The current builder instance.
      */
     protected abstract B self();
 
@@ -37,11 +39,13 @@ public abstract class AbstractAutomatonBuilder<B extends AbstractAutomatonBuilde
     }
 
     /**
-     * Esegue i controlli di integrità comuni a tutti i builder.
+     * Performs integrity checks common to all builders.
+     *
+     * @throws IllegalStateException if the builder configuration is invalid.
      */
     protected void validate() {
         if (initialState == null) {
-            throw new IllegalStateException("Lo stato iniziale deve essere impostato prima della build.");
+            throw new IllegalStateException("The initial state must be set before calling build().");
         }
     }
 

@@ -7,11 +7,11 @@ import it.tugamer89.autogex.core.State;
 import java.util.*;
 
 /**
- * Automa a Stati Finiti Deterministico (DFA).
+ * Deterministic Finite Automaton (DFA).
  */
 public class DFA extends AbstractAutomaton {
     
-    // Mappa: Stato Partenza -> (Mappa: Carattere -> Stato Arrivo)
+    // Map: Source State -> (Map: Character -> Target State)
     private final Map<State, Map<Character, State>> transitionTable;
 
     private DFA(Builder builder) {
@@ -26,7 +26,7 @@ public class DFA extends AbstractAutomaton {
         for (char symbol : input.toCharArray()) {
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
             
-            // Se non c'è una transizione definita per questo carattere, la stringa viene rifiutata
+            // If there is no defined transition for this character, the string is rejected
             if (stateTransitions == null || !stateTransitions.containsKey(symbol)) {
                 return false;
             }
@@ -34,7 +34,7 @@ public class DFA extends AbstractAutomaton {
             currentState = stateTransitions.get(symbol);
         }
         
-        // La stringa è accettata se e solo se, alla fine, mi trovo in uno stato finale
+        // The string is accepted if and only if we end up in a final state
         return finalStates.contains(currentState);
     }
 
@@ -43,7 +43,7 @@ public class DFA extends AbstractAutomaton {
     }
 
     /**
-     * Pattern Builder per costruire il DFA in modo fluente.
+     * Builder pattern to construct the DFA fluently.
      */
     public static class Builder extends AbstractAutomatonBuilder<Builder, DFA> {
         
@@ -59,7 +59,7 @@ public class DFA extends AbstractAutomaton {
             State to = states.get(toName);
             
             if (from == null || to == null) {
-                throw new IllegalArgumentException("Stato non trovato. Aggiungilo prima con addState.");
+                throw new IllegalArgumentException("State not found. Add it first using addState.");
             }
 
             transitionTable.computeIfAbsent(from, k -> new HashMap<>()).put(symbol, to);

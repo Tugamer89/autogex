@@ -12,8 +12,8 @@ class MinimizerTest {
 
     @Test
     void testMinimizeRedundantDFA() {
-        // Gli stati q1 e q2 sono totalmente equivalenti.
-        // Lo stato q5 è irraggiungibile.
+        // States q1 and q2 are completely equivalent.
+        // State q5 is unreachable.
         DFA redundantDfa = new DFA.Builder()
                 .addState("q0", false)
                 .addState("q1", true)
@@ -22,17 +22,17 @@ class MinimizerTest {
                 .addState("q5", true)
                 .setInitialState("q0")
                 
-                // Transizioni da q0 vanno verso q1 e q2
+                // Transitions from q0 go to q1 and q2
                 .addTransition("q0", 'a', "q1")
                 .addTransition("q0", 'b', "q2")
                 
-                // q1 e q2 vanno entrambi in q3 con 'a' e restano in se stessi con 'b'
+                // q1 and q2 both go to q3 with 'a' and loop on themselves with 'b'
                 .addTransition("q1", 'a', "q3")
                 .addTransition("q1", 'b', "q1")
                 .addTransition("q2", 'a', "q3")
                 .addTransition("q2", 'b', "q2")
                 
-                // q3 torna a q0
+                // q3 goes back to q0
                 .addTransition("q3", 'a', "q0")
                 .addTransition("q3", 'b', "q0")
                 .build();
@@ -41,14 +41,14 @@ class MinimizerTest {
 
         DFA minimalDfa = Minimizer.minimize(redundantDfa);
 
-        // Totale stati attesi: q0_new, q1_q2_new, q3_new -> 3 stati!
-        assertEquals(3, minimalDfa.getStates().size(), "Il DFA minimo deve avere esattamente 3 stati");
+        // Expected total states: q0_new, q1_q2_new, q3_new -> 3 states!
+        assertEquals(3, minimalDfa.getStates().size(), "The minimal DFA must have exactly 3 states");
 
-        // Verifichiamo che i linguaggi coincidano
+        // Verify that the languages match
         String[] testStrings = {"a", "b", "abbb", "aa", "bbaa", "ababa", "", "bbbb"};
         for (String s : testStrings) {
             assertEquals(redundantDfa.accepts(s), minimalDfa.accepts(s),
-                    "I due DFA devono comportarsi in modo identico per la stringa: " + s);
+                    "Both DFAs must behave identically for the string: " + s);
         }
     }
 

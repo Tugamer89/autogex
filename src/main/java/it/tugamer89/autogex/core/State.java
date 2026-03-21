@@ -3,7 +3,7 @@ package it.tugamer89.autogex.core;
 import java.util.Objects;
 
 /**
- * Rappresenta uno stato (q) all'interno di un automa.
+ * Represents a state (q) within an automaton.
  */
 public class State {
     private final String name;

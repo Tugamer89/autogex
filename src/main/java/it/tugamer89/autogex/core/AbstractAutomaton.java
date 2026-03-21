@@ -3,8 +3,8 @@ package it.tugamer89.autogex.core;
 import java.util.Set;
 
 /**
- * Classe base astratta per tutti i modelli di automi.
- * Centralizza la gestione degli stati e dei relativi getter.
+ * Abstract base class for all automata models.
+ * Centralizes the management of states and their respective getters.
  */
 public abstract class AbstractAutomaton implements Automaton {
     protected final Set<State> states;

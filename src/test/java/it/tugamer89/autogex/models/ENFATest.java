@@ -11,7 +11,7 @@ class ENFATest {
 
     @Test
     void testENFAWithEpsilonTransitions() {
-        // Automa che riconosce "a*b*" sfruttando la ε-transizione
+        // Automaton that recognizes "a*b*" leveraging ε-transitions
         ENFA enfa = new ENFA.Builder()
                 .addState("q0", true)
                 .addState("q1", true)
@@ -21,58 +21,58 @@ class ENFATest {
                 .addTransition("q1", 'b', "q1")
                 .build();
 
-        // ACCETTATE
-        assertTrue(enfa.accepts(""), "Accetta stringa vuota (q0 finale)");
-        assertTrue(enfa.accepts("a"), "Accetta 'a'");
-        assertTrue(enfa.accepts("b"), "Accetta 'b' (salto ε in q1)");
-        assertTrue(enfa.accepts("ab"), "Accetta 'ab'");
-        assertTrue(enfa.accepts("aaaabbbb"), "Accetta 'aaaabbbb'");
+        // ACCEPTED
+        assertTrue(enfa.accepts(""), "Accepts empty string (q0 is final)");
+        assertTrue(enfa.accepts("a"), "Accepts 'a'");
+        assertTrue(enfa.accepts("b"), "Accepts 'b' (ε-jump to q1)");
+        assertTrue(enfa.accepts("ab"), "Accepts 'ab'");
+        assertTrue(enfa.accepts("aaaabbbb"), "Accepts 'aaaabbbb'");
 
-        // RIFIUTATE
-        assertFalse(enfa.accepts("ba"), "Rifiuta 'ba' (non si può tornare in dietro da q1)");
-        assertFalse(enfa.accepts("aba"), "Rifiuta 'aba'");
-        assertFalse(enfa.accepts("c"), "Rifiuta 'c'");
+        // REJECTED
+        assertFalse(enfa.accepts("ba"), "Rejects 'ba' (cannot jump back from q1)");
+        assertFalse(enfa.accepts("aba"), "Rejects 'aba'");
+        assertFalse(enfa.accepts("c"), "Rejects 'c'");
     }
 
     @Test
     void testENFAGetters() {
-        // Testa i metodi getter
+        // Tests the getter methods
         ENFA enfa = new ENFA.Builder()
                 .addState("q0", true)
                 .setInitialState("q0")
                 .build();
 
         Set<State> states = enfa.getStates();
-        assertEquals(1, states.size(), "Dovrebbe esserci esattamente 1 stato");
+        assertEquals(1, states.size(), "There should be exactly 1 state");
         
         State initial = enfa.getInitialState();
         assertNotNull(initial);
-        assertEquals("q0", initial.getName(), "Lo stato iniziale deve essere q0");
+        assertEquals("q0", initial.getName(), "The initial state must be q0");
         
         Set<State> finalStates = enfa.getFinalStates();
-        assertEquals(1, finalStates.size(), "Dovrebbe esserci un solo stato finale");
-        assertTrue(finalStates.iterator().next().isFinal(), "Lo stato in finalStates deve essere finale");
+        assertEquals(1, finalStates.size(), "There should be exactly 1 final state");
+        assertTrue(finalStates.iterator().next().isFinal(), "The state in finalStates must be final");
     }
 
     @Test
     void testBuilderThrowsIllegalArgumentExceptionForMissingState() {
-        // Testa che venga lanciata un'eccezione se si aggiunge una transizione con stati non esistenti
+        // Tests that an exception is thrown if adding a transition with non-existing states
         ENFA.Builder builder = new ENFA.Builder().addState("q0", false);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addEpsilonTransition("q0", "qX"); // "qX" non è mai stato aggiunto
+            builder.addEpsilonTransition("q0", "qX"); // "qX" was never added
         });
 
-        assertTrue(exception.getMessage().contains("Stato non trovato"), "Il messaggio di errore deve indicare lo stato mancante");
+        assertTrue(exception.getMessage().contains("State not found"), "The error message must mention the missing state");
     }
 
     @Test
     void testBuilderThrowsIllegalStateExceptionForMissingInitialState() {
-        // Testa che non si possa costruire un ENFA senza aver impostato lo stato iniziale
+        // Tests that an ENFA cannot be built without setting the initial state
         ENFA.Builder builder = new ENFA.Builder().addState("q0", false);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, builder::build);
 
-        assertTrue(exception.getMessage().contains("stato iniziale"), "Il messaggio di errore deve menzionare lo stato iniziale");
+        assertTrue(exception.getMessage().contains("initial state"), "The error message must mention the initial state");
     }
 }

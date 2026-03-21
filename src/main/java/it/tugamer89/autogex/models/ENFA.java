@@ -7,11 +7,11 @@ import it.tugamer89.autogex.core.State;
 import java.util.*;
 
 /**
- * Automa a Stati Finiti Non Deterministico con Epsilon Transizioni (ε-NFA).
+ * Non-Deterministic Finite Automaton with Epsilon Transitions (ε-NFA).
  */
 public class ENFA extends AbstractAutomaton {
     
-    // Il carattere 'null' viene usato per rappresentare la ε-transizione
+    // The 'null' character is used to represent an ε-transition
     private final Map<State, Map<Character, Set<State>>> transitionTable;
 
     private ENFA(Builder builder) {
@@ -20,8 +20,11 @@ public class ENFA extends AbstractAutomaton {
     }
 
     /**
-     * Calcola la ε-closure di un insieme di stati.
-     * (Tutti gli stati raggiungibili senza consumare input).
+     * Computes the ε-closure of a set of states.
+     * (All states reachable without consuming any input).
+     *
+     * @param startStates The initial set of states.
+     * @return The ε-closure set of states.
      */
     public Set<State> epsilonClosure(Set<State> startStates) {
         Set<State> closure = new HashSet<>(startStates);
@@ -31,10 +34,10 @@ public class ENFA extends AbstractAutomaton {
             State currentState = queue.poll();
             Map<Character, Set<State>> stateTransitions = transitionTable.get(currentState);
             
-            // Cerca le transizioni associate a null (ε)
+            // Look for transitions associated with null (ε)
             if (stateTransitions != null && stateTransitions.containsKey(null)) {
                 for (State nextState : stateTransitions.get(null)) {
-                    // Se non lo abbiamo ancora visitato, lo aggiungiamo alla closure e alla coda
+                    // If not visited yet, add it to the closure and to the queue
                     if (closure.add(nextState)) {
                         queue.add(nextState);
                     }
@@ -46,7 +49,7 @@ public class ENFA extends AbstractAutomaton {
 
     @Override
     public boolean accepts(String input) {
-        // Partiamo dalla ε-closure dello stato iniziale
+        // Start from the ε-closure of the initial state
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
         
         for (char symbol : input.toCharArray()) {
@@ -59,7 +62,7 @@ public class ENFA extends AbstractAutomaton {
                 }
             }
             
-            // Dopo aver letto il simbolo, espandiamo con la ε-closure
+            // After reading the symbol, expand with the ε-closure
             currentStates = epsilonClosure(nextStates);
             
             if (currentStates.isEmpty()) {
@@ -75,7 +78,7 @@ public class ENFA extends AbstractAutomaton {
     }
 
     /**
-     * Pattern Builder per costruire l'ENFA in modo fluente.
+     * Builder pattern to construct the ENFA fluently.
      */
     public static class Builder extends AbstractAutomatonBuilder<Builder, ENFA> {
         
@@ -91,7 +94,7 @@ public class ENFA extends AbstractAutomaton {
             State to = states.get(toName);
             
             if (from == null || to == null) {
-                throw new IllegalArgumentException("Stato non trovato. Aggiungilo prima con addState.");
+                throw new IllegalArgumentException("State not found. Add it first using addState.");
             }
 
             transitionTable.computeIfAbsent(from, k -> new HashMap<>())
@@ -100,7 +103,9 @@ public class ENFA extends AbstractAutomaton {
             return this;
         }
 
-        // Metodo di utilità per rendere il codice più leggibile per le transizioni silenti
+        /**
+         * Utility method to make silent transitions more readable.
+         */
         public Builder addEpsilonTransition(String fromName, String toName) {
             return addTransition(fromName, null, toName);
         }

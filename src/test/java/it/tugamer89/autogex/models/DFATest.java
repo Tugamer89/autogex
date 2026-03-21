@@ -11,41 +11,41 @@ class DFATest {
 
     @Test
     void testDFAAcceptsStringsWithAtLeastOneZero() {
-        // Esempio 2.1.3
-        // Accetta le stringhe che contengono almeno un '0'
+        // Example 2.1.3
+        // Accepts strings containing at least one '0'
         DFA dfa = new DFA.Builder()
                 .addState("q0", false)
-                .addState("q1", true)   // q1 è l'unico stato finale
+                .addState("q1", true)   // q1 is the only final state
                 .addState("q2", false)
                 .setInitialState("q0")
-                // Transizioni da q0
+                // Transitions from q0
                 .addTransition("q0", '0', "q1")
                 .addTransition("q0", '1', "q2")
-                // Transizioni da q1
+                // Transitions from q1
                 .addTransition("q1", '0', "q1")
                 .addTransition("q1", '1', "q1")
-                // Transizioni da q2
+                // Transitions from q2
                 .addTransition("q2", '0', "q1")
                 .addTransition("q2", '1', "q0")
                 .build();
 
-        // ACCETTATE
-        assertTrue(dfa.accepts("0"), "Deve accettare un singolo 0");
-        assertTrue(dfa.accepts("100"), "Deve accettare 100");
-        assertTrue(dfa.accepts("11110"), "Deve accettare 11110");
-        assertTrue(dfa.accepts("10101"), "Deve accettare 10101");
+        // ACCEPTED
+        assertTrue(dfa.accepts("0"), "Should accept a single 0");
+        assertTrue(dfa.accepts("100"), "Should accept 100");
+        assertTrue(dfa.accepts("11110"), "Should accept 11110");
+        assertTrue(dfa.accepts("10101"), "Should accept 10101");
 
-        // RIFIUTATE
-        assertFalse(dfa.accepts("11"), "Non deve accettare 11");
-        assertFalse(dfa.accepts("1"), "Non deve accettare 1");
-        assertFalse(dfa.accepts("1111111"), "Non deve accettare solo 1");
-        assertFalse(dfa.accepts("10a"), "Non deve accettare 10a");
-        assertFalse(dfa.accepts(""), "Non deve accettare la stringa vuota");
+        // REJECTED
+        assertFalse(dfa.accepts("11"), "Should not accept 11");
+        assertFalse(dfa.accepts("1"), "Should not accept 1");
+        assertFalse(dfa.accepts("1111111"), "Should not accept only 1s");
+        assertFalse(dfa.accepts("10a"), "Should not accept 10a");
+        assertFalse(dfa.accepts(""), "Should not accept the empty string");
     }
 
     @Test
     void testDFAGetters() {
-        // Testa i metodi getter
+        // Tests the getter methods
         DFA dfa = new DFA.Builder()
                 .addState("q0", false)
                 .addState("q1", true)
@@ -54,38 +54,38 @@ class DFATest {
                 .build();
 
         Set<State> states = dfa.getStates();
-        assertEquals(2, states.size(), "Dovrebbero esserci esattamente 2 stati");
+        assertEquals(2, states.size(), "There should be exactly 2 states");
 
         State initial = dfa.getInitialState();
         assertNotNull(initial);
-        assertEquals("q0", initial.getName(), "Lo stato iniziale deve essere q0");
+        assertEquals("q0", initial.getName(), "The initial state must be q0");
 
         Set<State> finalStates = dfa.getFinalStates();
-        assertEquals(1, finalStates.size(), "Dovrebbe esserci un solo stato finale");
-        assertTrue(finalStates.iterator().next().isFinal(), "Lo stato in finalStates deve essere finale");
+        assertEquals(1, finalStates.size(), "There should be exactly 1 final state");
+        assertTrue(finalStates.iterator().next().isFinal(), "The state in finalStates must be final");
     }
 
     @Test
     void testBuilderThrowsIllegalArgumentExceptionForMissingState() {
-        // Testa che venga lanciata un'eccezione se si aggiunge una transizione con stati non esistenti
+        // Tests that an exception is thrown if adding a transition with non-existing states
         DFA.Builder builder = new DFA.Builder().addState("q0", false);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addTransition("q0", 'a', "q1"); // "q1" non è mai stato aggiunto
+            builder.addTransition("q0", 'a', "q1"); // "q1" was never added
         });
 
-        assertTrue(exception.getMessage().contains("Stato non trovato"), "Il messaggio di errore deve indicare lo stato mancante");
+        assertTrue(exception.getMessage().contains("State not found"), "The error message must mention the missing state");
     }
 
     @Test
     void testBuilderThrowsIllegalStateExceptionForMissingInitialState() {
-        // Testa che non si possa costruire un DFA senza aver impostato lo stato iniziale
+        // Tests that a DFA cannot be built without setting the initial state
         DFA.Builder builder = new DFA.Builder()
                 .addState("q0", false)
                 .addState("q1", true);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, builder::build);
 
-        assertTrue(exception.getMessage().contains("stato iniziale"), "Il messaggio di errore deve menzionare lo stato iniziale");
+        assertTrue(exception.getMessage().contains("initial state"), "The error message must mention the initial state");
     }
 }

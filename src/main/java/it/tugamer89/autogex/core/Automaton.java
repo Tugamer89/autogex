@@ -3,7 +3,7 @@ package it.tugamer89.autogex.core;
 import java.util.Set;
 
 /**
- * Interfaccia base per tutti i tipi di Automi (DFA, NFA, ENFA).
+ * Base interface for all types of Automata (DFA, NFA, ENFA).
  */
 public interface Automaton {
     Set<State> getStates();
@@ -11,8 +11,11 @@ public interface Automaton {
     Set<State> getFinalStates();
     
     /**
-     * Il metodo principale che verifica se la stringa in input appartiene
-     * al linguaggio riconosciuto dall'automa L(M).
+     * The main method that checks whether the input string belongs
+     * to the language recognized by the automaton L(M).
+     *
+     * @param input The string to be evaluated.
+     * @return true if the string is accepted, false otherwise.
      */
     boolean accepts(String input);
 }

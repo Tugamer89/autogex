@@ -7,39 +7,42 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Utility per la minimizzazione di un DFA.
- * Implementa l'algoritmo di raffinamento delle partizioni di Moore.
+ * Utility class for DFA minimization.
+ * Implements Moore's partition refinement algorithm.
  */
 public class Minimizer {
 
     private Minimizer() {
-        throw new UnsupportedOperationException("Classe di utility");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
-     * Minimizza un DFA restituendo un nuovo DFA equivalente con il numero minimo di stati.
+     * Minimizes a DFA, returning a new equivalent DFA with the minimum number of states.
+     *
+     * @param dfa The source DFA to minimize.
+     * @return The minimal DFA.
      */
     public static DFA minimize(DFA dfa) {
-        // 1. Rimuoviamo eventuali stati irraggiungibili
+        // 1. Remove unreachable states
         Set<State> reachableStates = getReachableStates(dfa);
         Set<Character> alphabet = getAlphabet(dfa);
 
-        // 2. Partizione iniziale (Finali vs Non Finali)
+        // 2. Initial partition (Finals vs Non-Finals)
         Set<Set<State>> partitions = createInitialPartitions(dfa, reachableStates);
 
-        // 3. Raffinamento iterativo delle partizioni (Punto Fisso)
+        // 3. Iterative partition refinement (until Fixed Point is reached)
         boolean changed = true;
         while (changed) {
             changed = false;
             Set<Set<State>> newPartitions = new HashSet<>();
 
             for (Set<State> group : partitions) {
-                // Suddivide il gruppo in base al comportamento (destinazioni delle transizioni)
+                // Split the group based on behavior (transition destinations)
                 Map<Map<Character, Set<State>>, Set<State>> subGroups = splitGroup(dfa, group, alphabet, partitions);
                 
                 newPartitions.addAll(subGroups.values());
                 
-                // Se un gruppo è stato spezzato in 2 o più sottogruppi, la partizione è cambiata
+                // If a group was split into 2 or more subgroups, the partition has changed
                 if (subGroups.size() > 1) {
                     changed = true;
                 }
@@ -47,11 +50,11 @@ public class Minimizer {
             partitions = newPartitions;
         }
 
-        // 4. Ricostruzione del DFA Minimizzato
+        // 4. Rebuild the Minimized DFA
         return buildMinimalDfa(dfa, partitions, alphabet);
     }
 
-    // --- Metodi Helper ---
+    // --- Helper Methods ---
 
     private static Set<Set<State>> createInitialPartitions(DFA dfa, Set<State> reachableStates) {
         Set<State> finalGroup = new HashSet<>();
@@ -75,11 +78,11 @@ public class Minimizer {
     private static Map<Map<Character, Set<State>>, Set<State>> splitGroup(
             DFA dfa, Set<State> group, Set<Character> alphabet, Set<Set<State>> currentPartitions) {
         
-        // Mappa la "firma" comportamentale di uno stato al sottogruppo di stati che la condividono
+        // Maps the behavioral "signature" of a state to the subgroup of states sharing it
         Map<Map<Character, Set<State>>, Set<State>> subGroups = new HashMap<>();
 
         for (State s : group) {
-            // La firma è: "Per ogni carattere, in quale partizione finisco?"
+            // The signature is: "For each character, which partition do I end up in?"
             Map<Character, Set<State>> behaviorSignature = new HashMap<>();
             
             for (char symbol : alphabet) {
@@ -99,22 +102,22 @@ public class Minimizer {
         Map<Set<State>, String> partitionToName = new HashMap<>();
         AtomicInteger counter = new AtomicInteger(0);
 
-        // Registrazione dei nuovi stati
+        // Register new states
         for (Set<State> partition : partitions) {
             String name = "M" + counter.getAndIncrement();
             partitionToName.put(partition, name);
             
-            // La partizione è finale se contiene almeno uno stato finale originale
+            // The partition is final if it contains at least one original final state
             boolean isFinal = partition.stream().anyMatch(s -> originalDfa.getFinalStates().contains(s));
             builder.addState(name, isFinal);
 
-            // La partizione è iniziale se contiene lo stato iniziale originale
+            // The partition is initial if it contains the original initial state
             if (partition.contains(originalDfa.getInitialState())) {
                 builder.setInitialState(name);
             }
         }
 
-        // Creazione delle transizioni (basta prelevare un elemento "rappresentante" per ogni partizione)
+        // Create transitions (taking a "representative" element for each partition is sufficient)
         for (Set<State> partition : partitions) {
             State representative = partition.iterator().next();
             String currentName = partitionToName.get(partition);
@@ -123,7 +126,7 @@ public class Minimizer {
                 State dest = getDestination(originalDfa, representative, symbol);
                 Set<State> targetPartition = findPartitionContaining(partitions, dest);
                 
-                // Se c'è una transizione valida, la colleghiamo
+                // Link the transition if valid
                 if (!targetPartition.isEmpty()) {
                     builder.addTransition(currentName, symbol, partitionToName.get(targetPartition));
                 }

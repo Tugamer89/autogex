@@ -7,11 +7,11 @@ import it.tugamer89.autogex.core.State;
 import java.util.*;
 
 /**
- * Automa a Stati Finiti Non Deterministico (NFA).
+ * Non-Deterministic Finite Automaton (NFA).
  */
 public class NFA extends AbstractAutomaton {
     
-    // Mappa: Stato Partenza -> (Mappa: Carattere -> Insieme di Stati di Arrivo)
+    // Map: Source State -> (Map: Character -> Set of Target States)
     private final Map<State, Map<Character, Set<State>>> transitionTable;
 
     private NFA(Builder builder) {
@@ -21,7 +21,7 @@ public class NFA extends AbstractAutomaton {
 
     @Override
     public boolean accepts(String input) {
-        // L'NFA può trovarsi in più stati contemporaneamente
+        // The NFA can be in multiple states simultaneously
         Set<State> currentStates = new HashSet<>();
         currentStates.add(initialState);
         
@@ -37,13 +37,13 @@ public class NFA extends AbstractAutomaton {
             
             currentStates = nextStates;
             
-            // Ottimizzazione: se non ci sono più stati attivi, la stringa è rifiutata
+            // Optimization: if there are no more active states, the string is rejected
             if (currentStates.isEmpty()) {
                 return false;
             }
         }
         
-        // Accetta se almeno uno degli stati correnti finali è uno stato finale dell'NFA
+        // Accepts if at least one of the current active states is a final state
         return currentStates.stream().anyMatch(finalStates::contains);
     }
 
@@ -52,7 +52,7 @@ public class NFA extends AbstractAutomaton {
     }
 
     /**
-     * Pattern Builder per costruire l'NFA in modo fluente.
+     * Builder pattern to construct the NFA fluently.
      */
     public static class Builder extends AbstractAutomatonBuilder<Builder, NFA> {
         
@@ -68,7 +68,7 @@ public class NFA extends AbstractAutomaton {
             State to = states.get(toName);
             
             if (from == null || to == null) {
-                throw new IllegalArgumentException("Stato non trovato. Aggiungilo prima con addState.");
+                throw new IllegalArgumentException("State not found. Add it first using addState.");
             }
 
             transitionTable.computeIfAbsent(from, k -> new HashMap<>())

@@ -1,13 +1,15 @@
 package it.tugamer89.autogex.core;
 
 /**
- * Rappresenta una singola transizione da uno stato a un altro leggendo un simbolo.
+ * Represents a single transition from one state to another by reading a symbol.
  */
 public record Transition(State from, Character symbol, State to) {
 
     /**
-     * Controlla se questa è una transizione silente.
-     * Usiamo 'null' per rappresentare epsilon.
+     * Checks if this is a silent transition.
+     * We use 'null' to represent epsilon (ε).
+     *
+     * @return true if it is an epsilon transition, false otherwise.
      */
     public boolean isEpsilon() {
         return symbol == null;

@@ -9,33 +9,36 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Utility per la conversione degli Automi a Stati Finiti.
+ * Utility class for Finite State Automata conversion.
  */
 public class Converter {
 
     private Converter() {
-        throw new UnsupportedOperationException("Classe di utility");
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
-     * Converte un ε-NFA in un NFA.
-     * Algoritmo di ε-eliminazione.
+     * Converts an ε-NFA into an NFA.
+     * Applies the ε-elimination algorithm.
+     *
+     * @param enfa The source ε-NFA.
+     * @return The equivalent NFA.
      */
     public static NFA enfaToNfa(ENFA enfa) {
         NFA.Builder builder = new NFA.Builder();
         Set<Character> alphabet = getAlphabet(enfa.getTransitionTable());
 
-        // 1. & 2. Aggiungiamo gli stati e ricalcoliamo gli stati finali
+        // 1. & 2. Add states and recalculate final states based on closures
         for (State s : enfa.getStates()) {
             Set<State> closure = enfa.epsilonClosure(Set.of(s));
             boolean isFinal = isFinal(closure, enfa.getFinalStates());
             builder.addState(s.getName(), isFinal);
         }
 
-        // Lo stato iniziale rimane lo stesso
+        // The initial state remains the same
         builder.setInitialState(enfa.getInitialState().getName());
 
-        // 3. Calcoliamo le nuove transizioni per ogni stato dell'alfabeto
+        // 3. Compute new transitions for each state across the alphabet
         for (State q : enfa.getStates()) {
             Set<State> qClosure = enfa.epsilonClosure(Set.of(q));
             
@@ -50,8 +53,11 @@ public class Converter {
     }
 
     /**
-     * Converte un NFA in un DFA.
-     * Algoritmo Rabin-Scott.
+     * Converts an NFA into a DFA.
+     * Applies the Rabin-Scott Subset Construction algorithm.
+     *
+     * @param nfa The source NFA.
+     * @return The equivalent DFA.
      */
     public static DFA nfaToDfa(NFA nfa) {
         DFA.Builder builder = new DFA.Builder();
@@ -61,7 +67,7 @@ public class Converter {
         Queue<Set<State>> queue = new LinkedList<>();
         AtomicInteger stateCounter = new AtomicInteger(0);
 
-        // Lo stato iniziale del DFA è l'insieme contenente solo lo stato iniziale dell'NFA
+        // The DFA initial state is the set containing only the NFA's initial state
         Set<State> initialSuperState = Set.of(nfa.getInitialState());
         String initialName = "D" + stateCounter.getAndIncrement();
 
@@ -71,7 +77,7 @@ public class Converter {
         dfaStateNames.put(initialSuperState, initialName);
         queue.add(initialSuperState);
 
-        // Esploriamo tutti i possibili sottoinsiemi
+        // Explore all possible subsets
         while (!queue.isEmpty()) {
             Set<State> currentSuperState = queue.poll();
             String currentName = dfaStateNames.get(currentSuperState);
@@ -83,7 +89,7 @@ public class Converter {
                     continue;
                 }
 
-                // Se troviamo un super-stato nuovo, lo registriamo
+                // If a new super-state is found, register it
                 String targetName = dfaStateNames.computeIfAbsent(nextSuperState, k -> {
                     String nextName = "D" + stateCounter.getAndIncrement();
                     builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
@@ -99,17 +105,20 @@ public class Converter {
     }
 
     /**
-     * Metodo di convenienza che applica l'intera catena di trasformazione: ENFA -> NFA -> DFA.
+     * Convenience method that applies the full transformation chain: ENFA -> NFA -> DFA.
+     *
+     * @param enfa The source ε-NFA.
+     * @return The equivalent DFA.
      */
     public static DFA enfaToDfa(ENFA enfa) {
         NFA intermediateNfa = enfaToNfa(enfa);
         return nfaToDfa(intermediateNfa);
     }
 
-    // --- Metodi Helper ---
+    // --- Helper Methods ---
 
     /**
-     * Calcola il sottoinsieme di stati raggiungibili leggendo un simbolo.
+     * Computes the reachable subset of states by reading a symbol.
      */
     private static Set<State> computeNextSuperState(NFA nfa, Set<State> currentSuperState, char symbol) {
         Set<State> nextSuperState = new HashSet<>();
@@ -123,8 +132,8 @@ public class Converter {
     }
 
     /**
-     * Calcola i target per un ENFA partendo da una closure e leggendo un simbolo, 
-     * applicando la ε-closure al risultato.
+     * Computes target states for an ENFA starting from a closure, reading a symbol,
+     * and applying the ε-closure to the result.
      */
     private static Set<State> computeEnfaTargets(ENFA enfa, Set<State> qClosure, char symbol) {
         Set<State> targets = new HashSet<>();

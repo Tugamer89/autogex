@@ -80,7 +80,7 @@ The project is developed in sequential milestones:
 
 - [x] **Phase 1:** Core Models and Builders (`DFA`, `NFA`, `ENFA`).
 - [x] **Phase 2:** Conversion Engine (Subset Construction) and Minimization.
-- [ ] **Phase 3:** Abstract Syntax Tree (AST) and Regular Expression (Regex) Parsing.
+- [x] **Phase 3:** Abstract Syntax Tree (AST) and Regular Expression (Regex) Parsing.
 - [ ] **Phase 4:** Compilation (Thompson's Construction to transform Regex $\rightarrow$ ENFA).
 
 ## License

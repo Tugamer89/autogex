@@ -6,7 +6,7 @@
 
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>

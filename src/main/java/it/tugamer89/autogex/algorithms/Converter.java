@@ -106,7 +106,7 @@ public class Converter {
         return nfaToDfa(intermediateNfa);
     }
 
-    // --- Metodi Helper Interni ---
+    // --- Metodi Helper ---
 
     /**
      * Calcola il sottoinsieme di stati raggiungibili leggendo un simbolo.

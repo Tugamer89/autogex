@@ -8,8 +8,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=alert_status&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=sqale_rating&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=security_rating&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![wakatime](https://wakatime.com/badge/user/423e1479-325a-4958-8d21-2d5f97c11efb/project/a34da62c-470e-4ee6-8156-4b61c35c9bde.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 **Autogex** è una libreria leggera, pulita ed estensibile nata per manipolare, convertire e minimizzare modelli computazionali formali. Implementa rigorosamente i teoremi della Teoria dei Linguaggi, fornendo un'API "Fluent" (tramite Builder Pattern) estremamente intuitiva, thread-safe e basata sull'immutabilità.
 

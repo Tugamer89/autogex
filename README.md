@@ -15,6 +15,7 @@
 
 ## Current Features
 
+- **Regex Compilation:** Full pipeline converting string regular expressions into optimized Minimal DFAs via Abstract Syntax Trees (AST) and Thompson's Construction.
 - **Modeling:** Native support for `DFA` (Deterministic Finite Automata), `NFA` (Non-Deterministic), and `ENFA` ($\epsilon$-NFA with silent transitions).
 - **Conversion:**  Subset construction algorithm (Rabin-Scott) and $\epsilon$-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
@@ -27,7 +28,7 @@ You can include Autogex in your Java project by adding this dependency to your `
 <dependency>
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>0.2.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -35,12 +36,29 @@ You can include Autogex in your Java project by adding this dependency to your `
 
 ## Usage Example
 
-### 1. Creating an NFA with Epsilon-Transitions
+### 1. The Regex Facade (Recommended)
 
-The API uses the Builder pattern to make automaton declaration as readable and safe as possible.
+The easiest way to use Autogex is through the `Regex` facade. It automatically parses the string, builds the AST, applies Thompson's Construction, converts to a DFA, and minimizes it for maximum performance.
+
+```java
+import it.tugamer89.autogex.regex.Regex;
+
+// Compiles the regex into a theoretical Minimal DFA under the hood
+Regex regex = new Regex("(a|b)*abb");
+
+System.out.println(regex.matches("abaabb")); // Output: true
+System.out.println(regex.matches("ab"));     // Output: false
+```
+
+### 2. Manual Automata Construction
+
+For educational purposes or custom needs, you can still manually build and convert models using the Builder pattern.
 
 ```java
 import it.tugamer89.autogex.models.ENFA;
+import it.tugamer89.autogex.algorithms.Converter;
+import it.tugamer89.autogex.algorithms.Minimizer;
+import it.tugamer89.autogex.models.DFA;
 
 // Building an ENFA that accepts the language: a*b*
 ENFA enfa = new ENFA.Builder()
@@ -48,28 +66,12 @@ ENFA enfa = new ENFA.Builder()
         .addState("q1", true)
         .setInitialState("q0")
         .addTransition("q0", 'a', "q0")
-        .addEpsilonTransition("q0", "q1") // Silent transition to q1
+        .addEpsilonTransition("q0", "q1") // Silent transition
         .addTransition("q1", 'b', "q1")
         .build();
 
-System.out.println(enfa.accepts("aaabbb")); // Output: true
-System.out.println(enfa.accepts("ba"));     // Output: false
-```
-
-### 2. Converting and Minimizing
-
-With just a few lines of code, you can transform a non-deterministic automaton into a perfect, optimized deterministic automaton, ready to be used at high performance.
-
-```java
-import it.tugamer89.autogex.algorithms.Converter;
-import it.tugamer89.autogex.algorithms.Minimizer;
-import it.tugamer89.autogex.models.DFA;
-
-// 1. Convert the previous ENFA into a DFA (Subset Construction)
-DFA dfa = Converter.enfaToDfa(enfa);
-
-// 2. Reduce the DFA to its theoretical minimum number of states
-DFA minimalDfa = Minimizer.minimize(dfa);
+// Convert the ENFA into a minimal DFA
+DFA minimalDfa = Minimizer.minimize(Converter.enfaToDfa(enfa));
 
 System.out.println(minimalDfa.accepts("aaabbb")); // Output: true
 ```
@@ -80,8 +82,9 @@ The project is developed in sequential milestones:
 
 - [x] **Phase 1:** Core Models and Builders (`DFA`, `NFA`, `ENFA`).
 - [x] **Phase 2:** Conversion Engine (Subset Construction) and Minimization.
-- [ ] **Phase 3:** Abstract Syntax Tree (AST) and Regular Expression (Regex) Parsing.
-- [ ] **Phase 4:** Compilation (Thompson's Construction to transform Regex $\rightarrow$ ENFA).
+- [x] **Phase 3:** Abstract Syntax Tree (AST) and Regular Expression (Regex) Parsing.
+- [x] **Phase 4:** Compilation (Thompson's Construction to transform Regex $\rightarrow$ ENFA).
+- [ ] **Phase 5:** Graphviz (DOT) Export and Visual Representation.
 
 ## License
 

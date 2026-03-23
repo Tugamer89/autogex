@@ -19,6 +19,7 @@
 - **Modeling:** Native support for `DFA` (Deterministic Finite Automata), `NFA` (Non-Deterministic), and `ENFA` ($\epsilon$-NFA with silent transitions).
 - **Conversion:**  Subset construction algorithm (Rabin-Scott) and $\epsilon$-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
+- **Visualization (New!):** Export any automaton or compiled regex directly to the Graphviz DOT language format.
 
 ## Installation
 
@@ -28,7 +29,7 @@ You can include Autogex in your Java project by adding this dependency to your `
 <dependency>
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -36,9 +37,9 @@ You can include Autogex in your Java project by adding this dependency to your `
 
 ## Usage Example
 
-### 1. The Regex Facade (Recommended)
+### 1. The Regex Facade & Visualization
 
-The easiest way to use Autogex is through the `Regex` facade. It automatically parses the string, builds the AST, applies Thompson's Construction, converts to a DFA, and minimizes it for maximum performance.
+The easiest way to use Autogex is through the `Regex` facade. It automatically parses the string, builds the AST, converts to a DFA, and minimizes it.
 
 ```java
 import it.tugamer89.autogex.regex.Regex;
@@ -47,8 +48,13 @@ import it.tugamer89.autogex.regex.Regex;
 Regex regex = new Regex("(a|b)*abb");
 
 System.out.println(regex.matches("abaabb")); // Output: true
-System.out.println(regex.matches("ab"));     // Output: false
+
+// Export the internal Minimal DFA to Graphviz DOT format for rendering!
+String dotGraph = regex.toDotGraph();
+System.out.println(dotGraph);
 ```
+
+*(You can copy the generated `dotGraph` string and paste it into [WebGraphviz](http://www.webgraphviz.com/) to see your state machine!)*
 
 ### 2. Manual Automata Construction
 
@@ -84,7 +90,7 @@ The project is developed in sequential milestones:
 - [x] **Phase 2:** Conversion Engine (Subset Construction) and Minimization.
 - [x] **Phase 3:** Abstract Syntax Tree (AST) and Regular Expression (Regex) Parsing.
 - [x] **Phase 4:** Compilation (Thompson's Construction to transform Regex $\rightarrow$ ENFA).
-- [ ] **Phase 5:** Graphviz (DOT) Export and Visual Representation.
+- [x] **Phase 5:** Graphviz (DOT) Export and Visual Representation.
 
 ## License
 

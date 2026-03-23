@@ -3,6 +3,7 @@ package it.tugamer89.autogex.regex;
 import it.tugamer89.autogex.algorithms.Converter;
 import it.tugamer89.autogex.algorithms.Minimizer;
 import it.tugamer89.autogex.algorithms.ThompsonConstructor;
+import it.tugamer89.autogex.export.GraphvizExporter;
 import it.tugamer89.autogex.models.DFA;
 import it.tugamer89.autogex.models.ENFA;
 import it.tugamer89.autogex.regex.ast.RegexNode;
@@ -47,6 +48,16 @@ public class Regex {
      */
     public boolean matches(String input) {
         return minimalDfa.accepts(input);
+    }
+
+    /**
+     * Exports the compiled minimal DFA to the Graphviz DOT language format.
+     * This string can be rendered using Graphviz tools or online viewers.
+     *
+     * @return The DOT graph representation.
+     */
+    public String toDotGraph() {
+        return GraphvizExporter.toDot(minimalDfa);
     }
 
     /**

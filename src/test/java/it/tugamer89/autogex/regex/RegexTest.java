@@ -62,4 +62,17 @@ class RegexTest {
         assertEquals(4, regex.getAutomaton().getStates().size(), 
                 "The minimized DFA for (a|b)*abb must have exactly 4 states");
     }
+
+    @Test
+    void testToDotGraph() {
+        Regex regex = new Regex("(a|b)*abb");
+        String dotGraph = regex.toDotGraph();
+        
+        assertNotNull(dotGraph, "DOT graph should not be null");
+        assertTrue(dotGraph.startsWith("digraph Automaton {"), "Must be a valid DOT digraph");
+        assertTrue(dotGraph.contains("rankdir=LR;"), "Must be left-to-right oriented");
+        assertTrue(dotGraph.contains("shape = doublecircle"), "Must contain at least one final state");
+        assertTrue(dotGraph.contains("label=\"a\""), "Must contain transitions for 'a'");
+        assertTrue(dotGraph.contains("label=\"b\""), "Must contain transitions for 'b'");
+    }
 }

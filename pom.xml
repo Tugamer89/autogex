@@ -81,15 +81,21 @@
                     </addStylesheets>
 
                     <windowtitle>Autogex API Documentation</windowtitle>
-                    <doctitle>Autogex ${project.version} API Reference</doctitle>
                     <bottom><![CDATA[
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
                         <script>
+                            window.MathJax = {
+                                tex: {
+                                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                                }
+                            };
                             document.addEventListener("DOMContentLoaded", (event) => {
                                 hljs.highlightAll();
                             });
                         </script>
+                        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
                         Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.
                     ]]></bottom>
 

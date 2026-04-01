@@ -46,9 +46,10 @@ jobs:
           echo "The actual folder is located at: $FOLDER"
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
-      - name: Inject Search Engines Site Verifications
+      - name: Inject Meta Tags
         run: |
           sed -i '/<head>/a \
+          <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." />\
           <meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />\
           <meta name="yandex-verification" content="fe2e9e5b84cda188" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
 

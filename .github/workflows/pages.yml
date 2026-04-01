@@ -60,8 +60,24 @@ jobs:
           path-to-root: ${{ steps.find_folder.outputs.javadoc_path }}
           additional-extensions: html
 
-      - name: Copy robots.txt
-        run: cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+      - name: Copy SEO Files
+        run: |
+          cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/32b1d3d62ea84b0eb1467bdabf85de11.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+
+      - name: Notify IndexNow
+        run: |
+          curl -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d '{
+              "host": "tugamer89.github.io",
+              "key": "32b1d3d62ea84b0eb1467bdabf85de11",
+              "keyLocation": "https://tugamer89.github.io/autogex/32b1d3d62ea84b0eb1467bdabf85de11.txt",
+              "urlList": [
+                "https://tugamer89.github.io/autogex/",
+                "https://tugamer89.github.io/autogex/sitemap.xml"
+              ]
+            }'
 
       - name: GitHub Pages Config
         uses: actions/configure-pages@v6

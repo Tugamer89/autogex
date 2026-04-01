@@ -53,7 +53,7 @@ public class ENFA extends AbstractAutomaton {
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
         
         for (char symbol : input.toCharArray()) {
-            Set<State> nextStates = computeNextStates(currentStates, symbol);
+            Set<State> nextStates = computeNextStates(currentStates, symbol, transitionTable);
             
             // After reading the symbol, expand with the ε-closure
             currentStates = epsilonClosure(nextStates);
@@ -64,21 +64,6 @@ public class ENFA extends AbstractAutomaton {
         }
         
         return currentStates.stream().anyMatch(finalStates::contains);
-    }
-
-    /**
-     * Computes the next active states based on the current states and the read symbol.
-     * Extracted to avoid SonarQube duplication with NFA.
-     */
-    private Set<State> computeNextStates(Set<State> currentStates, char symbol) {
-        Set<State> nextStates = new HashSet<>();
-        for (State state : currentStates) {
-            Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
-            if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
-                nextStates.addAll(stateTransitions.get(symbol));
-            }
-        }
-        return nextStates;
     }
 
     /**

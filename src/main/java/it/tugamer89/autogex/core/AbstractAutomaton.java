@@ -1,5 +1,7 @@
 package it.tugamer89.autogex.core;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,5 +32,25 @@ public abstract class AbstractAutomaton implements Automaton {
     @Override
     public Set<State> getFinalStates() {
         return finalStates;
+    }
+
+    /**
+     * Calculates the next active states for non-deterministic automata.
+     * Protected and shared method to avoid duplicated code between NFA and ENFA (SonarQube).
+     *
+     * @param currentStates   The set of current states.
+     * @param symbol          The symbol read from the input.
+     * @param transitionTable The transition table of the child automaton.
+     * @return The set of new reachable states.
+     */
+    protected Set<State> computeNextStates(Set<State> currentStates, char symbol, Map<State, Map<Character, Set<State>>> transitionTable) {
+        Set<State> nextStates = new HashSet<>();
+        for (State state : currentStates) {
+            Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
+            if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
+                nextStates.addAll(stateTransitions.get(symbol));
+            }
+        }
+        return nextStates;
     }
 }

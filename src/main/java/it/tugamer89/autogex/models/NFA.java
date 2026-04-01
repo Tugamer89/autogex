@@ -25,7 +25,7 @@ public class NFA extends AbstractAutomaton {
         currentStates.add(initialState);
         
         for (char symbol : input.toCharArray()) {
-            currentStates = computeNextStates(currentStates, symbol);
+            currentStates = computeNextStates(currentStates, symbol, transitionTable);
             
             // Optimization: if there are no more active states, the string is rejected
             if (currentStates.isEmpty()) {
@@ -35,21 +35,6 @@ public class NFA extends AbstractAutomaton {
         
         // Accepts if at least one of the current active states is a final state
         return currentStates.stream().anyMatch(finalStates::contains);
-    }
-
-    /**
-     * Computes the next active states based on the current states and the read symbol.
-     * Extracted to avoid SonarQube duplication with ENFA.
-     */
-    private Set<State> computeNextStates(Set<State> currentStates, char symbol) {
-        Set<State> nextStates = new HashSet<>();
-        for (State state : currentStates) {
-            Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
-            if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
-                nextStates.addAll(stateTransitions.get(symbol));
-            }
-        }
-        return nextStates;
     }
 
     /**

@@ -4,6 +4,7 @@ import it.tugamer89.autogex.algorithms.Converter;
 import it.tugamer89.autogex.algorithms.Minimizer;
 import it.tugamer89.autogex.algorithms.ThompsonConstructor;
 import it.tugamer89.autogex.export.GraphvizExporter;
+import it.tugamer89.autogex.export.MermaidExporter;
 import it.tugamer89.autogex.models.DFA;
 import it.tugamer89.autogex.models.ENFA;
 import it.tugamer89.autogex.regex.ast.RegexNode;
@@ -58,6 +59,16 @@ public class Regex {
      */
     public String toDotGraph() {
         return GraphvizExporter.toDot(minimalDfa);
+    }
+
+    /**
+     * Exports the compiled minimal DFA to the Mermaid.js stateDiagram-v2 format.
+     * This string can be natively rendered in GitHub Markdown without external viewers.
+     *
+     * @return The Mermaid.js graph representation.
+     */
+    public String toMermaidGraph() {
+        return MermaidExporter.toMermaid(minimalDfa);
     }
 
     /**

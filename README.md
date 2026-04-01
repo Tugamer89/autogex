@@ -17,8 +17,8 @@
 ## Current Features
 
 - **Regex Compilation:** Full pipeline converting string regular expressions into optimized Minimal DFAs via Abstract Syntax Trees (AST) and Thompson's Construction.
-- **Modeling:** Native support for `DFA` (Deterministic Finite Automata), `NFA` (Non-Deterministic), and `ENFA` ($ \epsilon $-NFA with silent transitions).
-- **Conversion:**  Subset construction algorithm (Rabin-Scott) and $ \epsilon $-transition elimination (`Converter`).
+- **Modeling:** Native support for `DFA` (Deterministic Finite Automata), `NFA` (Non-Deterministic), and `ENFA` (ε-NFA with silent transitions).
+- **Conversion:**  Subset construction algorithm (Rabin-Scott) and ε-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
 - **Visualization:** Export any automaton or compiled regex directly to the Graphviz DOT language format.
 

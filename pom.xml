@@ -72,6 +72,8 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
 
+                    <header><![CDATA[<meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />]]></header>
+
                     <windowtitle>Autogex API Documentation</windowtitle>
                     
                     <doctitle>Autogex ${project.version} API Reference</doctitle>

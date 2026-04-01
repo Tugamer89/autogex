@@ -38,6 +38,11 @@ public class DFA extends AbstractAutomaton {
         return finalStates.contains(currentState);
     }
 
+    /**
+     * Retrieves the internal transition table of the DFA.
+     *
+     * @return The transition table.
+     */
     public Map<State, Map<Character, State>> getTransitionTable() {
         return transitionTable;
     }
@@ -49,20 +54,30 @@ public class DFA extends AbstractAutomaton {
         
         private final Map<State, Map<Character, State>> transitionTable = new HashMap<>();
 
+        /**
+         * Default constructor for DFA Builder.
+         */
+        public Builder() {
+            // Empty constructor since fields are initialized at declaration.
+            // Required explicitly to maintain Javadoc and satisfy SonarQube rules.
+        }
+
         @Override
         protected Builder self() {
             return this;
         }
 
+        /**
+         * Adds a transition between two states.
+         *
+         * @param fromName The name of the source state.
+         * @param symbol   The character required to trigger the transition.
+         * @param toName   The name of the destination state.
+         * @return The current builder instance.
+         */
         public Builder addTransition(String fromName, char symbol, String toName) {
-            State from = states.get(fromName);
-            State to = states.get(toName);
-            
-            if (from == null || to == null) {
-                throw new IllegalArgumentException("State not found. Add it first using addState.");
-            }
-
-            transitionTable.computeIfAbsent(from, k -> new HashMap<>()).put(symbol, to);
+            State[] transitionStates = getTransitionStatesOrThrow(fromName, toName);
+            transitionTable.computeIfAbsent(transitionStates[0], k -> new HashMap<>()).put(symbol, transitionStates[1]);
             return self();
         }
 

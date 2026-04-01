@@ -7,9 +7,37 @@ package it.tugamer89.autogex.regex.ast;
 public interface RegexNode {
 
     /**
+     * Accepts a visitor to apply an operation on this node.
+     *
+     * @param visitor The visitor applying the operation.
+     * @param <T>     The return type of the visitor.
+     * @return The result of the visitor's operation.
+     */
+    <T> T accept(Visitor<T> visitor);
+
+    /**
+     * The Visitor interface for the AST nodes.
+     *
+     * @param <T> The return type of the visitor operations.
+     */
+    interface Visitor<T> {
+        T visit(LiteralNode node);
+        T visit(ConcatNode node);
+        T visit(UnionNode node);
+        T visit(StarNode node);
+    }
+
+    /**
      * Represents a single literal character in the regex (e.g., 'a', 'b').
+     *
+     * @param symbol The character symbol.
      */
     record LiteralNode(char symbol) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
         @Override
         public String toString() {
             return String.valueOf(symbol);
@@ -19,8 +47,16 @@ public interface RegexNode {
     /**
      * Represents the concatenation of two regular expressions (e.g., "ab").
      * Note: Concatenation is usually implicit in regex strings.
+     *
+     * @param left  The left operand of the concatenation.
+     * @param right The right operand of the concatenation.
      */
     record ConcatNode(RegexNode left, RegexNode right) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
         @Override
         public String toString() {
             return left.toString() + right.toString();
@@ -29,8 +65,16 @@ public interface RegexNode {
 
     /**
      * Represents the union (OR) of two regular expressions (e.g., "a|b").
+     *
+     * @param left  The left operand of the union.
+     * @param right The right operand of the union.
      */
     record UnionNode(RegexNode left, RegexNode right) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
         @Override
         public String toString() {
             return "(" + left.toString() + "|" + right.toString() + ")";
@@ -39,8 +83,15 @@ public interface RegexNode {
 
     /**
      * Represents the Kleene Star operator, allowing zero or more repetitions (e.g., "a*").
+     *
+     * @param child The node to which the star operator is applied.
      */
     record StarNode(RegexNode child) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
         @Override
         public String toString() {
             if (child instanceof ConcatNode) {

@@ -6,7 +6,7 @@
 
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 
     <name>Autogex</name>
     <description>A powerful Java engine for processing Finite State Automata and Regular Expressions.</description>
@@ -21,7 +21,7 @@
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 per Unit Testing -->
+        <!-- JUnit 5 for Unit Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -38,13 +38,13 @@
 
     <build>
         <plugins>
-            <!-- Plugin per i test -->
+            <!-- Plugin for testing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.5</version>
             </plugin>
-            <!-- Plugin per il coverage -->
+            <!-- Plugin for code coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -64,7 +64,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin per la documentazione -->
+            <!-- Plugin for documentation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -87,8 +87,8 @@
                         <script>
                             window.MathJax = {
                                 tex: {
-                                    inlineMath: [['$', '$']
-                                    displayMath: [['$$', '$$']
+                                    inlineMath: [['$', '$']],
+                                    displayMath: [['$$', '$$']]
                                 }
                             };
                             document.addEventListener("DOMContentLoaded", (event) => {
@@ -116,7 +116,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin per la distribuzione dei sorgenti -->
+            <!-- Plugin for source distribution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

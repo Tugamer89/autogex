@@ -9,9 +9,12 @@ class ThompsonConstructorTest {
 
     @Test
     void testThrowsExceptionOnUnsupportedNode() {
-        // Create an anonymous class that implements RegexNode 
-        // but is not one of the supported records (Literal, Concat, Union, Star)
+        // Create an anonymous class that implements RegexNode
         RegexNode unsupportedNode = new RegexNode() {
+            @Override
+            public <T> T accept(Visitor<T> visitor) {
+                throw new IllegalArgumentException("Unsupported RegexNode type");
+            }
             @Override
             public String toString() {
                 return "UnsupportedDummyNode";

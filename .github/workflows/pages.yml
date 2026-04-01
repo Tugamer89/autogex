@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
 
       - name: JDK 25 Set Up
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'

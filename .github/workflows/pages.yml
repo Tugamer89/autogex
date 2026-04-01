@@ -63,7 +63,7 @@ jobs:
       - name: Copy SEO Files
         run: |
           cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/32b1d3d62ea84b0eb1467bdabf85de11.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
 
       - name: Notify IndexNow
         run: |
@@ -71,8 +71,8 @@ jobs:
             -H "Content-Type: application/json; charset=utf-8" \
             -d '{
               "host": "tugamer89.github.io",
-              "key": "32b1d3d62ea84b0eb1467bdabf85de11",
-              "keyLocation": "https://tugamer89.github.io/autogex/32b1d3d62ea84b0eb1467bdabf85de11.txt",
+              "key": "8c8a09117f884afb9d9769c48698cf19",
+              "keyLocation": "https://tugamer89.github.io/autogex/8c8a09117f884afb9d9769c48698cf19.txt",
               "urlList": [
                 "https://tugamer89.github.io/autogex/",
                 "https://tugamer89.github.io/autogex/sitemap.xml"

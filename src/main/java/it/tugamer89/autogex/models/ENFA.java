@@ -53,14 +53,7 @@ public class ENFA extends AbstractAutomaton {
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
         
         for (char symbol : input.toCharArray()) {
-            Set<State> nextStates = new HashSet<>();
-            
-            for (State state : currentStates) {
-                Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
-                if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
-                    nextStates.addAll(stateTransitions.get(symbol));
-                }
-            }
+            Set<State> nextStates = computeNextStates(currentStates, symbol);
             
             // After reading the symbol, expand with the ε-closure
             currentStates = epsilonClosure(nextStates);
@@ -71,6 +64,21 @@ public class ENFA extends AbstractAutomaton {
         }
         
         return currentStates.stream().anyMatch(finalStates::contains);
+    }
+
+    /**
+     * Computes the next active states based on the current states and the read symbol.
+     * Extracted to avoid SonarQube duplication with NFA.
+     */
+    private Set<State> computeNextStates(Set<State> currentStates, char symbol) {
+        Set<State> nextStates = new HashSet<>();
+        for (State state : currentStates) {
+            Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
+            if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
+                nextStates.addAll(stateTransitions.get(symbol));
+            }
+        }
+        return nextStates;
     }
 
     /**
@@ -111,16 +119,10 @@ public class ENFA extends AbstractAutomaton {
          * @return The current builder instance.
          */
         public Builder addTransition(String fromName, Character symbol, String toName) {
-            State from = states.get(fromName);
-            State to = states.get(toName);
-            
-            if (from == null || to == null) {
-                throw new IllegalArgumentException("State not found. Add it first using addState.");
-            }
-
-            transitionTable.computeIfAbsent(from, k -> new HashMap<>())
+            State[] transitionStates = getTransitionStatesOrThrow(fromName, toName);
+            transitionTable.computeIfAbsent(transitionStates[0], k -> new HashMap<>())
                            .computeIfAbsent(symbol, k -> new HashSet<>())
-                           .add(to);
+                           .add(transitionStates[1]);
             return this;
         }
 

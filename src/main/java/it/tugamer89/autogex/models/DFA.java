@@ -76,14 +76,8 @@ public class DFA extends AbstractAutomaton {
          * @return The current builder instance.
          */
         public Builder addTransition(String fromName, char symbol, String toName) {
-            State from = states.get(fromName);
-            State to = states.get(toName);
-            
-            if (from == null || to == null) {
-                throw new IllegalArgumentException("State not found. Add it first using addState.");
-            }
-
-            transitionTable.computeIfAbsent(from, k -> new HashMap<>()).put(symbol, to);
+            State[] transitionStates = getTransitionStatesOrThrow(fromName, toName);
+            transitionTable.computeIfAbsent(transitionStates[0], k -> new HashMap<>()).put(symbol, transitionStates[1]);
             return self();
         }
 

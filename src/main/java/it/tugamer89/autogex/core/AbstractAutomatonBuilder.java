@@ -19,7 +19,10 @@ public abstract class AbstractAutomatonBuilder<B extends AbstractAutomatonBuilde
     /**
      * Default constructor for the abstract builder.
      */
-    protected AbstractAutomatonBuilder() {}
+    protected AbstractAutomatonBuilder() {
+        // Empty constructor since fields are initialized at declaration.
+        // Required explicitly to maintain Javadoc and satisfy SonarQube rules.
+    }
 
     /**
      * Abstract method that each concrete Builder must implement by returning 'this'.
@@ -65,6 +68,24 @@ public abstract class AbstractAutomatonBuilder<B extends AbstractAutomatonBuilde
         if (initialState == null) {
             throw new IllegalStateException("The initial state must be set before calling build().");
         }
+    }
+
+    /**
+     * Validates and retrieves the states for a transition.
+     * Shared among all concrete builders to prevent code duplication.
+     *
+     * @param fromName The name of the source state.
+     * @param toName   The name of the destination state.
+     * @return An array containing [sourceState, targetState].
+     * @throws IllegalArgumentException if either state does not exist.
+     */
+    protected State[] getTransitionStatesOrThrow(String fromName, String toName) {
+        State from = states.get(fromName);
+        State to = states.get(toName);
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("State not found. Add it first using addState.");
+        }
+        return new State[]{from, to};
     }
 
     /**

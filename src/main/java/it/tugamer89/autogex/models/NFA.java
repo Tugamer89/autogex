@@ -21,21 +21,11 @@ public class NFA extends AbstractAutomaton {
 
     @Override
     public boolean accepts(String input) {
-        // The NFA can be in multiple states simultaneously
         Set<State> currentStates = new HashSet<>();
         currentStates.add(initialState);
         
         for (char symbol : input.toCharArray()) {
-            Set<State> nextStates = new HashSet<>();
-            
-            for (State state : currentStates) {
-                Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
-                if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
-                    nextStates.addAll(stateTransitions.get(symbol));
-                }
-            }
-            
-            currentStates = nextStates;
+            currentStates = computeNextStates(currentStates, symbol);
             
             // Optimization: if there are no more active states, the string is rejected
             if (currentStates.isEmpty()) {
@@ -45,6 +35,21 @@ public class NFA extends AbstractAutomaton {
         
         // Accepts if at least one of the current active states is a final state
         return currentStates.stream().anyMatch(finalStates::contains);
+    }
+
+    /**
+     * Computes the next active states based on the current states and the read symbol.
+     * Extracted to avoid SonarQube duplication with ENFA.
+     */
+    private Set<State> computeNextStates(Set<State> currentStates, char symbol) {
+        Set<State> nextStates = new HashSet<>();
+        for (State state : currentStates) {
+            Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
+            if (stateTransitions != null && stateTransitions.containsKey(symbol)) {
+                nextStates.addAll(stateTransitions.get(symbol));
+            }
+        }
+        return nextStates;
     }
 
     /**
@@ -85,16 +90,10 @@ public class NFA extends AbstractAutomaton {
          * @return The current builder instance.
          */
         public Builder addTransition(String fromName, char symbol, String toName) {
-            State from = states.get(fromName);
-            State to = states.get(toName);
-            
-            if (from == null || to == null) {
-                throw new IllegalArgumentException("State not found. Add it first using addState.");
-            }
-
-            transitionTable.computeIfAbsent(from, k -> new HashMap<>())
+            State[] transitionStates = getTransitionStatesOrThrow(fromName, toName);
+            transitionTable.computeIfAbsent(transitionStates[0], k -> new HashMap<>())
                            .computeIfAbsent(symbol, k -> new HashSet<>())
-                           .add(to);
+                           .add(transitionStates[1]);
             return self();
         }
 

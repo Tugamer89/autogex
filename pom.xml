@@ -71,8 +71,6 @@
                 <version>3.12.0</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
-                    <outputDirectory>${project.build.directory}/site/apidocs</outputDirectory>
-                    <reportOutputDirectory>${project.build.directory}/site/apidocs</reportOutputDirectory>
                 </configuration>
                 <executions>
                     <execution>

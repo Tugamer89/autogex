@@ -10,6 +10,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=security_rating&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)
 ![wakatime](https://wakatime.com/badge/user/423e1479-325a-4958-8d21-2d5f97c11efb/project/a34da62c-470e-4ee6-8156-4b61c35c9bde.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
+[![Javadoc](https://img.shields.io/badge/Javadoc-Reference-007ec6?logo=java&logoColor=white)](https://tugamer89.github.io/autogex/)
 
 **Autogex** is a lightweight, clean, and extensible library built to manipulate, convert, and minimize formal computational models. It strictly implements the theorems of Formal Language Theory, providing an extremely intuitive, thread-safe, and immutability-based "Fluent" API (via the Builder Pattern).
 

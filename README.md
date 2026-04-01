@@ -38,6 +38,8 @@ You can include Autogex in your Java project by adding this dependency to your `
 
 ## Usage Example
 
+For a complete overview of all classes and methods, see the [Official API documentation](https://tugamer89.github.io/autogex).
+
 ### 1. The Regex Facade & Visualization
 
 The easiest way to use Autogex is through the `Regex` facade. It automatically parses the string, builds the AST, converts to a DFA, and minimizes it.

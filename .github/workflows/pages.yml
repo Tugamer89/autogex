@@ -40,7 +40,7 @@ jobs:
         run: mvn -B javadoc:javadoc
 
       - name: GitHub Pages Config
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v6
 
       - name: Artifacts Uploading
         uses: actions/upload-pages-artifact@v3

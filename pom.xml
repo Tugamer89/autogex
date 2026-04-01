@@ -76,7 +76,12 @@
                     
                     <windowtitle>Autogex API Documentation</windowtitle>
                     <doctitle>Autogex ${project.version} API Reference</doctitle>
-                    <bottom><![CDATA[Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.]]></bottom>
+                    <bottom><![CDATA[
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+                        <script>hljs.highlightAll();</script>
+                        Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.
+                    ]]></bottom>
 
                     <show>public</show>
                     <author>true</author>

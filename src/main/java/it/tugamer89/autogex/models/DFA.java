@@ -3,6 +3,8 @@ package it.tugamer89.autogex.models;
 import it.tugamer89.autogex.core.AbstractAutomaton;
 import it.tugamer89.autogex.core.AbstractAutomatonBuilder;
 import it.tugamer89.autogex.core.State;
+import it.tugamer89.autogex.trace.ExecutionStep;
+import it.tugamer89.autogex.trace.ExecutionTrace;
 
 import java.util.*;
 
@@ -20,22 +22,31 @@ public class DFA extends AbstractAutomaton {
     }
 
     @Override
-    public boolean accepts(String input) {
-        State currentState = initialState;
+    public ExecutionTrace execute(String input) {
+        List<ExecutionStep> steps = new ArrayList<>();
+        Set<State> currentStates = Set.of(initialState);
+        
+        // Initial setup step
+        steps.add(new ExecutionStep(Collections.emptySet(), null, currentStates));
         
         for (char symbol : input.toCharArray()) {
+            State currentState = currentStates.iterator().next();
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
             
-            // If there is no defined transition for this character, the string is rejected
-            if (stateTransitions == null || !stateTransitions.containsKey(symbol)) {
-                return false;
-            }
+            Set<State> nextStates = (stateTransitions != null && stateTransitions.containsKey(symbol))
+                    ? Set.of(stateTransitions.get(symbol)) : Collections.emptySet();
             
-            currentState = stateTransitions.get(symbol);
+            steps.add(new ExecutionStep(currentStates, symbol, nextStates));
+            currentStates = nextStates;
+            
+            // If there is no defined transition, the string is rejected (Trap state)
+            if (currentStates.isEmpty()) {
+                break;
+            }
         }
         
-        // The string is accepted if and only if we end up in a final state
-        return finalStates.contains(currentState);
+        boolean isAccepted = !currentStates.isEmpty() && finalStates.contains(currentStates.iterator().next());
+        return new ExecutionTrace(input, steps, isAccepted);
     }
 
     /**

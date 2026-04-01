@@ -21,6 +21,7 @@
 - **Conversion:**  Subset construction algorithm (Rabin-Scott) and ε-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
 - **Visualization:** Export any automaton or compiled regex directly to the Graphviz DOT language or Mermaid.js format for native GitHub rendering.
+- **Execution Tracing (New!):** Detailed step-by-step visual debugging of an automaton's state traversal with `automaton.execute(input).getFormattedTrace()`.
 
 ## Installation
 
@@ -30,7 +31,7 @@ You can include Autogex in your Java project by adding this dependency to your `
 <dependency>
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 

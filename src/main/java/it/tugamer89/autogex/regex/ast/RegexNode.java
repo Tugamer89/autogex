@@ -21,9 +21,33 @@ public interface RegexNode {
      * @param <T> The return type of the visitor operations.
      */
     interface Visitor<T> {
+        
+        /**
+         * Visits a LiteralNode.
+         * * @param node The LiteralNode to visit.
+         * @return The result of the visitor's operation.
+         */
         T visit(LiteralNode node);
+
+        /**
+         * Visits a ConcatNode.
+         * * @param node The ConcatNode to visit.
+         * @return The result of the visitor's operation.
+         */
         T visit(ConcatNode node);
+
+        /**
+         * Visits a UnionNode.
+         * * @param node The UnionNode to visit.
+         * @return The result of the visitor's operation.
+         */
         T visit(UnionNode node);
+
+        /**
+         * Visits a StarNode.
+         * * @param node The StarNode to visit.
+         * @return The result of the visitor's operation.
+         */
         T visit(StarNode node);
     }
 

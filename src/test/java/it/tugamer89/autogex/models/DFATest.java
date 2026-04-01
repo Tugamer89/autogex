@@ -67,14 +67,22 @@ class DFATest {
 
     @Test
     void testBuilderThrowsIllegalArgumentExceptionForMissingState() {
-        // Tests that an exception is thrown if adding a transition with non-existing states
         DFA.Builder builder = new DFA.Builder().addState("q0", false);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addTransition("q0", 'a', "q1"); // "q1" was never added
+        IllegalArgumentException exceptionToMissing = assertThrows(IllegalArgumentException.class, () -> {
+            builder.addTransition("q0", 'a', "q1"); 
         });
+        assertTrue(exceptionToMissing.getMessage().contains("State not found"), "The error message must mention the missing state");
 
-        assertTrue(exception.getMessage().contains("State not found"), "The error message must mention the missing state");
+        IllegalArgumentException exceptionFromMissing = assertThrows(IllegalArgumentException.class, () -> {
+            builder.addTransition("qX", 'a', "q0"); 
+        });
+        assertTrue(exceptionFromMissing.getMessage().contains("State not found"), "The error message must mention the missing state");
+
+        IllegalArgumentException exceptionBothMissing = assertThrows(IllegalArgumentException.class, () -> {
+            builder.addTransition("qX", 'a', "qY"); 
+        });
+        assertTrue(exceptionBothMissing.getMessage().contains("State not found"), "The error message must mention the missing state");
     }
 
     @Test

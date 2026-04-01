@@ -3,6 +3,8 @@ package it.tugamer89.autogex.models;
 import it.tugamer89.autogex.core.AbstractAutomaton;
 import it.tugamer89.autogex.core.AbstractAutomatonBuilder;
 import it.tugamer89.autogex.core.State;
+import it.tugamer89.autogex.trace.ExecutionStep;
+import it.tugamer89.autogex.trace.ExecutionTrace;
 
 import java.util.*;
 
@@ -48,22 +50,27 @@ public class ENFA extends AbstractAutomaton {
     }
 
     @Override
-    public boolean accepts(String input) {
+    public ExecutionTrace execute(String input) {
+        List<ExecutionStep> steps = new ArrayList<>();
+        
         // Start from the ε-closure of the initial state
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
+        steps.add(new ExecutionStep(Set.of(initialState), null, currentStates));
         
         for (char symbol : input.toCharArray()) {
-            Set<State> nextStates = computeNextStates(currentStates, symbol, transitionTable);
+            Set<State> moveResult = computeNextStates(currentStates, symbol, transitionTable);
+            Set<State> nextStates = epsilonClosure(moveResult);
             
-            // After reading the symbol, expand with the ε-closure
-            currentStates = epsilonClosure(nextStates);
+            steps.add(new ExecutionStep(currentStates, symbol, nextStates));
+            currentStates = nextStates;
             
             if (currentStates.isEmpty()) {
-                return false;
+                break;
             }
         }
         
-        return currentStates.stream().anyMatch(finalStates::contains);
+        boolean isAccepted = currentStates.stream().anyMatch(finalStates::contains);
+        return new ExecutionTrace(input, steps, isAccepted);
     }
 
     /**

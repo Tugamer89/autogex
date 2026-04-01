@@ -20,7 +20,7 @@
 - **Modeling:** Native support for `DFA` (Deterministic Finite Automata), `NFA` (Non-Deterministic), and `ENFA` ($ \epsilon $-NFA with silent transitions).
 - **Conversion:**  Subset construction algorithm (Rabin-Scott) and $ \epsilon $-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
-- **Visualization (New!):** Export any automaton or compiled regex directly to the Graphviz DOT language format.
+- **Visualization:** Export any automaton or compiled regex directly to the Graphviz DOT language format.
 
 ## Installation
 
@@ -30,7 +30,7 @@ You can include Autogex in your Java project by adding this dependency to your `
 <dependency>
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 

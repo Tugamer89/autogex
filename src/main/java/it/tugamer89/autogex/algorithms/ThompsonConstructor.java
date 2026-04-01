@@ -26,7 +26,7 @@ public class ThompsonConstructor {
      */
     public static ENFA construct(RegexNode ast) {
         ThompsonConstructor constructor = new ThompsonConstructor();
-        Fragment rootFragment = constructor.visit(ast);
+        Fragment rootFragment = constructor.generateFragment(ast);
 
         // Create a single global final state for the completed automaton
         String finalState = constructor.newStateName();
@@ -50,57 +50,66 @@ public class ThompsonConstructor {
         return "q" + (stateCounter++);
     }
 
-    private String addNonFinalState() {
-        String name = newStateName();
-        builder.addState(name, false);
-        return name;
+    private Fragment generateFragment(RegexNode node) {
+        return node.accept(new AstVisitor());
     }
 
     /**
-     * Recursively visits the AST nodes and builds the corresponding ENFA fragments.
+     * Visitor implementation to traverse the AST and build ENFA fragments using Polymorphism.
      */
-    private Fragment visit(RegexNode node) {
-        return switch (node) {
-            case LiteralNode(char symbol) -> {
-                String start = addNonFinalState();
-                String accept = addNonFinalState();
-                builder.addTransition(start, symbol, accept);
-                yield new Fragment(start, accept);
-            }
-            case ConcatNode(RegexNode leftNode, RegexNode rightNode) -> {
-                Fragment left = visit(leftNode);
-                Fragment right = visit(rightNode);
-                builder.addEpsilonTransition(left.accept(), right.start());
-                yield new Fragment(left.start(), right.accept());
-            }
-            case UnionNode(RegexNode leftNode, RegexNode rightNode) -> {
-                Fragment left = visit(leftNode);
-                Fragment right = visit(rightNode);
-                
-                String start = addNonFinalState();
-                String accept = addNonFinalState();
-                
-                builder.addEpsilonTransition(start, left.start());
-                builder.addEpsilonTransition(start, right.start());
-                builder.addEpsilonTransition(left.accept(), accept);
-                builder.addEpsilonTransition(right.accept(), accept);
-                
-                yield new Fragment(start, accept);
-            }
-            case StarNode(RegexNode childNode) -> {
-                Fragment child = visit(childNode);
-                
-                String start = addNonFinalState();
-                String accept = addNonFinalState();
-                
-                builder.addEpsilonTransition(start, child.start());
-                builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)
-                builder.addEpsilonTransition(child.accept(), child.start()); // Loop path
-                builder.addEpsilonTransition(child.accept(), accept);
-                
-                yield new Fragment(start, accept);
-            }
-            default -> throw new IllegalArgumentException("Unsupported RegexNode type: " + node.getClass());
-        };
+    private class AstVisitor implements RegexNode.Visitor<Fragment> {
+
+        private String addNonFinalState() {
+            String name = newStateName();
+            builder.addState(name, false);
+            return name;
+        }
+
+        @Override
+        public Fragment visit(LiteralNode lit) {
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+            builder.addTransition(start, lit.symbol(), accept);
+            return new Fragment(start, accept);
+        }
+
+        @Override
+        public Fragment visit(ConcatNode concat) {
+            Fragment left = concat.left().accept(this);
+            Fragment right = concat.right().accept(this);
+            builder.addEpsilonTransition(left.accept(), right.start());
+            return new Fragment(left.start(), right.accept());
+        }
+
+        @Override
+        public Fragment visit(UnionNode union) {
+            Fragment left = union.left().accept(this);
+            Fragment right = union.right().accept(this);
+            
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+            
+            builder.addEpsilonTransition(start, left.start());
+            builder.addEpsilonTransition(start, right.start());
+            builder.addEpsilonTransition(left.accept(), accept);
+            builder.addEpsilonTransition(right.accept(), accept);
+            
+            return new Fragment(start, accept);
+        }
+
+        @Override
+        public Fragment visit(StarNode star) {
+            Fragment child = star.child().accept(this);
+            
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+            
+            builder.addEpsilonTransition(start, child.start());
+            builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)
+            builder.addEpsilonTransition(child.accept(), child.start()); // Loop path
+            builder.addEpsilonTransition(child.accept(), accept);
+            
+            return new Fragment(start, accept);
+        }
     }
 }

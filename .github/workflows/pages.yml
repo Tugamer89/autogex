@@ -39,13 +39,20 @@ jobs:
       - name: Javadoc HTML Generation
         run: mvn -B javadoc:javadoc
 
+      - name: Find Javadoc Folder Automatically
+        id: find_folder
+        run: |
+          FOLDER=$(find target -name "apidocs" -type d | head -n 1)
+          echo "The actual folder is located at: $FOLDER"
+          echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
+
       - name: GitHub Pages Config
         uses: actions/configure-pages@v6
 
       - name: Artifacts Uploading
         uses: actions/upload-pages-artifact@v4
         with:
-          path: 'target/site/apidocs'
+          path: ${{ steps.find_folder.outputs.javadoc_path }}
 
       - name: Deployment
         id: deployment

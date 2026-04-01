@@ -72,8 +72,11 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
 
+                    <additionalOptions>
+                        <additionalOption>--allow-script-in-comments</additionalOption>
+                    </additionalOptions>
+
                     <overview>${basedir}/README.md</overview>
-                    
                     <windowtitle>Autogex API Documentation</windowtitle>
                     <doctitle>Autogex ${project.version} API Reference</doctitle>
                     <bottom><![CDATA[

@@ -1,0 +1,52 @@
+name: Publishes Documentation on GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy-javadoc:
+    name: Javadoc Build & Deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: JDK 25 Set Up
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Javadoc HTML Generation
+        run: mvn -B javadoc:javadoc
+
+      - name: GitHub Pages Config
+        uses: actions/configure-pages@v4
+
+      - name: Artifacts Uploading
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'target/site/apidocs'
+
+      - name: Deployment
+        id: deployment
+        uses: actions/deploy-pages@v4

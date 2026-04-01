@@ -52,6 +52,13 @@ jobs:
           <meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />\
           <meta name="yandex-verification" content="fe2e9e5b84cda188" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
 
+      - name: Generate Sitemap
+        uses: cicirello/generate-sitemap@v1.10.4
+        with:
+          base-url-path: https://tugamer89.github.io/autogex/
+          path-to-root: ${{ steps.find_folder.outputs.javadoc_path }}
+          additional-extensions: html
+
       - name: GitHub Pages Config
         uses: actions/configure-pages@v6
 

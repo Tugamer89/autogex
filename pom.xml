@@ -6,7 +6,7 @@
 
     <groupId>it.tugamer89</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
 
     <name>Autogex</name>
     <description>A powerful Java engine for processing Finite State Automata and Regular Expressions.</description>

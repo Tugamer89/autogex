@@ -53,7 +53,7 @@ jobs:
           <meta name="yandex-verification" content="fe2e9e5b84cda188" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
 
       - name: Generate Sitemap
-        uses: cicirello/generate-sitemap@v1.10.4
+        uses: cicirello/generate-sitemap@6a56a20238e631d653600cf792c3596722b78259
         with:
           base-url-path: https://tugamer89.github.io/autogex/
           path-to-root: ${{ steps.find_folder.outputs.javadoc_path }}

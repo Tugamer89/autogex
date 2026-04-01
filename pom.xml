@@ -74,7 +74,7 @@
 
                     <overview>${basedir}/README.md</overview>
 
-                    <header><![CDATA[<meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />]]></header>
+                    <head><![CDATA[<meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />]]></head>
 
                     <windowtitle>Autogex API Documentation</windowtitle>
                     

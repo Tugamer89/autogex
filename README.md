@@ -85,16 +85,6 @@ DFA minimalDfa = Minimizer.minimize(Converter.enfaToDfa(enfa));
 System.out.println(minimalDfa.accepts("aaabbb")); // Output: true
 ```
 
-## Project Roadmap
-
-The project is developed in sequential milestones:
-
-- [x] **Phase 1:** Core Models and Builders (`DFA`, `NFA`, `ENFA`).
-- [x] **Phase 2:** Conversion Engine (Subset Construction) and Minimization.
-- [x] **Phase 3:** Abstract Syntax Tree (AST) and Regular Expression (Regex) Parsing.
-- [x] **Phase 4:** Compilation (Thompson's Construction to transform Regex $\rightarrow$ ENFA).
-- [x] **Phase 5:** Graphviz (DOT) Export and Visual Representation.
-
 ## License
 
 This project is licensed under the MIT License. Feel free to use, study, modify, and distribute this code, even in commercial projects. See the [`LICENSE`](https://github.com/Tugamer89/autogex/blob/main/LICENSE) for full details.

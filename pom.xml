@@ -73,15 +73,12 @@
                     <source>${maven.compiler.source}</source>
 
                     <overview>${basedir}/README.md</overview>
-
                     <head><![CDATA[<meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />]]></head>
 
                     <windowtitle>Autogex API Documentation</windowtitle>
-                    
                     <doctitle>Autogex ${project.version} API Reference</doctitle>
-                    
                     <bottom><![CDATA[Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.]]></bottom>
-                    
+
                     <show>public</show>
                     <author>true</author>
                     <version>true</version>

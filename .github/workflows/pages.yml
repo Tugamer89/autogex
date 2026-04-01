@@ -59,6 +59,9 @@ jobs:
           path-to-root: ${{ steps.find_folder.outputs.javadoc_path }}
           additional-extensions: html
 
+      - name: Copy robots.txt
+        run: cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+
       - name: GitHub Pages Config
         uses: actions/configure-pages@v6
 

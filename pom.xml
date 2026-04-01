@@ -77,7 +77,7 @@
                     <overview>${basedir}/README.md</overview>
 
                     <addStylesheets>
-                        <addStylesheet>src/main/javadoc/custom-javadoc.css</addStylesheet>
+                        <addStylesheet>custom-javadoc.css</addStylesheet>
                     </addStylesheets>
 
                     <windowtitle>Autogex API Documentation</windowtitle>

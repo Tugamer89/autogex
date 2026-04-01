@@ -71,6 +71,20 @@
                 <version>3.12.0</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
+
+                    <windowtitle>Autogex API Documentation</windowtitle>
+                    
+                    <doctitle>Autogex ${project.version} API Reference</doctitle>
+                    
+                    <bottom><![CDATA[Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.]]></bottom>
+                    
+                    <show>public</show>
+                    <author>true</author>
+                    <version>true</version>
+                    
+                    <links>
+                        <link>https://docs.oracle.com/en/java/javase/25/docs/api/</link>
+                    </links>
                 </configuration>
                 <executions>
                     <execution>

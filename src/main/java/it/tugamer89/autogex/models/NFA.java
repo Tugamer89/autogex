@@ -3,6 +3,8 @@ package it.tugamer89.autogex.models;
 import it.tugamer89.autogex.core.AbstractAutomaton;
 import it.tugamer89.autogex.core.AbstractAutomatonBuilder;
 import it.tugamer89.autogex.core.State;
+import it.tugamer89.autogex.trace.ExecutionStep;
+import it.tugamer89.autogex.trace.ExecutionTrace;
 
 import java.util.*;
 
@@ -20,21 +22,27 @@ public class NFA extends AbstractAutomaton {
     }
 
     @Override
-    public boolean accepts(String input) {
-        Set<State> currentStates = new HashSet<>();
-        currentStates.add(initialState);
+    public ExecutionTrace execute(String input) {
+        List<ExecutionStep> steps = new ArrayList<>();
+        Set<State> currentStates = Set.of(initialState);
+        
+        // Initial setup step
+        steps.add(new ExecutionStep(Collections.emptySet(), null, currentStates));
         
         for (char symbol : input.toCharArray()) {
-            currentStates = computeNextStates(currentStates, symbol, transitionTable);
+            Set<State> nextStates = computeNextStates(currentStates, symbol, transitionTable);
+            
+            steps.add(new ExecutionStep(currentStates, symbol, nextStates));
+            currentStates = nextStates;
             
             // Optimization: if there are no more active states, the string is rejected
             if (currentStates.isEmpty()) {
-                return false;
+                break;
             }
         }
         
-        // Accepts if at least one of the current active states is a final state
-        return currentStates.stream().anyMatch(finalStates::contains);
+        boolean isAccepted = currentStates.stream().anyMatch(finalStates::contains);
+        return new ExecutionTrace(input, steps, isAccepted);
     }
 
     /**

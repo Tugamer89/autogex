@@ -2,6 +2,8 @@ package it.tugamer89.autogex.core;
 
 import java.util.Set;
 
+import it.tugamer89.autogex.trace.ExecutionTrace;
+
 /**
  * Base interface for all types of Automata (DFA, NFA, ENFA).
  */
@@ -29,11 +31,21 @@ public interface Automaton {
     Set<State> getFinalStates();
     
     /**
+     * Processes the input string and returns a detailed execution trace.
+     *
+     * @param input The string to be evaluated.
+     * @return An ExecutionTrace detailing the entire state traversal.
+     */
+    ExecutionTrace execute(String input);
+    
+    /**
      * The main method that checks whether the input string belongs
      * to the language recognized by the automaton L(M).
      *
      * @param input The string to be evaluated.
      * @return true if the string is accepted, false otherwise.
      */
-    boolean accepts(String input);
+    default boolean accepts(String input) {
+        return execute(input).isAccepted();
+    }
 }

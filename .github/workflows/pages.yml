@@ -51,16 +51,15 @@ jobs:
           sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
 
           sed -i '/<head>/a \
-          <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." />\
-          <meta name="google-site-verification" content="yR04oI5NTEJeO6htVqmUek7P6GezU-Mn-zRJegqdwL4" />\
-          <meta name="yandex-verification" content="fe2e9e5b84cda188" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." />'\
+          ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           
           sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
 
       - name: Generate Sitemap
         uses: cicirello/generate-sitemap@6a56a20238e631d653600cf792c3596722b78259
         with:
-          base-url-path: https://tugamer89.github.io/autogex/
+          base-url-path: https://autogex.eu.org/
           path-to-root: ${{ steps.find_folder.outputs.javadoc_path }}
           additional-extensions: html
 
@@ -74,12 +73,12 @@ jobs:
           curl -X POST "https://api.indexnow.org/indexnow" \
             -H "Content-Type: application/json; charset=utf-8" \
             -d '{
-              "host": "tugamer89.github.io",
+              "host": "autogex.eu.org",
               "key": "8c8a09117f884afb9d9769c48698cf19",
-              "keyLocation": "https://tugamer89.github.io/autogex/8c8a09117f884afb9d9769c48698cf19.txt",
+              "keyLocation": "https://autogex.eu.org/8c8a09117f884afb9d9769c48698cf19.txt",
               "urlList": [
-                "https://tugamer89.github.io/autogex/",
-                "https://tugamer89.github.io/autogex/sitemap.xml"
+                "https://autogex.eu.org/",
+                "https://autogex.eu.org/sitemap.xml"
               ]
             }'
 

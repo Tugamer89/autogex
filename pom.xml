@@ -80,6 +80,10 @@
                         <addStylesheet>custom-javadoc.css</addStylesheet>
                     </addStylesheets>
 
+                    <header><![CDATA[
+                        <img src="{@docRoot}/logo.svg" alt="Autogex Logo" style="height: 35px; vertical-align: middle;">
+                    ]]></header>
+
                     <windowtitle>Autogex API Documentation</windowtitle>
                     <bottom><![CDATA[
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

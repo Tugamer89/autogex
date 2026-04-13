@@ -1,5 +1,9 @@
 # Autogex
 
+<p align="center">
+  <img src="src/main/javadoc/logo.svg" alt="Autogex Logo" width="500">
+</p>
+
 **A powerful Java engine for processing Finite State Automata and Regular Expressions.**
 
 ![Java Version](https://img.shields.io/badge/Java-25-orange?logo=java)

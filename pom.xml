@@ -81,7 +81,6 @@
                     </addStylesheets>
 
                     <header><![CDATA[
-                        <link rel="icon" type="image/svg+xml" href="favicon.svg">
                         <img src="logo.svg" alt="Autogex Logo" style="height: 35px; vertical-align: middle;">
                     ]]></header>
 

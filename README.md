@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/main/javadoc/logo.svg" alt="Autogex Logo" width="500">
+  <img src="https://autogex.eu.org/logo.svg" alt="Autogex Logo" width="500">
 </p>
 
 # Autogex

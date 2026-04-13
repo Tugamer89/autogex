@@ -67,6 +67,7 @@ jobs:
         run: |
           cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
           cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/logo.svg ${{ steps.find_folder.outputs.javadoc_path }}/
 
       - name: Notify IndexNow
         run: |

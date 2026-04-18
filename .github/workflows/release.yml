@@ -49,7 +49,7 @@ jobs:
         run: mvn -B deploy -DskipTests
 
       - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'target/*.jar'
 

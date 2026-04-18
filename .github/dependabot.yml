@@ -1,12 +1,10 @@
 version: 2
 updates:
-  # Dipendenze Java nel pom.xml
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
 
-  # Versioni delle Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

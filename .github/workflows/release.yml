@@ -1,24 +1,24 @@
 name: Release Artifacts & Publish Package
 
 on:
-  release:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'Inserisci il tag della release'
-        required: true
-        default: 'v0.1.0'
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*.*.*'
 
 permissions:
   contents: write
   packages: write
+  id-token: write
+  attestations: write
 
 jobs:
   publish-and-release:
+    name: Build, Test, Publish and Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout source code
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -32,15 +32,47 @@ jobs:
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
+      - name: Run Tests (Gatekeeper)
+        run: mvn -B test
+
+      - name: Extract Project Version from POM
+        id: extract_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+          echo "Extracted version: $VERSION"
+
       - name: Publish to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B deploy -DskipTests
 
-      - name: Upload JAR to Release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v1
         with:
+          subject-path: 'target/*.jar'
+
+      - name: Create GitHub Release & Upload JARs
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: Autogex ${{ env.TAG_NAME }}
+          generate_release_notes: true
+          body: |
+            **Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions.
+            
+            ### Maven Package
+            This release updates the package hosted on GitHub Packages. To use it, make sure to update the version in your `pom.xml`:
+            ```xml
+            <dependency>
+                <groupId>it.tugamer89</groupId>
+                <artifactId>autogex</artifactId>
+                <version>${{ env.PROJECT_VERSION }}</version>
+            </dependency>
+            ```
+            
+            **Security**: The `.jar` files attached to this release include a cryptographic provenance attestation (SLSA Level 3).
           files: target/*.jar
-          tag_name: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

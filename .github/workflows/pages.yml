@@ -46,14 +46,11 @@ jobs:
       - name: Inject Meta Tags & SEO Fixes
         run: |
           sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-
-          sed -i '/<head>/a \
-          <link rel="icon" type="image/svg+xml" href="/favicon.svg"> \
-          <meta name="robots" content="noindex, nofollow"> \
-          <meta name="description" content="Autogex Development Documentation." />' \
-          ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          
           sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          
+          sed -i '/<head>/a <meta name="robots" content="noindex, nofollow"> <meta name="description" content="Autogex Development Documentation." />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
+          touch ${{ steps.find_folder.outputs.javadoc_path }}/.nojekyll
 
       - name: Deploy to GitHub Pages (dev folder)
         uses: peaceiris/actions-gh-pages@v4

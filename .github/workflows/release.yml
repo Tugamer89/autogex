@@ -91,8 +91,12 @@ jobs:
       - name: Inject Meta Tags & Copy SEO Files
         run: |
           sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg"> <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." /> <link rel="canonical" href="https://autogex.eu.org/" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          
+          sed -i '/<head>/a <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." /> <link rel="canonical" href="https://autogex.eu.org/" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
+          touch ${{ steps.find_folder.outputs.javadoc_path }}/.nojekyll
+          
           cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
           cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
           cp src/main/javadoc/logo.svg ${{ steps.find_folder.outputs.javadoc_path }}/

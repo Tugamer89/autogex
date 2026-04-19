@@ -77,10 +77,10 @@
                     </addStylesheets>
 
                     <header><![CDATA[
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <img src="/logo.svg" alt="Autogex Logo" style="height: 35px; vertical-align: middle;">
-                            <select id="version-switcher" onchange="window.location.href=this.value" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc; background-color: #f6f8fa; font-family: monospace; font-size: 14px; cursor: pointer;">
-                                <option value="/">Loading versions...</option>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                            <img src="/logo.svg" alt="Autogex Logo" style="height: 24px;">
+                            <select id="version-switcher">
+                                <option value="/">Loading...</option>
                             </select>
                         </div>
                         <script src="/version-switcher.js"></script>

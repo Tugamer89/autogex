@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout gh-pages
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           fetch-depth: 0
@@ -29,3 +29,17 @@ jobs:
           git add sitemap.xml
           git commit -m "Auto-generated global sitemap" || exit 0
           git push
+
+      - name: Notify IndexNow
+        run: |
+          curl -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d '{
+              "host": "autogex.eu.org",
+              "key": "8c8a09117f884afb9d9769c48698cf19",
+              "keyLocation": "https://autogex.eu.org/8c8a09117f884afb9d9769c48698cf19.txt",
+              "urlList": [
+                "https://autogex.eu.org/",
+                "https://autogex.eu.org/sitemap.xml"
+              ]
+            }'

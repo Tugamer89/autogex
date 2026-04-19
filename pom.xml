@@ -21,7 +21,6 @@
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 for Unit Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -38,13 +37,11 @@
 
     <build>
         <plugins>
-            <!-- Plugin for testing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.5</version>
             </plugin>
-            <!-- Plugin for code coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -64,7 +61,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin for documentation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -81,7 +77,13 @@
                     </addStylesheets>
 
                     <header><![CDATA[
-                        <img src="/logo.svg" alt="Autogex Logo" style="height: 35px; vertical-align: middle;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <img src="/logo.svg" alt="Autogex Logo" style="height: 35px; vertical-align: middle;">
+                            <select id="version-switcher" onchange="window.location.href=this.value" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc; background-color: #f6f8fa; font-family: monospace; font-size: 14px; cursor: pointer;">
+                                <option value="/">Loading versions...</option>
+                            </select>
+                        </div>
+                        <script src="/version-switcher.js"></script>
                     ]]></header>
 
                     <windowtitle>Autogex Docs</windowtitle>
@@ -120,7 +122,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Plugin for source distribution -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

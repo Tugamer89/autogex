@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
   pages: write
+  id-token: write
   actions: write
 
 jobs:
@@ -45,11 +46,14 @@ jobs:
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
-      - name: Inject Meta Tags
+      - name: Inject Meta Tags & Fixes
         run: |
           sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg"> <meta name="robots" content="noindex, nofollow">' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          
+          sed -i '/<head>/a <meta name="robots" content="noindex, nofollow"> <meta name="description" content="Autogex Old Documentation." />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
+          touch ${{ steps.find_folder.outputs.javadoc_path }}/.nojekyll
 
       - name: Deploy Docs to Version Folder
         uses: peaceiris/actions-gh-pages@v4

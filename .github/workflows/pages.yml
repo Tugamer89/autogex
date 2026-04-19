@@ -52,7 +52,7 @@ jobs:
 
           sed -i '/<head>/a \
           <link rel="icon" type="image/svg+xml" href="favicon.svg"> \
-          <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." />' \
+          <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." /> \
           <link rel="canonical" href="https://autogex.eu.org/" />' \
           ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           

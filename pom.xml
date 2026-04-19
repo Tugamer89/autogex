@@ -83,7 +83,6 @@
                                 <option value="/">Loading...</option>
                             </select>
                         </div>
-                        <script src="/version-switcher.js"></script>
                     ]]></header>
 
                     <windowtitle>Autogex Docs</windowtitle>
@@ -102,6 +101,7 @@
                             });
                         </script>
                         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+                        <script src="/version-switcher.js"></script>
                         Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.
                     ]]></bottom>
 

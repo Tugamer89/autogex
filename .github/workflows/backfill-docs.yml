@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
   pages: write
+  actions: write
 
 jobs:
   backfill:
@@ -57,3 +58,8 @@ jobs:
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
           destination_dir: ${{ env.VERSION }}
           keep_files: true
+
+      - name: Trigger Sitemap Update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run sitemap.yml --ref main

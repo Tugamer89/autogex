@@ -10,6 +10,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: "pages-dev"
@@ -61,3 +62,8 @@ jobs:
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
           destination_dir: dev
           keep_files: true
+
+      - name: Trigger Sitemap Update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run sitemap.yml --ref main

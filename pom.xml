@@ -84,7 +84,7 @@
                         <img src="/logo.svg" alt="Autogex Logo" style="height: 35px; vertical-align: middle;">
                     ]]></header>
 
-                    <windowtitle>Autogex API Documentation</windowtitle>
+                    <windowtitle>Autogex Docs</windowtitle>
                     <bottom><![CDATA[
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>

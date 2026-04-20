@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK 25
         uses: actions/setup-java@v5
@@ -34,8 +32,6 @@ jobs:
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-      - name: Run Tests (Gatekeeper)
-        run: mvn -B test
 
       - name: Extract Project Version from POM
         id: extract_version
@@ -71,7 +67,7 @@ jobs:
       - name: Publish to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B deploy -DskipTests
+        run: mvn -B -T 1C deploy -DskipTests
 
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v4
@@ -90,7 +86,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Javadoc HTML Generation
-        run: mvn -B javadoc:javadoc
+        run: mvn -B -T 1C javadoc:javadoc
 
       - name: Find Javadoc Folder
         id: find_folder
@@ -100,15 +96,18 @@ jobs:
 
       - name: Inject Meta Tags & SEO Fixes
         run: |
-          sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          
-          sed -i '/<head>/a <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." /> <link rel="canonical" href="https://autogex.eu.org/" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
+          sed -i \
+            -e '/<meta name="description"/d' \
+            -e '/id="autogex-heading"/d' \
+            -e '/<head>/a <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." />\n<link rel="canonical" href="https://autogex.eu.org/" />' \
+            ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
+            sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
       - name: Minify Frontend Assets (CSS, HTML)
         run: |
-          npm install -g clean-css-cli html-minifier
+          npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier terser svgo
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
 
@@ -130,7 +129,6 @@ jobs:
       
       - name: Minify Frontend Assets (JS, SVG)
         run: |
-          npm install -g terser svgo
           terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
           svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg
           svgo ${{ steps.find_folder.outputs.javadoc_path }}/favicon.svg

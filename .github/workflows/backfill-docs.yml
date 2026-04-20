@@ -22,8 +22,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Generate Tags List
         id: get-tags
@@ -70,7 +68,7 @@ jobs:
           echo "VERSION=$CLEAN_VER" >> $GITHUB_ENV
 
       - name: Javadoc HTML Generation
-        run: mvn -B javadoc:javadoc
+        run: mvn -B -T 1C javadoc:javadoc
 
       - name: Find Javadoc Folder
         id: find_folder
@@ -80,16 +78,19 @@ jobs:
 
       - name: Inject Meta Tags & SEO Fixes
         run: |
-          sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          
-          sed -i '/<head>/a <meta name="robots" content="noindex, nofollow"> <meta name="description" content="Autogex Old Documentation." />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
-          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
+          sed -i \
+            -e '/<meta name="description"/d' \
+            -e '/id="autogex-heading"/d' \
+            -e '/<head>/a <meta name="robots" content="noindex, nofollow">\n<meta name="description" content="Autogex Old Documentation." />' \
+            ${{ steps.find_folder.outputs.javadoc_path }}/index.html
+
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
+            sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
       - name: Minify Frontend Assets (CSS, HTML)
         continue-on-error: true
         run: |
-          npm install -g clean-css-cli html-minifier
+          npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css || true
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \; || true
 

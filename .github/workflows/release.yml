@@ -88,28 +88,18 @@ jobs:
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
-      - name: Inject Meta Tags & Copy SEO Files
+      - name: Inject Meta Tags & SEO Fixes
         run: |
           sed -i '/<meta name="description"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           sed -i '/id="autogex-heading"/d' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           
           sed -i '/<head>/a <meta name="description" content="Autogex: A powerful Java engine for processing Finite State Automata and Regular Expressions. Convert Regex to minimal DFA easily." /> <link rel="canonical" href="https://autogex.eu.org/" />' ${{ steps.find_folder.outputs.javadoc_path }}/index.html
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
-          touch ${{ steps.find_folder.outputs.javadoc_path }}/.nojekyll
-          
-          cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/logo.svg ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/favicon.svg ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/version-switcher.js ${{ steps.find_folder.outputs.javadoc_path }}/
 
-      - name: Minify Frontend Assets (JS, CSS, SVG)
+      - name: Minify Frontend Assets (CSS, HTML)
         run: |
-          npm install -g terser clean-css-cli svgo html-minifier
-          terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
+          npm install -g clean-css-cli html-minifier
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/custom-javadoc.css
-          svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg
-          svgo ${{ steps.find_folder.outputs.javadoc_path }}/favicon.svg
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
 
       - name: Deploy Docs to Version Folder
@@ -119,6 +109,21 @@ jobs:
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
           destination_dir: ${{ env.PROJECT_VERSION }}
           keep_files: true
+      
+      - name: Copy SEO Files
+        run: |
+          cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/logo.svg ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/favicon.svg ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/version-switcher.js ${{ steps.find_folder.outputs.javadoc_path }}/
+      
+      - name: Minify Frontend Assets (JS, SVG)
+        run: |
+          npm install -g terser svgo
+          terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
+          svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg
+          svgo ${{ steps.find_folder.outputs.javadoc_path }}/favicon.svg
 
       - name: Deploy Docs to Root (Latest)
         uses: peaceiris/actions-gh-pages@v4

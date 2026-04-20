@@ -6,10 +6,12 @@
 
     <groupId>org.eu.autogex</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.3.4</version>
+    <version>1.3.5</version>
 
     <name>Autogex</name>
-    <description>A powerful Java engine for processing Finite State Automata and Regular Expressions.</description>
+    <description>
+        Autogex is a lightweight, zero-dependency Java engine for parsing, converting, and minimizing Finite State Automata (DFA, NFA, ENFA) and Regular Expressions. It strictly implements Formal Language Theory theorems, featuring an immutable and thread-safe Fluent API. Key capabilities include AST-based Regex compilation via Thompson's construction, Rabin-Scott subset construction, Moore's DFA minimization, step-by-step execution tracing, and native visual graph exports to Graphviz DOT and Mermaid.js formats.
+    </description>
     
     <url>https://autogex.eu.org/</url>
 

@@ -41,7 +41,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Build and Test
-        run: mvn -B verify
+        run: mvn -B -T 1C verify -Dmaven.javadoc.skip=true -Dsource.skip=true
 
       - name: Analyze with SonarCloud
         if: ${{ github.actor != 'dependabot[bot]' }}

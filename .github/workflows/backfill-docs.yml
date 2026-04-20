@@ -9,10 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
-  actions: write
+  contents: read
 
 jobs:
   setup-tags:
@@ -20,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix_tags: ${{ steps.get-tags.outputs.tags }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -40,6 +39,10 @@ jobs:
     name: Build & Deploy (${{ matrix.tag }})
     needs: setup-tags
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     strategy:
       max-parallel: 1
       fail-fast: false
@@ -96,8 +99,10 @@ jobs:
     name: Trigger Global Sitemap
     needs: backfill
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
-      - name: Checkout per il comando CLI
+      - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Trigger Sitemap Update
         env:

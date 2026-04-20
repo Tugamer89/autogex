@@ -28,10 +28,11 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
-
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
 
       - name: Extract Project Version from POM
         id: extract_version
@@ -47,27 +48,29 @@ jobs:
           echo "RELEASE_BODY<<$EOF" >> $GITHUB_ENV
           echo "**Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions." >> $GITHUB_ENV
           echo "" >> $GITHUB_ENV
-          echo "### Maven Package" >> $GITHUB_ENV
-          echo "This release updates the package hosted on GitHub Packages. To use it, make sure to update the version in your \`pom.xml\`:" >> $GITHUB_ENV
+          echo "### Maven Central" >> $GITHUB_ENV
+          echo "This release is officially published on Maven Central. To use it, add the following dependency to your \`pom.xml\`:" >> $GITHUB_ENV
           echo "\`\`\`xml" >> $GITHUB_ENV
           echo "<dependency>" >> $GITHUB_ENV
-          echo "    <groupId>it.tugamer89</groupId>" >> $GITHUB_ENV
+          echo "    <groupId>org.eu.autogex</groupId>" >> $GITHUB_ENV
           echo "    <artifactId>autogex</artifactId>" >> $GITHUB_ENV
           echo "    <version>$VERSION</version>" >> $GITHUB_ENV
           echo "</dependency>" >> $GITHUB_ENV
           echo "\`\`\`" >> $GITHUB_ENV
           echo "" >> $GITHUB_ENV
-          echo "**Security**: The \`.jar\` files attached to this release include a cryptographic provenance attestation (SLSA Level 3)." >> $GITHUB_ENV
+          echo "**Security**: The \`.jar\` files attached to this release include a cryptographic provenance attestation (SLSA Level 3) and are GPG signed." >> $GITHUB_ENV
           echo "$EOF" >> $GITHUB_ENV
 
       - name: Update POM Description dynamically
         run: |
           perl -0777 -pi -e 's|<description>.*?</description>|<description>\n$ENV{RELEASE_BODY}\n    </description>|s' pom.xml
 
-      - name: Publish to GitHub Packages
+      - name: Publish to Maven Central
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B -T 1C deploy -DskipTests
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: mvn -B deploy -DskipTests
 
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v4

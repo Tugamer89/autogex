@@ -15,6 +15,7 @@
 ![wakatime](https://wakatime.com/badge/user/423e1479-325a-4958-8d21-2d5f97c11efb/project/a34da62c-470e-4ee6-8156-4b61c35c9bde.svg)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 [![Javadoc](https://img.shields.io/badge/Javadoc-Reference-007ec6?logo=java&logoColor=white)](https://autogex.eu.org)
+[![Maven Central](https://img.shields.io/maven-central/v/org.eu.autogex/autogex?color=blue&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/org.eu.autogex/autogex)
 
 **Autogex** is a lightweight, clean, and extensible library built to manipulate, convert, and minimize formal computational models. It strictly implements the theorems of Formal Language Theory, providing an extremely intuitive, thread-safe, and immutability-based "Fluent" API (via the Builder Pattern).
 
@@ -33,13 +34,11 @@ You can include Autogex in your Java project by adding this dependency to your `
 
 ```xml
 <dependency>
-    <groupId>it.tugamer89</groupId>
-    <artifactId>autogex</artifactId>
-    <version>1.3.0</version>
+  <groupId>org.eu.autogex</groupId>
+  <artifactId>autogex</artifactId>
+  <version>1.3.2</version>
 </dependency>
 ```
-
-**Note for GitHub Packages:** To download packages hosted directly on GitHub, you must have a *Personal Access Token (PAT)* configured in your local `~/.m2/settings.xml` file.
 
 ## Usage Example
 
@@ -50,7 +49,7 @@ For a complete overview of all classes and methods, see the [Official API docume
 The easiest way to use Autogex is through the `Regex` facade. It automatically parses the string, builds the AST, converts to a DFA, and minimizes it.
 
 ```java
-import it.tugamer89.autogex.regex.Regex;
+import org.eu.autogex.regex.Regex;
 
 // Compiles the regex into a theoretical Minimal DFA under the hood
 Regex regex = new Regex("(a|b)*abb");
@@ -73,10 +72,10 @@ System.out.println(mermaidGraph);
 For educational purposes or custom needs, you can still manually build and convert models using the Builder pattern.
 
 ```java
-import it.tugamer89.autogex.models.ENFA;
-import it.tugamer89.autogex.algorithms.Converter;
-import it.tugamer89.autogex.algorithms.Minimizer;
-import it.tugamer89.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.algorithms.Converter;
+import org.eu.autogex.algorithms.Minimizer;
+import org.eu.autogex.models.DFA;
 
 // Building an ENFA that accepts the language: a*b*
 ENFA enfa = new ENFA.Builder()

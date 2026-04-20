@@ -66,7 +66,7 @@ jobs:
 
       - name: Update POM Description dynamically
         run: |
-          perl -0777 -pi -e "s|<description>.*?</description>|<description>\n$ENV{'RELEASE_BODY'}\n    </description>|s" pom.xml
+          perl -0777 -pi -e 's|<description>.*?</description>|<description>\n$ENV{RELEASE_BODY}\n    </description>|s' pom.xml
 
       - name: Publish to GitHub Packages
         env:

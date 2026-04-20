@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag to build documentation for (e.g. v1.2.0)'
-        required: true
+        description: 'Tag (es. v1.2.0). Lascia vuoto per rigenerare TUTTI i tag.'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -14,14 +15,42 @@ permissions:
   actions: write
 
 jobs:
-  backfill:
-    name: Build & Deploy Old Version
+  setup-tags:
+    name: Determine Tags to Process
     runs-on: ubuntu-latest
+    outputs:
+      matrix_tags: ${{ steps.get-tags.outputs.tags }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate Tags List
+        id: get-tags
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            echo "tags=[\"${{ github.event.inputs.tag_name }}\"]" >> $GITHUB_OUTPUT
+          else
+            TAGS=$(git tag -l "v*" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "tags=$TAGS" >> $GITHUB_OUTPUT
+          fi
+
+  backfill:
+    name: Build & Deploy (${{ matrix.tag }})
+    needs: setup-tags
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        tag: ${{ fromJson(needs.setup-tags.outputs.matrix_tags) }}
+        
     steps:
       - name: Checkout Code at Tag
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.inputs.tag_name }}
+          ref: ${{ matrix.tag }}
 
       - name: JDK 25 Set Up
         uses: actions/setup-java@v5
@@ -33,7 +62,7 @@ jobs:
       - name: Extract Clean Version
         id: version
         run: |
-          TAG=${{ github.event.inputs.tag_name }}
+          TAG=${{ matrix.tag }}
           CLEAN_VER=${TAG#v}
           echo "VERSION=$CLEAN_VER" >> $GITHUB_ENV
 
@@ -63,6 +92,13 @@ jobs:
           destination_dir: ${{ env.VERSION }}
           keep_files: true
 
+  trigger-sitemap:
+    name: Trigger Global Sitemap
+    needs: backfill
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout per il comando CLI
+        uses: actions/checkout@v6
       - name: Trigger Sitemap Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

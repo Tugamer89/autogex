@@ -45,6 +45,29 @@ jobs:
           echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
 
+      - name: Prepare Release & Package Description
+        run: |
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "RELEASE_BODY<<$EOF" >> $GITHUB_ENV
+          echo "**Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions." >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "### Maven Package" >> $GITHUB_ENV
+          echo "This release updates the package hosted on GitHub Packages. To use it, make sure to update the version in your \`pom.xml\`:" >> $GITHUB_ENV
+          echo "\`\`\`xml" >> $GITHUB_ENV
+          echo "<dependency>" >> $GITHUB_ENV
+          echo "    <groupId>it.tugamer89</groupId>" >> $GITHUB_ENV
+          echo "    <artifactId>autogex</artifactId>" >> $GITHUB_ENV
+          echo "    <version>$VERSION</version>" >> $GITHUB_ENV
+          echo "</dependency>" >> $GITHUB_ENV
+          echo "\`\`\`" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "**Security**: The \`.jar\` files attached to this release include a cryptographic provenance attestation (SLSA Level 3)." >> $GITHUB_ENV
+          echo "$EOF" >> $GITHUB_ENV
+
+      - name: Update POM Description dynamically
+        run: |
+          perl -0777 -pi -e "s|<description>.*?</description>|<description>\n$ENV{'RELEASE_BODY'}\n    </description>|s" pom.xml
+
       - name: Publish to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,20 +84,7 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           name: Autogex ${{ env.TAG_NAME }}
           generate_release_notes: true
-          body: |
-            **Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions.
-            
-            ### Maven Package
-            This release updates the package hosted on GitHub Packages. To use it, make sure to update the version in your `pom.xml`:
-            ```xml
-            <dependency>
-                <groupId>it.tugamer89</groupId>
-                <artifactId>autogex</artifactId>
-                <version>${{ env.PROJECT_VERSION }}</version>
-            </dependency>
-            ```
-            
-            **Security**: The `.jar` files attached to this release include a cryptographic provenance attestation (SLSA Level 3).
+          body: ${{ env.RELEASE_BODY }}
           files: target/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

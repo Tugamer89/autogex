@@ -87,10 +87,11 @@ jobs:
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
       - name: Minify Frontend Assets (CSS, HTML)
+        continue-on-error: true
         run: |
           npm install -g clean-css-cli html-minifier
-          cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
-          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
+          cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css || true
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \; || true
 
       - name: Deploy Docs to Version Folder
         uses: peaceiris/actions-gh-pages@v4

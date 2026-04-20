@@ -49,7 +49,8 @@ jobs:
             mvn -B -T 1C verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar \
               -Dsonar.projectKey=Tugamer89_autogex \
               -Dmaven.javadoc.skip=true \
-              -Dsource.skip=true
+              -Dsource.skip=true \
+              -Dgpg.skip=true
           else
-            mvn -B -T 1C verify -Dmaven.javadoc.skip=true -Dsource.skip=true
+            mvn -B -T 1C verify -Dmaven.javadoc.skip=true -Dsource.skip=true -Dgpg.skip=true
           fi

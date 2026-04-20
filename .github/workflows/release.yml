@@ -99,7 +99,7 @@ jobs:
       - name: Minify Frontend Assets (CSS, HTML)
         run: |
           npm install -g clean-css-cli html-minifier
-          cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/custom-javadoc.css
+          cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
 
       - name: Deploy Docs to Version Folder

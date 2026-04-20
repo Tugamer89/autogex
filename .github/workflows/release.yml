@@ -61,10 +61,6 @@ jobs:
           echo "**Security**: The \`.jar\` files attached to this release include a cryptographic provenance attestation (SLSA Level 3) and are GPG signed." >> $GITHUB_ENV
           echo "$EOF" >> $GITHUB_ENV
 
-      - name: Update POM Description dynamically
-        run: |
-          perl -0777 -pi -e 's|<description>.*?</description>|<description>\n$ENV{RELEASE_BODY}\n    </description>|s' pom.xml
-
       - name: Publish to Maven Central
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}

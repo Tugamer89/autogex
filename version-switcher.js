@@ -1,9 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const switchers = document.querySelectorAll('select#version-switcher');
-    if (switchers.length === 0) return;
-    
-    switchers.forEach(s => s.removeAttribute('onchange'));
-    
     const currentPath = window.location.pathname;
     
     const getBase = (path) => {
@@ -14,9 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     
     const currentBase = getBase(currentPath);
-    
-    switchers.forEach(switcher => {
-        switcher.addEventListener('change', (e) => {
+    document.body.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'version-switcher') {
             const targetBase = e.target.value;
             
             let remainder = currentPath.substring(currentBase.length);
@@ -26,9 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
             
             let newUrl = (targetBase + remainder).replace(/\/\//g, '/');
             window.location.href = newUrl;
-        });
+        }
     });
     
+    const updateSelects = (optionsHtml) => {
+        document.querySelectorAll('select#version-switcher').forEach(switcher => {
+            switcher.removeAttribute('onchange'); 
+            switcher.innerHTML = optionsHtml;
+            switcher.value = currentBase;
+        });
+    };
+
     fetch('https://api.github.com/repos/Tugamer89/autogex/tags')
         .then(res => {
             if (!res.ok) throw new Error("API Limit");
@@ -42,10 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             options += '<option value="/dev/">Development (main)</option>';
             
-            switchers.forEach(switcher => {
-                switcher.innerHTML = options;
-                switcher.value = currentBase;
-            });
+            updateSelects(options);
         })
         .catch(err => {
             let options = '<option value="/">Latest Stable</option><option value="/dev/">Development (main)</option>';
@@ -53,9 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (match && currentBase !== '/dev/' && currentBase !== '/') {
                 options += `<option value="${currentBase}">Version ${match[1]}</option>`;
             }
-            switchers.forEach(switcher => {
-                switcher.innerHTML = options;
-                switcher.value = currentBase;
-            });
+            updateSelects(options);
         });
 });

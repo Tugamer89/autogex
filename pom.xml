@@ -6,7 +6,7 @@
 
     <groupId>org.eu.autogex</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.3.2</version>
+    <version>1.3.3</version>
 
     <name>Autogex</name>
     <description>A powerful Java engine for processing Finite State Automata and Regular Expressions.</description>
@@ -106,7 +106,7 @@
                     <windowtitle>Autogex Docs</windowtitle>
                     <bottom><![CDATA[
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>`
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
                         <script src="/version-switcher.js"></script>
                         Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.
                     ]]></bottom>

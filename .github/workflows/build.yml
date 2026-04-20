@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - '.vscode/**'
+      - 'LICENSE'
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch: {}

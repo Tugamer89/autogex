@@ -16,6 +16,7 @@
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 [![Javadoc](https://img.shields.io/badge/Javadoc-Reference-007ec6?logo=java&logoColor=white)](https://autogex.eu.org)
 [![Maven Central](https://img.shields.io/maven-central/v/org.eu.autogex/autogex?color=blue&logo=apachemaven&logoColor=white)](https://central.sonatype.com/artifact/org.eu.autogex/autogex)
+[![Sponsor](https://img.shields.io/badge/Sponsor-Tugamer89-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Tugamer89)
 
 **Autogex** is a lightweight, clean, and extensible library built to manipulate, convert, and minimize formal computational models. It strictly implements the theorems of Formal Language Theory, providing an extremely intuitive, thread-safe, and immutability-based "Fluent" API (via the Builder Pattern).
 
@@ -92,6 +93,12 @@ DFA minimalDfa = Minimizer.minimize(Converter.enfaToDfa(enfa));
 
 System.out.println(minimalDfa.accepts("aaabbb")); // Output: true
 ```
+
+## Support the Project
+
+Autogex is an open-source project maintained with passion. If you find this library useful for your work, studies, or projects, consider supporting its development!
+
+[![Sponsor Tugamer89](https://img.shields.io/badge/Sponsor_Tugamer89-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Tugamer89)
 
 ## License
 

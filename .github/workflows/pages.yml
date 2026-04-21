@@ -65,12 +65,7 @@ jobs:
       - name: Deploy to GitHub Pages (dev folder)
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
           destination_dir: dev
           keep_files: true
-
-      - name: Trigger Sitemap Update
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run sitemap.yml --ref main

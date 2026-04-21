@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.12](https://github.com/Tugamer89/autogex/compare/v1.3.11...v1.3.12) (2026-04-21)
+
+
+### Bug Fixes
+
+* added concurrency options to release please ([b4826f4](https://github.com/Tugamer89/autogex/commit/b4826f48d093a20796c6c345f1dca4e7a41bd9e2))
+* release description ([a7847dc](https://github.com/Tugamer89/autogex/commit/a7847dc15ea02f700e0f46f61e26484d25cf8513))
+
 ## [1.3.11](https://github.com/Tugamer89/autogex/compare/v1.3.10...v1.3.11) (2026-04-21)
 
 

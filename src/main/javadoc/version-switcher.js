@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(tags => {
             let options = '<option value="/">Latest Stable</option>';
-            options += '<option value="/dev/">Development (main)</option>';
             
             const minorVersions = new Set();
 
@@ -57,6 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     options += `<option value="/${minor}.x/">Version ${minor}.x</option>`;
                 }
             });
+
+            options += '<option value="/dev/">Development (main)</option>';
             
             updateSelects(options);
         })

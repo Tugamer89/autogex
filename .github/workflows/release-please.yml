@@ -40,14 +40,16 @@ jobs:
           BRANCH=$(echo $PR_DATA | jq -r '.headBranchName')
           VERSION=$(echo $PR_DATA | jq -r '.version')
           
+          git fetch origin $BRANCH
           git checkout $BRANCH
           
           sed -i "0,/<version>/ s|<version>[^<]*</version>|<version>${VERSION}</version>|" pom.xml
+          sed -i "0,/<version>/ s|<version>[^<]*</version>|<version>${VERSION}</version>|" README.md
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pom.xml
-          git commit -m "chore: sync pom.xml version to ${VERSION}" || echo "No changes to commit"
+          git add pom.xml README.md
+          git commit -m "chore: sync project files version to ${VERSION}" || echo "No changes to commit"
           git push origin $BRANCH
 
       - name: Rename GitHub Release

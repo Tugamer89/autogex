@@ -9,6 +9,8 @@ on:
       - '.github/**'
       - '.vscode/**'
       - 'LICENSE'
+      - '.release-please-manifest.json'
+      - 'release-please-config.json'
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch: {}

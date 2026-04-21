@@ -1,0 +1,34 @@
+name: Feature Request
+description: Suggest an idea or algorithm for Autogex
+title: "[FEAT]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make Autogex even better? We'd love to hear it!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is.
+      placeholder: I'm always frustrated when I can't export to...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: What specifically do you want to happen? Mention any formal language theories or algorithms if applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: Are there other libraries or workarounds you are currently using?
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or diagrams about the feature request here.

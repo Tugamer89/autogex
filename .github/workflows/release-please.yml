@@ -38,7 +38,10 @@ jobs:
         run: |
           PR_DATA='${{ steps.release.outputs.pr }}'
           BRANCH=$(echo $PR_DATA | jq -r '.headBranchName')
-          VERSION=$(echo $PR_DATA | jq -r '.version')
+          VERSION="${{ steps.release.outputs.version }}"
+          if [ -z "$VERSION" ] || [ "$VERSION" == "null" ]; then
+            VERSION=$(echo $PR_JSON | jq -r '.title' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          fi
           
           git fetch origin $BRANCH
           git checkout $BRANCH

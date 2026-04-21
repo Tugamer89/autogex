@@ -40,7 +40,7 @@ jobs:
           BRANCH=$(echo $PR_DATA | jq -r '.headBranchName')
           VERSION="${{ steps.release.outputs.version }}"
           if [ -z "$VERSION" ] || [ "$VERSION" == "null" ]; then
-            VERSION=$(echo $PR_JSON | jq -r '.title' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+            VERSION=$(echo $PR_DATA | jq -r '.title' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           fi
           
           git fetch origin $BRANCH

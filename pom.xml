@@ -6,7 +6,7 @@
 
     <groupId>org.eu.autogex</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.3.11-SNAPSHOT</version>
+    <version>1.3.11</version>
 
     <name>Autogex</name>
     <description>

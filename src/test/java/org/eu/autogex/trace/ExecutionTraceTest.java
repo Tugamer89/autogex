@@ -49,7 +49,7 @@ class ExecutionTraceTest {
 
     @Test
     void testExecutionTraceGenerationAccepted() {
-        // Costruiamo lo stesso DFA semplice
+        // Let's build the same simple DFA
         DFA dfa =
                 new DFA.Builder()
                         .addState("q0", false)
@@ -59,41 +59,41 @@ class ExecutionTraceTest {
                         .addTransition("q1", 'b', "q0")
                         .build();
 
-        // Eseguiamo una stringa che viene accettata (termina in q1)
+        // Let's execute a string that is accepted (ends in q1)
         ExecutionTrace trace = dfa.execute("a");
 
-        assertTrue(trace.isAccepted(), "La stringa 'a' termina in q1, che è uno stato finale");
+        assertTrue(trace.isAccepted(), "The string 'a' ends in q1, which is a final state");
 
-        // Testiamo il branch dell'esito positivo
+        // Test the positive outcome branch
         String formattedOutput = trace.getFormattedTrace();
         assertTrue(
                 formattedOutput.contains("ACCEPTED"),
-                "L'output formattato deve indicare ACCEPTED se la stringa è accettata");
+                "The formatted output should indicate ACCEPTED if the string is accepted");
     }
 
     @Test
     void testExecutionStepEmptyAndNullStates() {
-        // Test per il branch in cui "states == null" in formatStates
+        // Test for the branch where "states == null" in formatStates
         ExecutionStep stepNull = new ExecutionStep(null, 'a', null);
         assertEquals(
                 "∅ --[a]--> ∅",
                 stepNull.toString(),
-                "Gli insiemi nulli devono essere formattati come ∅");
+                "The null sets should be formatted as ∅");
 
-        // Test per il branch in cui "states.isEmpty()" in formatStates
+        // Test for the branch where "states.isEmpty()" in formatStates
         ExecutionStep stepEmpty =
                 new ExecutionStep(Collections.emptySet(), 'b', Collections.emptySet());
         assertEquals(
                 "∅ --[b]--> ∅",
                 stepEmpty.toString(),
-                "Gli insiemi vuoti devono essere formattati come ∅");
+                "The empty sets should be formatted as ∅");
 
-        // Test combinato (Epsilon + insiemi vuoti)
+        // Test combined (Epsilon + empty sets)
         ExecutionStep stepEpsilonEmpty =
                 new ExecutionStep(Collections.emptySet(), null, Collections.emptySet());
         assertEquals(
                 "∅ --[ε]--> ∅",
                 stepEpsilonEmpty.toString(),
-                "Gli epsilon con insiemi vuoti devono essere gestiti correttamente");
+                "The epsilon with empty sets should be handled correctly");
     }
 }

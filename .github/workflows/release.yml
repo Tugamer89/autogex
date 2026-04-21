@@ -1,7 +1,6 @@
 name: Release Artifacts & Publish Package
 
 on:
-  workflow_dispatch: {}
   push:
     tags:
       - 'v*.*.*'
@@ -34,34 +33,33 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Extract Project Version from POM
-        id: extract_version
+      - name: Extract Version
+        id: meta
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          TAG_NAME=${{ github.ref_name }}
+          VERSION=${TAG_NAME#v}
           MINOR_VERSION=$(echo $VERSION | cut -d. -f1,2)
           echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
           echo "DOCS_VERSION=$MINOR_VERSION.x" >> $GITHUB_ENV
-          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
-          echo "Extracted version: $VERSION (Docs folder: $MINOR_VERSION.x)"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-      - name: Prepare Release & Package Description
+      - name: Prepare Release Body
         run: |
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "RELEASE_BODY<<$EOF" >> $GITHUB_ENV
-          echo "**Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions." >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "### Maven Central" >> $GITHUB_ENV
-          echo "This release is officially published on Maven Central. To use it, add the following dependency to your \`pom.xml\`:" >> $GITHUB_ENV
-          echo "\`\`\`xml" >> $GITHUB_ENV
-          echo "<dependency>" >> $GITHUB_ENV
-          echo "    <groupId>org.eu.autogex</groupId>" >> $GITHUB_ENV
-          echo "    <artifactId>autogex</artifactId>" >> $GITHUB_ENV
-          echo "    <version>$VERSION</version>" >> $GITHUB_ENV
-          echo "</dependency>" >> $GITHUB_ENV
-          echo "\`\`\`" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "**Security**: The \`.jar\` files attached to this release include a cryptographic provenance attestation (SLSA Level 3) and are GPG signed." >> $GITHUB_ENV
-          echo "$EOF" >> $GITHUB_ENV
+          cat <<EOF > release_notes.md
+          **Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions.
+
+          ### Maven Central
+          This release is officially published on Maven Central. To use it, add the following dependency to your \`pom.xml\`:
+          \`\`\`xml
+          <dependency>
+              <groupId>org.eu.autogex</groupId>
+              <artifactId>autogex</artifactId>
+              <version>${{ env.PROJECT_VERSION }}</version>
+          </dependency>
+          \`\`\`
+
+          **Security**: The \`.jar\` files attached to this release include a provenance attestation (SLSA Level 3) and are GPG signed.
+          EOF
 
       - name: Publish to Maven Central
         env:
@@ -75,14 +73,13 @@ jobs:
         with:
           subject-path: 'target/*.jar'
 
-      - name: Create GitHub Release & Upload JARs
+      - name: Update GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG_NAME }}
-          name: Autogex ${{ env.TAG_NAME }}
-          generate_release_notes: true
-          body: ${{ env.RELEASE_BODY }}
+          body_path: release_notes.md
           files: target/*.jar
+          append_body: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

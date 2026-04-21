@@ -75,18 +75,13 @@ class ExecutionTraceTest {
     void testExecutionStepEmptyAndNullStates() {
         // Test for the branch where "states == null" in formatStates
         ExecutionStep stepNull = new ExecutionStep(null, 'a', null);
-        assertEquals(
-                "∅ --[a]--> ∅",
-                stepNull.toString(),
-                "The null sets should be formatted as ∅");
+        assertEquals("∅ --[a]--> ∅", stepNull.toString(), "The null sets should be formatted as ∅");
 
         // Test for the branch where "states.isEmpty()" in formatStates
         ExecutionStep stepEmpty =
                 new ExecutionStep(Collections.emptySet(), 'b', Collections.emptySet());
         assertEquals(
-                "∅ --[b]--> ∅",
-                stepEmpty.toString(),
-                "The empty sets should be formatted as ∅");
+                "∅ --[b]--> ∅", stepEmpty.toString(), "The empty sets should be formatted as ∅");
 
         // Test combined (Epsilon + empty sets)
         ExecutionStep stepEpsilonEmpty =

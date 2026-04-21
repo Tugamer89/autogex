@@ -3,6 +3,9 @@ name: Spotless Auto-Format
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - '**.java'
+      - 'pom.xml'
 
 jobs:
   spotless-apply:

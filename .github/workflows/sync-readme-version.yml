@@ -2,10 +2,8 @@ name: Sync README Version
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'pom.xml'
+    tags:
+      - 'v*.*.*'
 
 permissions:
   contents: write

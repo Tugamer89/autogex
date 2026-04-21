@@ -20,6 +20,12 @@ jobs:
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
 
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
       - uses: googleapis/release-please-action@v4
         id: release
         with:
@@ -27,6 +33,23 @@ jobs:
           manifest-file: .release-please-manifest.json
           token: ${{ steps.app-token.outputs.token }}
         
+      - name: Sync pom.xml version
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          PR_DATA='${{ steps.release.outputs.pr }}'
+          BRANCH=$(echo $PR_DATA | jq -r '.headBranchName')
+          VERSION=$(echo $PR_DATA | jq -r '.version')
+          
+          git checkout $BRANCH
+          
+          sed -i "0,/<version>/ s|<version>[^<]*</version>|<version>${VERSION}</version>|" pom.xml
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pom.xml
+          git commit -m "chore: sync pom.xml version to ${VERSION}" || echo "No changes to commit"
+          git push origin $BRANCH
+
       - name: Rename GitHub Release
         if: ${{ steps.release.outputs.release_created }}
         env:

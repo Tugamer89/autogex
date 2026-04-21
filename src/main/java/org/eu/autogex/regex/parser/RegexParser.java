@@ -4,21 +4,16 @@ import org.eu.autogex.regex.ast.RegexNode;
 import org.eu.autogex.regex.ast.RegexNode.*;
 
 /**
- * A Recursive Descent Parser that converts a Regular Expression string into an Abstract Syntax Tree (AST).
- * * Grammar implemented:
- * Regex  -> Term ( '|' Term )*
- * Term   -> Factor ( Factor )* (Implicit concatenation)
- * Factor -> Base ( '*' )*
- * Base   -> char | '(' Regex ')'
+ * A Recursive Descent Parser that converts a Regular Expression string into an Abstract Syntax Tree
+ * (AST). * Grammar implemented: Regex -> Term ( '|' Term )* Term -> Factor ( Factor )* (Implicit
+ * concatenation) Factor -> Base ( '*' )* Base -> char | '(' Regex ')'
  */
 public class RegexParser {
 
     private final String input;
     private int position;
 
-    /**
-     * Private constructor to enforce the use of the static parse method.
-     */
+    /** Private constructor to enforce the use of the static parse method. */
     private RegexParser(String input) {
         this.input = input.replaceAll("\\s+", ""); // Remove whitespaces for simplicity
         this.position = 0;
@@ -35,13 +30,14 @@ public class RegexParser {
         if (regex == null || regex.isEmpty()) {
             throw new IllegalArgumentException("Regular expression cannot be null or empty.");
         }
-        
+
         RegexParser parser = new RegexParser(regex);
         RegexNode root = parser.parseRegex();
 
         // If we finished parsing but haven't reached the end of the string, there's a syntax error
         if (parser.hasNext()) {
-            throw new IllegalArgumentException("Unexpected character at index " + parser.position + ": " + parser.peek());
+            throw new IllegalArgumentException(
+                    "Unexpected character at index " + parser.position + ": " + parser.peek());
         }
 
         return root;
@@ -49,9 +45,7 @@ public class RegexParser {
 
     // --- Recursive Parsing Methods ---
 
-    /**
-     * Parses a full Regex, handling the Union ('|') operator.
-     */
+    /** Parses a full Regex, handling the Union ('|') operator. */
     private RegexNode parseRegex() {
         RegexNode left = parseTerm();
 
@@ -63,9 +57,7 @@ public class RegexParser {
         return left;
     }
 
-    /**
-     * Parses a Term, handling implicit Concatenation.
-     */
+    /** Parses a Term, handling implicit Concatenation. */
     private RegexNode parseTerm() {
         RegexNode left = parseFactor();
 
@@ -79,9 +71,7 @@ public class RegexParser {
         return left;
     }
 
-    /**
-     * Parses a Factor, handling the Kleene Star ('*') operator.
-     */
+    /** Parses a Factor, handling the Kleene Star ('*') operator. */
     private RegexNode parseFactor() {
         RegexNode base = parseBase();
 
@@ -92,9 +82,7 @@ public class RegexParser {
         return base;
     }
 
-    /**
-     * Parses a Base, which is either a parenthesized Regex or a single Literal.
-     */
+    /** Parses a Base, which is either a parenthesized Regex or a single Literal. */
     private RegexNode parseBase() {
         if (match('(')) {
             RegexNode node = parseRegex();
@@ -105,7 +93,8 @@ public class RegexParser {
         }
 
         if (!hasNext() || peek() == '|' || peek() == ')' || peek() == '*') {
-            throw new IllegalArgumentException("Invalid token at index " + position + ". Expected literal or '('.");
+            throw new IllegalArgumentException(
+                    "Invalid token at index " + position + ". Expected literal or '('.");
         }
 
         return new LiteralNode(next());

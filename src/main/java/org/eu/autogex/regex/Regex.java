@@ -11,8 +11,8 @@ import org.eu.autogex.regex.ast.RegexNode;
 import org.eu.autogex.regex.parser.RegexParser;
 
 /**
- * Facade class representing a compiled Regular Expression.
- * Under the hood, it parses the regex, builds an ENFA, converts it to a DFA, and minimizes it.
+ * Facade class representing a compiled Regular Expression. Under the hood, it parses the regex,
+ * builds an ENFA, converts it to a DFA, and minimizes it.
  */
 public class Regex {
 
@@ -27,16 +27,16 @@ public class Regex {
      */
     public Regex(String pattern) {
         this.pattern = pattern;
-        
+
         // 1. Parse string to AST
         RegexNode ast = RegexParser.parse(pattern);
-        
+
         // 2. Apply Thompson's Construction (AST -> ENFA)
         ENFA enfa = ThompsonConstructor.construct(ast);
-        
+
         // 3. Apply Subset Construction (ENFA -> DFA)
         DFA rawDfa = Converter.enfaToDfa(enfa);
-        
+
         // 4. Apply Moore's Partitioning (DFA -> Minimal DFA)
         this.minimalDfa = Minimizer.minimize(rawDfa);
     }
@@ -52,8 +52,8 @@ public class Regex {
     }
 
     /**
-     * Exports the compiled minimal DFA to the Graphviz DOT language format.
-     * This string can be rendered using Graphviz tools or online viewers.
+     * Exports the compiled minimal DFA to the Graphviz DOT language format. This string can be
+     * rendered using Graphviz tools or online viewers.
      *
      * @return The DOT graph representation.
      */
@@ -62,8 +62,8 @@ public class Regex {
     }
 
     /**
-     * Exports the compiled minimal DFA to the Mermaid.js stateDiagram-v2 format.
-     * This string can be natively rendered in GitHub Markdown without external viewers.
+     * Exports the compiled minimal DFA to the Mermaid.js stateDiagram-v2 format. This string can be
+     * natively rendered in GitHub Markdown without external viewers.
      *
      * @return The Mermaid.js graph representation.
      */

@@ -1,25 +1,25 @@
 package org.eu.autogex.models;
 
-import org.eu.autogex.core.State;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.eu.autogex.core.State;
+import org.junit.jupiter.api.Test;
 
 class ENFATest {
 
     @Test
     void testENFAWithEpsilonTransitions() {
         // Automaton that recognizes "a*b*" leveraging ε-transitions
-        ENFA enfa = new ENFA.Builder()
-                .addState("q0", true)
-                .addState("q1", true)
-                .setInitialState("q0")
-                .addTransition("q0", 'a', "q0")
-                .addEpsilonTransition("q0", "q1") // q0 --ε--> q1
-                .addTransition("q1", 'b', "q1")
-                .build();
+        ENFA enfa =
+                new ENFA.Builder()
+                        .addState("q0", true)
+                        .addState("q1", true)
+                        .setInitialState("q0")
+                        .addTransition("q0", 'a', "q0")
+                        .addEpsilonTransition("q0", "q1") // q0 --ε--> q1
+                        .addTransition("q1", 'b', "q1")
+                        .build();
 
         // ACCEPTED
         assertTrue(enfa.accepts(""), "Accepts empty string (q0 is final)");
@@ -37,21 +37,19 @@ class ENFATest {
     @Test
     void testENFAGetters() {
         // Tests the getter methods
-        ENFA enfa = new ENFA.Builder()
-                .addState("q0", true)
-                .setInitialState("q0")
-                .build();
+        ENFA enfa = new ENFA.Builder().addState("q0", true).setInitialState("q0").build();
 
         Set<State> states = enfa.getStates();
         assertEquals(1, states.size(), "There should be exactly 1 state");
-        
+
         State initial = enfa.getInitialState();
         assertNotNull(initial);
         assertEquals("q0", initial.getName(), "The initial state must be q0");
-        
+
         Set<State> finalStates = enfa.getFinalStates();
         assertEquals(1, finalStates.size(), "There should be exactly 1 final state");
-        assertTrue(finalStates.iterator().next().isFinal(), "The state in finalStates must be final");
+        assertTrue(
+                finalStates.iterator().next().isFinal(), "The state in finalStates must be final");
     }
 
     @Test
@@ -59,11 +57,16 @@ class ENFATest {
         // Tests that an exception is thrown if adding a transition with non-existing states
         ENFA.Builder builder = new ENFA.Builder().addState("q0", false);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addEpsilonTransition("q0", "qX"); // "qX" was never added
-        });
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            builder.addEpsilonTransition("q0", "qX"); // "qX" was never added
+                        });
 
-        assertTrue(exception.getMessage().contains("State not found"), "The error message must mention the missing state");
+        assertTrue(
+                exception.getMessage().contains("State not found"),
+                "The error message must mention the missing state");
     }
 
     @Test
@@ -73,6 +76,8 @@ class ENFATest {
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, builder::build);
 
-        assertTrue(exception.getMessage().contains("initial state"), "The error message must mention the initial state");
+        assertTrue(
+                exception.getMessage().contains("initial state"),
+                "The error message must mention the initial state");
     }
 }

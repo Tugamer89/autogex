@@ -3,8 +3,8 @@ package org.eu.autogex.trace;
 import java.util.List;
 
 /**
- * Contains the complete chronological sequence of states evaluated by an automaton
- * when processing a specific input string.
+ * Contains the complete chronological sequence of states evaluated by an automaton when processing
+ * a specific input string.
  */
 public class ExecutionTrace {
 
@@ -16,8 +16,8 @@ public class ExecutionTrace {
     /**
      * Constructs a new ExecutionTrace.
      *
-     * @param input    The original string evaluated.
-     * @param steps    The ordered list of execution steps.
+     * @param input The original string evaluated.
+     * @param steps The ordered list of execution steps.
      * @param accepted The final evaluation outcome.
      */
     public ExecutionTrace(String input, List<ExecutionStep> steps, boolean accepted) {
@@ -27,6 +27,8 @@ public class ExecutionTrace {
     }
 
     /**
+     * Returns the original input string.
+     *
      * @return The original input string.
      */
     public String getInput() {
@@ -34,6 +36,8 @@ public class ExecutionTrace {
     }
 
     /**
+     * Returns the list of execution steps.
+     *
      * @return An immutable list containing all evaluation steps.
      */
     public List<ExecutionStep> getSteps() {
@@ -41,6 +45,8 @@ public class ExecutionTrace {
     }
 
     /**
+     * Returns the final evaluation outcome.
+     *
      * @return True if the automaton successfully accepted the string.
      */
     public boolean isAccepted() {
@@ -48,8 +54,8 @@ public class ExecutionTrace {
     }
 
     /**
-     * Generates a beautifully formatted multiline string mapping the entire execution path.
-     * Useful for debugging and console outputs.
+     * Generates a beautifully formatted multiline string mapping the entire execution path. Useful
+     * for debugging and console outputs.
      *
      * @return The formatted trace log.
      */
@@ -58,15 +64,15 @@ public class ExecutionTrace {
         sb.append(SEPARATOR);
         sb.append(String.format(" TRACE FOR INPUT: '%s'%n", input));
         sb.append(SEPARATOR);
-        
+
         for (int i = 0; i < steps.size(); i++) {
             sb.append(String.format(" Step %02d | %s%n", i, steps.get(i).toString()));
         }
-        
+
         sb.append(SEPARATOR);
         sb.append(String.format(" RESULT  | %s%n", accepted ? "ACCEPTED" : "REJECTED"));
         sb.append(SEPARATOR);
-        
+
         return sb.toString();
     }
 }

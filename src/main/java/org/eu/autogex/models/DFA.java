@@ -1,18 +1,15 @@
 package org.eu.autogex.models;
 
 import java.util.*;
-
 import org.eu.autogex.core.AbstractAutomaton;
 import org.eu.autogex.core.AbstractAutomatonBuilder;
 import org.eu.autogex.core.State;
 import org.eu.autogex.trace.ExecutionStep;
 import org.eu.autogex.trace.ExecutionTrace;
 
-/**
- * Deterministic Finite Automaton (DFA).
- */
+/** Deterministic Finite Automaton (DFA). */
 public class DFA extends AbstractAutomaton {
-    
+
     // Map: Source State -> (Map: Character -> Target State)
     private final Map<State, Map<Character, State>> transitionTable;
 
@@ -25,27 +22,30 @@ public class DFA extends AbstractAutomaton {
     public ExecutionTrace execute(String input) {
         List<ExecutionStep> steps = new ArrayList<>();
         Set<State> currentStates = Set.of(initialState);
-        
+
         // Initial setup step
         steps.add(new ExecutionStep(Collections.emptySet(), null, currentStates));
-        
+
         for (char symbol : input.toCharArray()) {
             State currentState = currentStates.iterator().next();
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
-            
-            Set<State> nextStates = (stateTransitions != null && stateTransitions.containsKey(symbol))
-                    ? Set.of(stateTransitions.get(symbol)) : Collections.emptySet();
-            
+
+            Set<State> nextStates =
+                    (stateTransitions != null && stateTransitions.containsKey(symbol))
+                            ? Set.of(stateTransitions.get(symbol))
+                            : Collections.emptySet();
+
             steps.add(new ExecutionStep(currentStates, symbol, nextStates));
             currentStates = nextStates;
-            
+
             // If there is no defined transition, the string is rejected (Trap state)
             if (currentStates.isEmpty()) {
                 break;
             }
         }
-        
-        boolean isAccepted = !currentStates.isEmpty() && finalStates.contains(currentStates.iterator().next());
+
+        boolean isAccepted =
+                !currentStates.isEmpty() && finalStates.contains(currentStates.iterator().next());
         return new ExecutionTrace(input, steps, isAccepted);
     }
 
@@ -58,16 +58,12 @@ public class DFA extends AbstractAutomaton {
         return transitionTable;
     }
 
-    /**
-     * Builder pattern to construct the DFA fluently.
-     */
+    /** Builder pattern to construct the DFA fluently. */
     public static class Builder extends AbstractAutomatonBuilder<Builder, DFA> {
-        
+
         private final Map<State, Map<Character, State>> transitionTable = new HashMap<>();
 
-        /**
-         * Default constructor for DFA Builder.
-         */
+        /** Default constructor for DFA Builder. */
         public Builder() {
             // Empty constructor since fields are initialized at declaration.
             // Required explicitly to maintain Javadoc and satisfy SonarQube rules.
@@ -82,13 +78,15 @@ public class DFA extends AbstractAutomaton {
          * Adds a transition between two states.
          *
          * @param fromName The name of the source state.
-         * @param symbol   The character required to trigger the transition.
-         * @param toName   The name of the destination state.
+         * @param symbol The character required to trigger the transition.
+         * @param toName The name of the destination state.
          * @return The current builder instance.
          */
         public Builder addTransition(String fromName, char symbol, String toName) {
             State[] transitionStates = getTransitionStatesOrThrow(fromName, toName);
-            transitionTable.computeIfAbsent(transitionStates[0], k -> new HashMap<>()).put(symbol, transitionStates[1]);
+            transitionTable
+                    .computeIfAbsent(transitionStates[0], k -> new HashMap<>())
+                    .put(symbol, transitionStates[1]);
             return self();
         }
 

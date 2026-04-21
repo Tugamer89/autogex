@@ -2,15 +2,12 @@ package org.eu.autogex.algorithms;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.models.NFA;
 
-/**
- * Utility class for Finite State Automata conversion.
- */
+/** Utility class for Finite State Automata conversion. */
 public class Converter {
 
     private Converter() {
@@ -18,8 +15,7 @@ public class Converter {
     }
 
     /**
-     * Converts an ε-NFA into an NFA.
-     * Applies the ε-elimination algorithm.
+     * Converts an ε-NFA into an NFA. Applies the ε-elimination algorithm.
      *
      * @param enfa The source ε-NFA.
      * @return The equivalent NFA.
@@ -41,7 +37,7 @@ public class Converter {
         // 3. Compute new transitions for each state across the alphabet
         for (State q : enfa.getStates()) {
             Set<State> qClosure = enfa.epsilonClosure(Set.of(q));
-            
+
             for (char a : alphabet) {
                 Set<State> targets = computeEnfaTargets(enfa, qClosure, a);
                 for (State target : targets) {
@@ -53,8 +49,7 @@ public class Converter {
     }
 
     /**
-     * Converts an NFA into a DFA.
-     * Applies the Rabin-Scott Subset Construction algorithm.
+     * Converts an NFA into a DFA. Applies the Rabin-Scott Subset Construction algorithm.
      *
      * @param nfa The source NFA.
      * @return The equivalent DFA.
@@ -90,12 +85,15 @@ public class Converter {
                 }
 
                 // If a new super-state is found, register it
-                String targetName = dfaStateNames.computeIfAbsent(nextSuperState, k -> {
-                    String nextName = "D" + stateCounter.getAndIncrement();
-                    builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
-                    queue.add(k);
-                    return nextName;
-                });
+                String targetName =
+                        dfaStateNames.computeIfAbsent(
+                                nextSuperState,
+                                k -> {
+                                    String nextName = "D" + stateCounter.getAndIncrement();
+                                    builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
+                                    queue.add(k);
+                                    return nextName;
+                                });
 
                 builder.addTransition(currentName, symbol, targetName);
             }
@@ -117,10 +115,9 @@ public class Converter {
 
     // --- Helper Methods ---
 
-    /**
-     * Computes the reachable subset of states by reading a symbol.
-     */
-    private static Set<State> computeNextSuperState(NFA nfa, Set<State> currentSuperState, char symbol) {
+    /** Computes the reachable subset of states by reading a symbol. */
+    private static Set<State> computeNextSuperState(
+            NFA nfa, Set<State> currentSuperState, char symbol) {
         Set<State> nextSuperState = new HashSet<>();
         for (State s : currentSuperState) {
             Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
@@ -132,8 +129,8 @@ public class Converter {
     }
 
     /**
-     * Computes target states for an ENFA starting from a closure, reading a symbol,
-     * and applying the ε-closure to the result.
+     * Computes target states for an ENFA starting from a closure, reading a symbol, and applying
+     * the ε-closure to the result.
      */
     private static Set<State> computeEnfaTargets(ENFA enfa, Set<State> qClosure, char symbol) {
         Set<State> targets = new HashSet<>();
@@ -146,7 +143,8 @@ public class Converter {
         return targets;
     }
 
-    private static Set<Character> getAlphabet(Map<State, Map<Character, Set<State>>> transitionTable) {
+    private static Set<Character> getAlphabet(
+            Map<State, Map<Character, Set<State>>> transitionTable) {
         Set<Character> alphabet = new HashSet<>();
         for (Map<Character, Set<State>> transitions : transitionTable.values()) {
             for (Character c : transitions.keySet()) {

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag (es. v1.2.0). Lascia vuoto per rigenerare TUTTI i tag.'
+        description: 'Tag (es. v1.2.0). Lascia vuoto per rigenerare TUTTI i tag (dalla 1.0 in poi).'
         required: false
         type: string
 
@@ -29,7 +29,7 @@ jobs:
           if [ -n "${{ github.event.inputs.tag_name }}" ]; then
             echo "tags=[\"${{ github.event.inputs.tag_name }}\"]" >> $GITHUB_OUTPUT
           else
-            TAGS=$(git tag -l "v*" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            TAGS=$(git tag -l --sort=v:refname "v*" | grep -E '^v[1-9]' | jq -R -s -c 'split("\n") | map(select(length > 0))')
             echo "tags=$TAGS" >> $GITHUB_OUTPUT
           fi
 
@@ -65,7 +65,9 @@ jobs:
         run: |
           TAG=${{ matrix.tag }}
           CLEAN_VER=${TAG#v}
+          MINOR_VER=$(echo $CLEAN_VER | cut -d. -f1,2)
           echo "VERSION=$CLEAN_VER" >> $GITHUB_ENV
+          echo "DOCS_VERSION=$MINOR_VER.x" >> $GITHUB_ENV
 
       - name: Javadoc HTML Generation
         run: mvn -B -T 1C javadoc:javadoc
@@ -99,7 +101,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
-          destination_dir: ${{ env.VERSION }}
+          destination_dir: ${{ env.DOCS_VERSION }}
           keep_files: true
 
   trigger-sitemap:

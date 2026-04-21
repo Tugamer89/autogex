@@ -1,8 +1,8 @@
 package org.eu.autogex.core;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class StateTest {
 
@@ -17,7 +17,8 @@ class StateTest {
         assertEquals(s1.hashCode(), s2.hashCode(), "Equal states must have the same hashCode");
         assertNotEquals(s1, s3, "Different states must not be equal");
         assertNotEquals(s1, nullObject, "State must not be equal to null");
-        assertNotEquals(s1, new Object(), "State must not be equal to an object of a different class");
+        assertNotEquals(
+                s1, new Object(), "State must not be equal to an object of a different class");
     }
 
     @Test

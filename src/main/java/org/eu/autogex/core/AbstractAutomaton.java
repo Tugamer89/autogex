@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Abstract base class for all automata models.
- * Centralizes the management of states and their respective getters.
+ * Abstract base class for all automata models. Centralizes the management of states and their
+ * respective getters.
  */
 public abstract class AbstractAutomaton implements Automaton {
     protected final Set<State> states;
@@ -35,15 +35,18 @@ public abstract class AbstractAutomaton implements Automaton {
     }
 
     /**
-     * Calculates the next active states for non-deterministic automata.
-     * Protected and shared method to avoid duplicated code between NFA and ENFA (SonarQube).
+     * Calculates the next active states for non-deterministic automata. Protected and shared method
+     * to avoid duplicated code between NFA and ENFA (SonarQube).
      *
-     * @param currentStates   The set of current states.
-     * @param symbol          The symbol read from the input.
+     * @param currentStates The set of current states.
+     * @param symbol The symbol read from the input.
      * @param transitionTable The transition table of the child automaton.
      * @return The set of new reachable states.
      */
-    protected Set<State> computeNextStates(Set<State> currentStates, char symbol, Map<State, Map<Character, Set<State>>> transitionTable) {
+    protected Set<State> computeNextStates(
+            Set<State> currentStates,
+            char symbol,
+            Map<State, Map<Character, Set<State>>> transitionTable) {
         Set<State> nextStates = new HashSet<>();
         for (State state : currentStates) {
             Map<Character, Set<State>> stateTransitions = transitionTable.get(state);

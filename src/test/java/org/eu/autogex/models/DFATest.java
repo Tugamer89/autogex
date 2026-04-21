@@ -1,11 +1,10 @@
 package org.eu.autogex.models;
 
-import org.eu.autogex.core.State;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.eu.autogex.core.State;
+import org.junit.jupiter.api.Test;
 
 class DFATest {
 
@@ -13,21 +12,22 @@ class DFATest {
     void testDFAAcceptsStringsWithAtLeastOneZero() {
         // Example 2.1.3
         // Accepts strings containing at least one '0'
-        DFA dfa = new DFA.Builder()
-                .addState("q0", false)
-                .addState("q1", true)   // q1 is the only final state
-                .addState("q2", false)
-                .setInitialState("q0")
-                // Transitions from q0
-                .addTransition("q0", '0', "q1")
-                .addTransition("q0", '1', "q2")
-                // Transitions from q1
-                .addTransition("q1", '0', "q1")
-                .addTransition("q1", '1', "q1")
-                // Transitions from q2
-                .addTransition("q2", '0', "q1")
-                .addTransition("q2", '1', "q0")
-                .build();
+        DFA dfa =
+                new DFA.Builder()
+                        .addState("q0", false)
+                        .addState("q1", true) // q1 is the only final state
+                        .addState("q2", false)
+                        .setInitialState("q0")
+                        // Transitions from q0
+                        .addTransition("q0", '0', "q1")
+                        .addTransition("q0", '1', "q2")
+                        // Transitions from q1
+                        .addTransition("q1", '0', "q1")
+                        .addTransition("q1", '1', "q1")
+                        // Transitions from q2
+                        .addTransition("q2", '0', "q1")
+                        .addTransition("q2", '1', "q0")
+                        .build();
 
         // ACCEPTED
         assertTrue(dfa.accepts("0"), "Should accept a single 0");
@@ -46,12 +46,13 @@ class DFATest {
     @Test
     void testDFAGetters() {
         // Tests the getter methods
-        DFA dfa = new DFA.Builder()
-                .addState("q0", false)
-                .addState("q1", true)
-                .setInitialState("q0")
-                .addTransition("q0", 'a', "q1")
-                .build();
+        DFA dfa =
+                new DFA.Builder()
+                        .addState("q0", false)
+                        .addState("q1", true)
+                        .setInitialState("q0")
+                        .addTransition("q0", 'a', "q1")
+                        .build();
 
         Set<State> states = dfa.getStates();
         assertEquals(2, states.size(), "There should be exactly 2 states");
@@ -62,38 +63,54 @@ class DFATest {
 
         Set<State> finalStates = dfa.getFinalStates();
         assertEquals(1, finalStates.size(), "There should be exactly 1 final state");
-        assertTrue(finalStates.iterator().next().isFinal(), "The state in finalStates must be final");
+        assertTrue(
+                finalStates.iterator().next().isFinal(), "The state in finalStates must be final");
     }
 
     @Test
     void testBuilderThrowsIllegalArgumentExceptionForMissingState() {
         DFA.Builder builder = new DFA.Builder().addState("q0", false);
 
-        IllegalArgumentException exceptionToMissing = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addTransition("q0", 'a', "q1"); 
-        });
-        assertTrue(exceptionToMissing.getMessage().contains("State not found"), "The error message must mention the missing state");
+        IllegalArgumentException exceptionToMissing =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            builder.addTransition("q0", 'a', "q1");
+                        });
+        assertTrue(
+                exceptionToMissing.getMessage().contains("State not found"),
+                "The error message must mention the missing state");
 
-        IllegalArgumentException exceptionFromMissing = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addTransition("qX", 'a', "q0"); 
-        });
-        assertTrue(exceptionFromMissing.getMessage().contains("State not found"), "The error message must mention the missing state");
+        IllegalArgumentException exceptionFromMissing =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            builder.addTransition("qX", 'a', "q0");
+                        });
+        assertTrue(
+                exceptionFromMissing.getMessage().contains("State not found"),
+                "The error message must mention the missing state");
 
-        IllegalArgumentException exceptionBothMissing = assertThrows(IllegalArgumentException.class, () -> {
-            builder.addTransition("qX", 'a', "qY"); 
-        });
-        assertTrue(exceptionBothMissing.getMessage().contains("State not found"), "The error message must mention the missing state");
+        IllegalArgumentException exceptionBothMissing =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            builder.addTransition("qX", 'a', "qY");
+                        });
+        assertTrue(
+                exceptionBothMissing.getMessage().contains("State not found"),
+                "The error message must mention the missing state");
     }
 
     @Test
     void testBuilderThrowsIllegalStateExceptionForMissingInitialState() {
         // Tests that a DFA cannot be built without setting the initial state
-        DFA.Builder builder = new DFA.Builder()
-                .addState("q0", false)
-                .addState("q1", true);
+        DFA.Builder builder = new DFA.Builder().addState("q0", false).addState("q1", true);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, builder::build);
 
-        assertTrue(exception.getMessage().contains("initial state"), "The error message must mention the initial state");
+        assertTrue(
+                exception.getMessage().contains("initial state"),
+                "The error message must mention the initial state");
     }
 }

@@ -2,9 +2,7 @@ package org.eu.autogex.core;
 
 import java.util.Objects;
 
-/**
- * Represents a state (q) within an automaton.
- */
+/** Represents a state (q) within an automaton. */
 public class State {
     private final String name;
     private final boolean isFinal;
@@ -12,7 +10,7 @@ public class State {
     /**
      * Constructs a new State.
      *
-     * @param name    The unique name of the state.
+     * @param name The unique name of the state.
      * @param isFinal True if the state is an accepting (final) state.
      */
     public State(String name, boolean isFinal) {

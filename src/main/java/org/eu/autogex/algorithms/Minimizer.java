@@ -2,14 +2,10 @@ package org.eu.autogex.algorithms;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 
-/**
- * Utility class for DFA minimization.
- * Implements Moore's partition refinement algorithm.
- */
+/** Utility class for DFA minimization. Implements Moore's partition refinement algorithm. */
 public class Minimizer {
 
     private Minimizer() {
@@ -38,10 +34,11 @@ public class Minimizer {
 
             for (Set<State> group : partitions) {
                 // Split the group based on behavior (transition destinations)
-                Map<Map<Character, Set<State>>, Set<State>> subGroups = splitGroup(dfa, group, alphabet, partitions);
-                
+                Map<Map<Character, Set<State>>, Set<State>> subGroups =
+                        splitGroup(dfa, group, alphabet, partitions);
+
                 newPartitions.addAll(subGroups.values());
-                
+
                 // If a group was split into 2 or more subgroups, the partition has changed
                 if (subGroups.size() > 1) {
                     changed = true;
@@ -71,33 +68,35 @@ public class Minimizer {
         Set<Set<State>> partitions = new HashSet<>();
         if (!finalGroup.isEmpty()) partitions.add(finalGroup);
         if (!nonFinalGroup.isEmpty()) partitions.add(nonFinalGroup);
-        
+
         return partitions;
     }
 
     private static Map<Map<Character, Set<State>>, Set<State>> splitGroup(
             DFA dfa, Set<State> group, Set<Character> alphabet, Set<Set<State>> currentPartitions) {
-        
+
         // Maps the behavioral "signature" of a state to the subgroup of states sharing it
         Map<Map<Character, Set<State>>, Set<State>> subGroups = new HashMap<>();
 
         for (State s : group) {
             // The signature is: "For each character, which partition do I end up in?"
             Map<Character, Set<State>> behaviorSignature = new HashMap<>();
-            
+
             for (char symbol : alphabet) {
                 State destination = getDestination(dfa, s, symbol);
-                Set<State> targetPartition = findPartitionContaining(currentPartitions, destination);
+                Set<State> targetPartition =
+                        findPartitionContaining(currentPartitions, destination);
                 behaviorSignature.put(symbol, targetPartition);
             }
 
             subGroups.computeIfAbsent(behaviorSignature, k -> new HashSet<>()).add(s);
         }
-        
+
         return subGroups;
     }
 
-    private static DFA buildMinimalDfa(DFA originalDfa, Set<Set<State>> partitions, Set<Character> alphabet) {
+    private static DFA buildMinimalDfa(
+            DFA originalDfa, Set<Set<State>> partitions, Set<Character> alphabet) {
         DFA.Builder builder = new DFA.Builder();
         Map<Set<State>, String> partitionToName = new HashMap<>();
         AtomicInteger counter = new AtomicInteger(0);
@@ -106,9 +105,10 @@ public class Minimizer {
         for (Set<State> partition : partitions) {
             String name = "M" + counter.getAndIncrement();
             partitionToName.put(partition, name);
-            
+
             // The partition is final if it contains at least one original final state
-            boolean isFinal = partition.stream().anyMatch(s -> originalDfa.getFinalStates().contains(s));
+            boolean isFinal =
+                    partition.stream().anyMatch(s -> originalDfa.getFinalStates().contains(s));
             builder.addState(name, isFinal);
 
             // The partition is initial if it contains the original initial state
@@ -125,10 +125,11 @@ public class Minimizer {
             for (char symbol : alphabet) {
                 State dest = getDestination(originalDfa, representative, symbol);
                 Set<State> targetPartition = findPartitionContaining(partitions, dest);
-                
+
                 // Link the transition if valid
                 if (!targetPartition.isEmpty()) {
-                    builder.addTransition(currentName, symbol, partitionToName.get(targetPartition));
+                    builder.addTransition(
+                            currentName, symbol, partitionToName.get(targetPartition));
                 }
             }
         }
@@ -139,14 +140,14 @@ public class Minimizer {
     private static Set<State> getReachableStates(DFA dfa) {
         Set<State> reachable = new HashSet<>();
         Queue<State> queue = new LinkedList<>();
-        
+
         reachable.add(dfa.getInitialState());
         queue.add(dfa.getInitialState());
 
         while (!queue.isEmpty()) {
             State current = queue.poll();
             Map<Character, State> transitions = dfa.getTransitionTable().get(current);
-            
+
             if (transitions != null) {
                 for (State nextState : transitions.values()) {
                     if (reachable.add(nextState)) {

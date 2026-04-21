@@ -3,15 +3,14 @@ package org.eu.autogex.export;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.models.NFA;
 
 /**
- * Utility class for exporting automata to the Graphviz DOT language format.
- * This allows for easy visual representation of DFA, NFA, and ENFA models.
+ * Utility class for exporting automata to the Graphviz DOT language format. This allows for easy
+ * visual representation of DFA, NFA, and ENFA models.
  */
 public class GraphvizExporter {
 
@@ -49,7 +48,8 @@ public class GraphvizExporter {
     public static String toDot(NFA nfa) {
         StringBuilder sb = buildDotHeader(nfa.getInitialState(), nfa.getFinalStates());
 
-        for (Map.Entry<State, Map<Character, Set<State>>> entry : nfa.getTransitionTable().entrySet()) {
+        for (Map.Entry<State, Map<Character, Set<State>>> entry :
+                nfa.getTransitionTable().entrySet()) {
             State source = entry.getKey();
             for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
                 for (State target : transition.getValue()) {
@@ -62,8 +62,8 @@ public class GraphvizExporter {
     }
 
     /**
-     * Exports an ENFA to a DOT format string.
-     * Epsilon transitions (null keys) are represented with the 'ε' symbol.
+     * Exports an ENFA to a DOT format string. Epsilon transitions (null keys) are represented with
+     * the 'ε' symbol.
      *
      * @param enfa The Epsilon-NFA.
      * @return The DOT language representation.
@@ -71,10 +71,14 @@ public class GraphvizExporter {
     public static String toDot(ENFA enfa) {
         StringBuilder sb = buildDotHeader(enfa.getInitialState(), enfa.getFinalStates());
 
-        for (Map.Entry<State, Map<Character, Set<State>>> entry : enfa.getTransitionTable().entrySet()) {
+        for (Map.Entry<State, Map<Character, Set<State>>> entry :
+                enfa.getTransitionTable().entrySet()) {
             State source = entry.getKey();
             for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                String label = transition.getKey() == null ? EPSILON_LABEL : transition.getKey().toString();
+                String label =
+                        transition.getKey() == null
+                                ? EPSILON_LABEL
+                                : transition.getKey().toString();
                 for (State target : transition.getValue()) {
                     appendTransition(sb, source, label, target);
                 }
@@ -93,9 +97,10 @@ public class GraphvizExporter {
 
         // Define final states appearance (Double Circle)
         if (!finalStates.isEmpty()) {
-            String finalStatesList = finalStates.stream()
-                    .map(s -> "\"" + s.getName() + "\"")
-                    .collect(Collectors.joining(" "));
+            String finalStatesList =
+                    finalStates.stream()
+                            .map(s -> "\"" + s.getName() + "\"")
+                            .collect(Collectors.joining(" "));
             sb.append("  node [shape = doublecircle]; ").append(finalStatesList).append(";\n");
         }
 
@@ -111,9 +116,15 @@ public class GraphvizExporter {
         return sb;
     }
 
-    private static void appendTransition(StringBuilder sb, State source, String label, State target) {
-        sb.append("  \"").append(source.getName()).append("\" -> \"")
-          .append(target.getName()).append("\" [label=\"").append(label).append("\"];\n");
+    private static void appendTransition(
+            StringBuilder sb, State source, String label, State target) {
+        sb.append("  \"")
+                .append(source.getName())
+                .append("\" -> \"")
+                .append(target.getName())
+                .append("\" [label=\"")
+                .append(label)
+                .append("\"];\n");
     }
 
     private static String closeDot(StringBuilder sb) {

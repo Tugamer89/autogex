@@ -22,21 +22,49 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Generate Tags List
         id: get-tags
         run: |
           if [ -n "${{ github.event.inputs.tag_name }}" ]; then
             echo "tags=[\"${{ github.event.inputs.tag_name }}\"]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          RAW_TAGS=$(git tag -l --sort=v:refname "v*" | grep -E '^v[1-9]' || true)
+          
+          echo "--- TAG LOCALI TROVATI ---"
+          echo "$RAW_TAGS"
+          echo "--------------------------"
+          
+          if [ -z "$RAW_TAGS" ]; then
+            echo "Nessun tag valido. Verrà eseguito un job 'skip' per evitare il crash della matrix."
+            echo "tags=[\"skip\"]" >> $GITHUB_OUTPUT
           else
-            TAGS=$(git tag -l --sort=v:refname "v*" | grep -E '^v[1-9]' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            echo "tags=$TAGS" >> $GITHUB_OUTPUT
+            JSON_ARRAY="["
+            FIRST=true
+            for t in $RAW_TAGS; do
+              if [ "$FIRST" = true ]; then
+                JSON_ARRAY="$JSON_ARRAY\"$t\""
+                FIRST=false
+              else
+                JSON_ARRAY="$JSON_ARRAY, \"$t\""
+              fi
+            done
+            JSON_ARRAY="$JSON_ARRAY]"
+            
+            echo "JSON Generato per la Matrix: $JSON_ARRAY"
+            echo "tags=$JSON_ARRAY" >> $GITHUB_OUTPUT
           fi
 
   backfill:
     name: Build & Deploy (${{ matrix.tag }})
     needs: setup-tags
     runs-on: ubuntu-latest
+    if: ${{ matrix.tag != 'skip' }}
     permissions:
       contents: write
       pages: write

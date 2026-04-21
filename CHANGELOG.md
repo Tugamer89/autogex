@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.11](https://github.com/Tugamer89/autogex/compare/v1.3.10...v1.3.11) (2026-04-21)
+
+
+### Bug Fixes
+
+* changed dev option position & improved readme sync ([1c4d0cf](https://github.com/Tugamer89/autogex/commit/1c4d0cf44b601d11289175eaafdce2735118dbba))
+* improved spotless trigger ([cef79ea](https://github.com/Tugamer89/autogex/commit/cef79ea4b2f50d7756dc1ec8a8dbd6cff75b3779))
+* release phase & readme sync ([12c181b](https://github.com/Tugamer89/autogex/commit/12c181bbb0141986910560ff519518a260b84487))
+* var name ([3734997](https://github.com/Tugamer89/autogex/commit/3734997c16a30a7ff1ccb8d09566f5b4f9b903c6))
+* version gathering ([ae9ab3e](https://github.com/Tugamer89/autogex/commit/ae9ab3e2408d5c486d766447eaa16acfe5fa3cbc))
+* workflow step name ([3b66d58](https://github.com/Tugamer89/autogex/commit/3b66d58af9d6617eaa9beb1745723d2ad2c1f8c9))
+
 ## [1.3.10](https://github.com/Tugamer89/autogex/compare/v1.3.9...v1.3.10) (2026-04-21)
 
 

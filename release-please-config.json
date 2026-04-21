@@ -1,10 +1,7 @@
 {
   "packages": {
     ".": {
-      "release-type": "maven",
-      "extra-files": [
-        "pom.xml"
-      ]
+      "release-type": "maven"
     }
   }
 }

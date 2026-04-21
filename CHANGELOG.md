@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.9](https://github.com/Tugamer89/autogex/compare/v1.3.8...v1.3.9) (2026-04-21)
+
+
+### Bug Fixes
+
+* automated CI tests start ([972fd64](https://github.com/Tugamer89/autogex/commit/972fd6453599a3744a62471361dd1e859e1c2262))
+* release name and triggers ([a378033](https://github.com/Tugamer89/autogex/commit/a378033fa33475b779175245e69950cf5a54da96))
+
 ## [1.3.8](https://github.com/Tugamer89/autogex/compare/v1.3.7...v1.3.8) (2026-04-21)
 
 

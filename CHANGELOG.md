@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.10](https://github.com/Tugamer89/autogex/compare/v1.3.9...v1.3.10) (2026-04-21)
+
+
+### Bug Fixes
+
+* improved CI/CD workflows triggers ([f2a03fd](https://github.com/Tugamer89/autogex/commit/f2a03fdbb68ecde9c1bf050c626d81d730532f61))
+
 ## [1.3.9](https://github.com/Tugamer89/autogex/compare/v1.3.8...v1.3.9) (2026-04-21)
 
 

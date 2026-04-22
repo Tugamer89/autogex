@@ -84,7 +84,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Javadoc HTML Generation
-        run: mvn -B -T 1C javadoc:javadoc
+        run: mvn -B -T 1C compile javadoc:javadoc
 
       - name: Find Javadoc Folder
         id: find_folder

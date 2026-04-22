@@ -170,7 +170,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.12.0</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
+                    <release>${maven.compiler.source}</release>
                     <additionalOptions>
                         <additionalOption>--allow-script-in-comments</additionalOption>
                     </additionalOptions>

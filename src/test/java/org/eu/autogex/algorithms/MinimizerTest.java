@@ -6,11 +6,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.eu.autogex.models.DFA;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class MinimizerTest {
 
-    @Test
-    void testMinimizeRedundantDFA() {
+    @ParameterizedTest(name = "Testing Minimized DFA behavior with input: ''{0}''")
+    @ValueSource(strings = {"a", "b", "abbb", "aa", "bbaa", "ababa", "", "bbbb"})
+    void testMinimizeRedundantDFA(String input) {
         // States q1 and q2 are completely equivalent.
         // State q5 is unreachable.
         DFA redundantDfa =
@@ -46,13 +49,10 @@ class MinimizerTest {
                 3, minimalDfa.getStates().size(), "The minimal DFA must have exactly 3 states");
 
         // Verify that the languages match
-        String[] testStrings = {"a", "b", "abbb", "aa", "bbaa", "ababa", "", "bbbb"};
-        for (String s : testStrings) {
-            assertEquals(
-                    redundantDfa.accepts(s),
-                    minimalDfa.accepts(s),
-                    "Both DFAs must behave identically for the string: " + s);
-        }
+        assertEquals(
+                redundantDfa.accepts(input),
+                minimalDfa.accepts(input),
+                "Both DFAs must behave identically");
     }
 
     @Test

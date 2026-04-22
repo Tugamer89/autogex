@@ -8,11 +8,14 @@ import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.models.NFA;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ConverterTest {
 
-    @Test
-    void testENFAToNFA() {
+    @ParameterizedTest(name = "Testing ENFA to NFA conversion with input: ''{0}''")
+    @ValueSource(strings = {"", "a", "b", "ab", "aaabbb", "ba", "aba", "c"})
+    void testENFAToNFA(String input) {
         // ENFA accepting a*b*
         ENFA enfa =
                 new ENFA.Builder()
@@ -26,22 +29,21 @@ class ConverterTest {
 
         NFA nfa = Converter.enfaToNfa(enfa);
 
-        String[] testStrings = {"", "a", "b", "ab", "aaabbb", "ba", "aba", "c"};
-        for (String s : testStrings) {
-            assertEquals(
-                    enfa.accepts(s),
-                    nfa.accepts(s),
-                    "The converted NFA must yield the same result as the ENFA for: '" + s + "'");
-        }
+        assertEquals(
+                enfa.accepts(input),
+                nfa.accepts(input),
+                "The converted NFA must yield the same result as the ENFA");
 
+        // Verify that the NFA does not contain ε-transitions (null)
         for (var transitions : nfa.getTransitionTable().values()) {
             assertFalse(
                     transitions.containsKey(null), "An NFA must not contain ε-transitions (null)");
         }
     }
 
-    @Test
-    void testNFAToDFA() {
+    @ParameterizedTest(name = "Testing NFA to DFA conversion with input: ''{0}''")
+    @ValueSource(strings = {"01", "0001", "1101", "10101", "0", "1", "010", "111"})
+    void testNFAToDFA(String input) {
         // NFA accepting strings ending with "01"
         NFA nfa =
                 new NFA.Builder()
@@ -57,17 +59,15 @@ class ConverterTest {
 
         DFA dfa = Converter.nfaToDfa(nfa);
 
-        String[] testStrings = {"01", "0001", "1101", "10101", "0", "1", "010", "111"};
-        for (String s : testStrings) {
-            assertEquals(
-                    nfa.accepts(s),
-                    dfa.accepts(s),
-                    "The converted DFA must yield the same result as the NFA for: '" + s + "'");
-        }
+        assertEquals(
+                nfa.accepts(input),
+                dfa.accepts(input),
+                "The converted DFA must yield the same result as the NFA");
     }
 
-    @Test
-    void testENFAToDFA() {
+    @ParameterizedTest(name = "Testing ENFA to DFA full conversion with input: ''{0}''")
+    @ValueSource(strings = {"", "a", "b", "ab", "aaabbb", "ba", "aba", "c"})
+    void testENFAToDFA(String input) {
         // Complete chain: ENFA -> (NFA) -> DFA
         ENFA enfa =
                 new ENFA.Builder()
@@ -81,15 +81,10 @@ class ConverterTest {
 
         DFA dfa = Converter.enfaToDfa(enfa);
 
-        String[] testStrings = {"", "a", "b", "ab", "aaabbb", "ba", "aba", "c"};
-        for (String s : testStrings) {
-            assertEquals(
-                    enfa.accepts(s),
-                    dfa.accepts(s),
-                    "The DFA (from ENFA) must yield the same result as the original ENFA for: '"
-                            + s
-                            + "'");
-        }
+        assertEquals(
+                enfa.accepts(input),
+                dfa.accepts(input),
+                "The DFA (from ENFA) must yield the same result as the original ENFA");
     }
 
     @Test

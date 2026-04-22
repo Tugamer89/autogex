@@ -52,7 +52,8 @@ jobs:
               -Dsonar.projectKey=Tugamer89_autogex \
               -Dmaven.javadoc.skip=true \
               -Dsource.skip=true \
-              -Dgpg.skip=true
+              -Dgpg.skip=true \
+              pitest:mutationCoverage
           else
             mvn -B -T 1C verify -Dmaven.javadoc.skip=true -Dsource.skip=true -Dgpg.skip=true
           fi

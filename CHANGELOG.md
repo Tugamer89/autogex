@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/Tugamer89/autogex/compare/v1.3.12...v1.4.0) (2026-04-22)
+
+
+### Features
+
+* enhance test suite, coverage checks and module visibility ([5758fb9](https://github.com/Tugamer89/autogex/commit/5758fb91069449095e0deb2598727e4b6e13471a))
+
+
+### Bug Fixes
+
+* **javadoc:** resolve named and unnamed modules conflict ([003b603](https://github.com/Tugamer89/autogex/commit/003b60391f3b31e75126ed12ff9c008a05ab759e))
+
 ## [1.3.12](https://github.com/Tugamer89/autogex/compare/v1.3.11...v1.3.12) (2026-04-21)
 
 

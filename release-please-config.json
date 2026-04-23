@@ -4,14 +4,17 @@
       "release-type": "simple",
       "extra-files": [
         {
-          "type": "regex",
+          "type": "xml",
           "path": "pom.xml",
-          "regex": "<version>([0-9]+\\.[0-9]+\\.[0-9]+.*)</version>"
+          "xpath": "/*[local-name()='project']/*[local-name()='version']"
         },
         {
-          "type": "regex",
-          "path": "README.md",
-          "regex": "<version>([0-9]+\\.[0-9]+\\.[0-9]+.*)</version>"
+          "type": "generic",
+          "path": "README.md"
+        },
+        {
+          "type": "generic",
+          "path": ".github/ISSUE_TEMPLATE/bug_report.yml"
         }
       ]
     }

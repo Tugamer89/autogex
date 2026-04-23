@@ -33,6 +33,7 @@
 
 You can include Autogex in your Java project by adding this dependency to your `pom.xml` file:
 
+<!-- x-release-please-start-version -->
 ```xml
 <dependency>
   <groupId>org.eu.autogex</groupId>
@@ -40,6 +41,7 @@ You can include Autogex in your Java project by adding this dependency to your `
   <version>1.4.0</version>
 </dependency>
 ```
+<!-- x-release-please-end -->
 
 ## Usage Example
 

@@ -15,7 +15,7 @@ class AutoGexTest {
     void testVersionIsResolved() {
         // Assert that the version is successfully loaded (either from Manifest or fallback)
         assertNotNull(AutoGex.VERSION, "Version should not be null");
-        assertTrue(AutoGex.VERSION.length() > 0, "Version string should not be empty");
+        assertTrue(!AutoGex.VERSION.isEmpty(), "Version string should not be empty");
     }
 
     @Test

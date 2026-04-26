@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.0](https://github.com/Tugamer89/autogex/compare/v1.4.0...v1.5.0) (2026-04-26)
+
+
+### Features
+
+* **regex:** implement advanced syntax operators (+, ?, ., []) ([#63](https://github.com/Tugamer89/autogex/issues/63)) ([fd7973e](https://github.com/Tugamer89/autogex/commit/fd7973e8b8e2aa318448e32e73ce2249c09206d7))
+
+
+### Bug Fixes
+
+* fixed build badge link ([9369951](https://github.com/Tugamer89/autogex/commit/9369951a70fae4116ba7b2436c31fbaa9711cc03))
+* fixed sonarcloud error java:S7158 ([0c2ca18](https://github.com/Tugamer89/autogex/commit/0c2ca1873a62c53414402c4480eab7144358e50a))
+
 ## [1.4.0](https://github.com/Tugamer89/autogex/compare/v1.3.12...v1.4.0) (2026-04-22)
 
 

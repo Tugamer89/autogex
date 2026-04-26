@@ -7,7 +7,7 @@
 **A powerful Java engine for processing Finite State Automata and Regular Expressions.**
 
 ![Java Version](https://img.shields.io/badge/Java-25-orange?logo=java)
-![Build Status](https://github.com/Tugamer89/autogex/actions/workflows/build.yml/badge.svg)
+![Build Status](https://github.com/Tugamer89/autogex/actions/workflows/ci-build.yml/badge.svg)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=coverage&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=alert_status&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tugamer89_autogex&metric=sqale_rating&token=415f1436d3abd3702152559c347907a6f725e6e4)](https://sonarcloud.io/summary/new_code?id=Tugamer89_autogex)

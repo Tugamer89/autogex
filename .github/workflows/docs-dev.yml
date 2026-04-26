@@ -1,4 +1,4 @@
-name: Publishes Dev Documentation on GitHub Pages
+name: Docs - Publish Dev to Pages
 
 on:
   push:
@@ -10,42 +10,40 @@ on:
       - 'pom.xml'
   workflow_dispatch: {}
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-  actions: write
-
 concurrency:
   group: "pages-dev"
   cancel-in-progress: true
 
 jobs:
   deploy-dev-javadoc:
-    name: Javadoc Build & Deploy (Dev)
+    name: Docs - Deploy Development Version
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
     steps:
-      - name: Code Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: JDK 25 Set Up
+      - name: Setup Java Environment
         uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-      - name: Javadoc HTML Generation
+      - name: Generate Javadoc Documentation
         run: mvn -B -T 1C compile javadoc:javadoc
 
-      - name: Find Javadoc Folder Automatically
+      - name: Locate Generated Documentation
         id: find_folder
         run: |
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
-      - name: Inject Meta Tags & SEO Fixes
+      - name: Apply SEO Enhancements
         run: |
           sed -i \
             -e '/<meta name="description"/d' \
@@ -56,13 +54,13 @@ jobs:
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
             sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
-      - name: Minify Frontend Assets (CSS, HTML)
+      - name: Optimize Documentation Assets
         run: |
           npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
 
-      - name: Deploy to GitHub Pages (dev folder)
+      - name: Publish Development Documentation to Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -71,15 +69,16 @@ jobs:
           keep_files: true
 
   trigger-sitemap:
-    name: Trigger Global Sitemap
+    name: Util - Trigger Sitemap Update
     needs: deploy-dev-javadoc
     runs-on: ubuntu-latest
     permissions:
       actions: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Trigger Sitemap Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run sitemap.yml --ref main
+        run: gh workflow run docs-sitemap.yml --ref main

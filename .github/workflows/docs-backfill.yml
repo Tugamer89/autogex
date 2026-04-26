@@ -1,25 +1,23 @@
-name: Backfill Old Documentation
+name: Docs - Backfill Old Versions
 
 on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag (es. v1.2.0). Lascia vuoto per rigenerare TUTTI i tag (dalla 1.0 in poi).'
+        description: 'Tag name (e.g., v1.2.0). Leave blank to backfill all available tags starting from 1.0.'
         required: false
         type: string
 
-permissions:
-  contents: read
-
 jobs:
   setup-tags:
-    name: Determine Tags to Process
+    name: Util - Determine Tags to Process
     runs-on: ubuntu-latest
     outputs:
       matrix_tags: ${{ steps.get-tags.outputs.tags }}
       has_tags: ${{ steps.get-tags.outputs.has_tags }}
     permissions:
       contents: read
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -65,7 +63,7 @@ jobs:
           fi
 
   backfill:
-    name: Build & Deploy (${{ matrix.tag }})
+    name: Docs - Build and Deploy Old Versions (${{ matrix.tag }})
     needs: setup-tags
     runs-on: ubuntu-latest
     if: needs.setup-tags.outputs.has_tags == 'true'
@@ -73,6 +71,9 @@ jobs:
       contents: write
       pages: write
       id-token: write
+    env:
+      VERSION: ""
+      DOCS_VERSION: ""
     strategy:
       max-parallel: 1
       fail-fast: false
@@ -80,19 +81,19 @@ jobs:
         tag: ${{ fromJson(needs.setup-tags.outputs.matrix_tags) }}
         
     steps:
-      - name: Checkout Code at Tag
+      - name: Checkout Repository at Tag
         uses: actions/checkout@v6
         with:
           ref: ${{ matrix.tag }}
 
-      - name: JDK 25 Set Up
+      - name: Setup Java Environment
         uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-      - name: Extract Clean Version
+      - name: Identify Project Version from Tag
         id: version
         run: |
           TAG=${{ matrix.tag }}
@@ -101,16 +102,16 @@ jobs:
           echo "VERSION=$CLEAN_VER" >> $GITHUB_ENV
           echo "DOCS_VERSION=$MINOR_VER.x" >> $GITHUB_ENV
 
-      - name: Javadoc HTML Generation
+      - name: Generate Javadoc Documentation
         run: mvn -B -T 1C compile javadoc:javadoc
 
-      - name: Find Javadoc Folder
+      - name: Locate Generated Documentation
         id: find_folder
         run: |
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
-      - name: Inject Meta Tags & SEO Fixes
+      - name: Apply SEO Enhancements
         run: |
           sed -i \
             -e '/<meta name="description"/d' \
@@ -121,14 +122,14 @@ jobs:
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
             sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
-      - name: Minify Frontend Assets (CSS, HTML)
+      - name: Optimize Documentation Assets
         continue-on-error: true
         run: |
           npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css || true
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \; || true
 
-      - name: Deploy Docs to Version Folder
+      - name: Publish Versioned Documentation to Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -137,15 +138,16 @@ jobs:
           keep_files: true
 
   trigger-sitemap:
-    name: Trigger Global Sitemap
+    name: Util - Trigger Sitemap Update
     needs: backfill
     runs-on: ubuntu-latest
     permissions:
       actions: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Trigger Sitemap Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run sitemap.yml --ref main
+        run: gh workflow run docs-sitemap.yml --ref main

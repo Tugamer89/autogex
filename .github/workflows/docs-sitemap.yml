@@ -1,4 +1,4 @@
-name: Generate Global Sitemap
+name: Docs - Generate Sitemap
 
 on:
   push:
@@ -8,14 +8,15 @@ on:
       - '**/*.html'
   workflow_dispatch: {}
 
-permissions:
-  contents: write
-
 jobs:
   build-sitemap:
+    name: Docs - Generate and Push Sitemap
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout gh-pages Branch
         uses: actions/checkout@v6
         with:
           ref: gh-pages

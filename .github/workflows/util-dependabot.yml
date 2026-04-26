@@ -1,27 +1,29 @@
-name: Dependabot auto-merge
+name: Util - Dependabot Auto-Merge
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-permissions:
-  pull-requests: write
-  contents: write
-
 jobs:
   dependabot:
+    name: Util - Dependabot Auto-Merge
     runs-on: ubuntu-latest
     if: github.event.pull_request.user.login == 'dependabot[bot]'
+    permissions:
+      pull-requests: write
+      contents: write
+
     steps:
-      - name: Dependabot metadata
+      - name: Fetch Dependabot Metadata
         id: metadata
         uses: dependabot/fetch-metadata@v3
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Checkout repository
+          
+      - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: Enable auto-merge for Dependabot PRs
+      - name: Enable Auto-Merge for Dependabot PRs
         if: ${{ steps.metadata.outputs.update-type != 'version-update:semver-major' }}
         run: gh pr merge --auto --squash "$PR_NUMBER"
         env:

@@ -1,27 +1,30 @@
-name: Release Artifacts & Publish Package
+name: CD - Publish Package & Release
 
 on:
   push:
     tags:
       - 'v*.*.*'
 
-permissions:
-  contents: write
-  packages: write
-  id-token: write
-  attestations: write
-  pages: write
-  actions: write
-
 jobs:
   publish-and-release:
-    name: Build, Test, Publish and Release
+    name: CD - Maven Central Deployment
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+      pages: write
+    env:
+      PROJECT_VERSION: ""
+      DOCS_VERSION: ""
+      TAG_NAME: ""
+
     steps:
-      - name: Checkout source code
+      - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: Set up JDK 25
+      - name: Setup Java Environment
         uses: actions/setup-java@v5
         with:
           java-version: '25'
@@ -33,7 +36,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Extract Version
+      - name: Identify Project Version from Tag
         id: meta
         run: |
           TAG_NAME=${{ github.ref_name }}
@@ -83,16 +86,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Javadoc HTML Generation
+      - name: Generate Javadoc Documentation
         run: mvn -B -T 1C compile javadoc:javadoc
 
-      - name: Find Javadoc Folder
+      - name: Locate Generated Documentation
         id: find_folder
         run: |
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
-      - name: Inject Meta Tags & SEO Fixes
+      - name: Apply SEO Enhancements
         run: |
           sed -i \
             -e '/<meta name="description"/d' \
@@ -103,13 +106,13 @@ jobs:
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
             sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
-      - name: Minify Frontend Assets (CSS, HTML)
+      - name: Optimize Documentation Assets
         run: |
           npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier terser svgo
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
 
-      - name: Deploy Docs to Version Folder
+      - name: Publish Versioned Documentation to Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -125,13 +128,13 @@ jobs:
           cp src/main/javadoc/favicon.svg ${{ steps.find_folder.outputs.javadoc_path }}/
           cp src/main/javadoc/version-switcher.js ${{ steps.find_folder.outputs.javadoc_path }}/
       
-      - name: Minify Frontend Assets (JS, SVG)
+      - name: Optimize Root Assets
         run: |
           terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
           svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg
           svgo ${{ steps.find_folder.outputs.javadoc_path }}/favicon.svg
 
-      - name: Deploy Docs to Root (Latest)
+      - name: Publish Latest Documentation to Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -140,15 +143,16 @@ jobs:
           keep_files: true
 
   trigger-sitemap:
-    name: Trigger Global Sitemap
+    name: Util - Trigger Sitemap Update
     needs: publish-and-release
     runs-on: ubuntu-latest
     permissions:
       actions: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Trigger Sitemap Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run sitemap.yml --ref main
+        run: gh workflow run docs-sitemap.yml --ref main

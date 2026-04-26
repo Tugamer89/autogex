@@ -39,6 +39,49 @@ class RegexTest {
     }
 
     @Test
+    void testRegexPlusOperator() {
+        Regex regex = new Regex("a+");
+
+        assertFalse(regex.matches(""), "Plus operator must reject empty string");
+        assertTrue(regex.matches("a"), "Plus operator must accept single occurrence");
+        assertTrue(regex.matches("aaaaa"), "Plus operator must accept multiple occurrences");
+        assertFalse(regex.matches("b"), "Should reject unrelated characters");
+    }
+
+    @Test
+    void testRegexOptionalOperator() {
+        Regex regex = new Regex("a?");
+
+        assertTrue(regex.matches(""), "Optional operator must accept empty string");
+        assertTrue(regex.matches("a"), "Optional operator must accept single occurrence");
+        assertFalse(regex.matches("aa"), "Optional operator must reject multiple occurrences");
+    }
+
+    @Test
+    void testRegexWildcardOperator() {
+        Regex regex = new Regex("a.c");
+
+        assertTrue(regex.matches("abc"), "Wildcard should match standard letter");
+        assertTrue(regex.matches("aXc"), "Wildcard should match capital letter");
+        assertTrue(regex.matches("a9c"), "Wildcard should match digit");
+        assertTrue(regex.matches("a-c"), "Wildcard should match symbol");
+        assertTrue(regex.matches("a c"), "Wildcard should match space (in input)");
+
+        assertFalse(regex.matches("ac"), "Wildcard must match exactly one character");
+        assertFalse(regex.matches("abbc"), "Wildcard cannot match multiple characters");
+    }
+
+    @Test
+    void testRegexCharacterClasses() {
+        Regex regex = new Regex("[a-cx-z\\d]+");
+
+        assertTrue(regex.matches("a"), "Matches single character from class");
+        assertTrue(regex.matches("acxy092"), "Matches multiple class characters mixed");
+        assertFalse(regex.matches("d"), "Rejects characters outside the class range");
+        assertFalse(regex.matches("acM2"), "Rejects strings containing invalid characters");
+    }
+
+    @Test
     void testComplexRegexPipeline() {
         Regex regex = new Regex("(a|b)*abb");
 

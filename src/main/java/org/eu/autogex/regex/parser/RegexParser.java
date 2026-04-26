@@ -1,12 +1,15 @@
 package org.eu.autogex.regex.parser;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.eu.autogex.regex.ast.RegexNode;
 import org.eu.autogex.regex.ast.RegexNode.*;
 
 /**
  * A Recursive Descent Parser that converts a Regular Expression string into an Abstract Syntax Tree
  * (AST). * Grammar implemented: Regex -> Term ( '|' Term )* Term -> Factor ( Factor )* (Implicit
- * concatenation) Factor -> Base ( '*' )* Base -> char | '(' Regex ')'
+ * concatenation) Factor -> Base ( '*' | '+' | '?' )* Base -> char | '(' Regex ')' | '.' | '['
+ * charClass ']' | '\d'
  */
 public class RegexParser {
 
@@ -45,7 +48,11 @@ public class RegexParser {
 
     // --- Recursive Parsing Methods ---
 
-    /** Parses a full Regex, handling the Union ('|') operator. */
+    /**
+     * Parses a full Regex, handling the Union ('|') operator.
+     *
+     * @return The RegexNode representing the parsed expression.
+     */
     private RegexNode parseRegex() {
         RegexNode left = parseTerm();
 
@@ -57,13 +64,21 @@ public class RegexParser {
         return left;
     }
 
-    /** Parses a Term, handling implicit Concatenation. */
+    /**
+     * Parses a Term, handling implicit Concatenation.
+     *
+     * @return The RegexNode representing the term.
+     */
     private RegexNode parseTerm() {
         RegexNode left = parseFactor();
 
         // Continue concatenating as long as the next character is part of a new Factor
-        // (i.e., not a closing parenthesis, not a union operator, and not EOF)
-        while (hasNext() && peek() != '|' && peek() != ')') {
+        while (hasNext()
+                && peek() != '|'
+                && peek() != ')'
+                && peek() != '*'
+                && peek() != '+'
+                && peek() != '?') {
             RegexNode right = parseFactor();
             left = new ConcatNode(left, right);
         }
@@ -71,18 +86,35 @@ public class RegexParser {
         return left;
     }
 
-    /** Parses a Factor, handling the Kleene Star ('*') operator. */
+    /**
+     * Parses a Factor, handling the Kleene Star ('*'), Plus ('+'), and Optional ('?') operators.
+     *
+     * @return The RegexNode representing the factor.
+     */
     private RegexNode parseFactor() {
         RegexNode base = parseBase();
 
-        while (match('*')) {
-            base = new StarNode(base);
+        while (hasNext() && (peek() == '*' || peek() == '+' || peek() == '?')) {
+            char op = next();
+            if (op == '*') {
+                base = new StarNode(base);
+            } else if (op == '+') {
+                base = new PlusNode(base);
+            } else if (op == '?') {
+                base = new OptionalNode(base);
+            }
         }
 
         return base;
     }
 
-    /** Parses a Base, which is either a parenthesized Regex or a single Literal. */
+    /**
+     * Parses a Base, which is either a parenthesized Regex, a Character Class, a Wildcard, or a
+     * single Literal.
+     *
+     * @return The RegexNode representing the base element.
+     * @throws IllegalArgumentException if the syntax is incorrect.
+     */
     private RegexNode parseBase() {
         if (match('(')) {
             RegexNode node = parseRegex();
@@ -92,12 +124,95 @@ public class RegexParser {
             return node;
         }
 
-        if (!hasNext() || peek() == '|' || peek() == ')' || peek() == '*') {
+        if (match('.')) {
+            return new WildcardNode();
+        }
+
+        if (match('[')) {
+            return parseCharClass();
+        }
+
+        if (match('\\')) {
+            char escaped = next();
+            if (escaped == 'd') {
+                return new CharClassNode(getDigitSet());
+            }
+            return new LiteralNode(escaped);
+        }
+
+        if (!hasNext()
+                || peek() == '|'
+                || peek() == ')'
+                || peek() == '*'
+                || peek() == '+'
+                || peek() == '?') {
             throw new IllegalArgumentException(
                     "Invalid token at index " + position + ". Expected literal or '('.");
         }
 
         return new LiteralNode(next());
+    }
+
+    /**
+     * Parses a character class inside brackets (e.g. [a-z0-9]).
+     *
+     * @return A CharClassNode representing the accepted set of characters.
+     * @throws IllegalArgumentException if the bracket is never closed.
+     */
+    private RegexNode parseCharClass() {
+        Set<Character> chars = new HashSet<>();
+
+        while (hasNext() && peek() != ']') {
+            if (match('\\')) {
+                parseEscapedCharInClass(chars);
+            } else {
+                parseLiteralOrRangeInClass(chars);
+            }
+        }
+
+        if (!match(']')) {
+            throw new IllegalArgumentException("Missing closing bracket ']' for character class.");
+        }
+
+        return new CharClassNode(chars);
+    }
+
+    /**
+     * Helper method to parse escaped characters (e.g. \d, \-) inside a character class.
+     *
+     * @param chars The set of characters being populated.
+     */
+    private void parseEscapedCharInClass(Set<Character> chars) {
+        char escaped = next();
+        if (escaped == 'd') {
+            chars.addAll(getDigitSet());
+        } else {
+            chars.add(escaped);
+        }
+    }
+
+    /**
+     * Helper method to parse individual literals or character ranges (e.g. a-z) inside a character
+     * class.
+     *
+     * @param chars The set of characters being populated.
+     */
+    private void parseLiteralOrRangeInClass(Set<Character> chars) {
+        char startChar = next();
+
+        // Check for range indicator (e.g. 'a-z')
+        if (hasNext()
+                && peek() == '-'
+                && position + 1 < input.length()
+                && input.charAt(position + 1) != ']') {
+            match('-'); // Consume '-'
+            char endChar = next();
+            for (char c = startChar; c <= endChar; c++) {
+                chars.add(c);
+            }
+        } else {
+            chars.add(startChar);
+        }
     }
 
     // --- Utility Methods for Token Navigation ---
@@ -120,5 +235,13 @@ public class RegexParser {
             return true;
         }
         return false;
+    }
+
+    private Set<Character> getDigitSet() {
+        Set<Character> digits = new HashSet<>();
+        for (char c = '0'; c <= '9'; c++) {
+            digits.add(c);
+        }
+        return digits;
     }
 }

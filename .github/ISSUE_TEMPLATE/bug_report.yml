@@ -47,7 +47,7 @@ body:
     attributes:
       label: Autogex Version
       description: What version of Autogex are you using?
-      placeholder: e.g., 1.4.0 # x-release-please-version
+      placeholder: e.g., 1.5.0 # x-release-please-version
     validations:
       required: true
   - type: textarea

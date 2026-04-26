@@ -107,5 +107,58 @@ public class ThompsonConstructor {
 
             return new Fragment(start, accept);
         }
+
+        @Override
+        public Fragment visit(PlusNode plus) {
+            Fragment child = plus.child().accept(this);
+
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+
+            builder.addEpsilonTransition(start, child.start());
+            builder.addEpsilonTransition(child.accept(), child.start()); // Loop path (one or more)
+            builder.addEpsilonTransition(child.accept(), accept);
+
+            return new Fragment(start, accept);
+        }
+
+        @Override
+        public Fragment visit(OptionalNode opt) {
+            Fragment child = opt.child().accept(this);
+
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+
+            builder.addEpsilonTransition(start, child.start());
+            builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)
+            builder.addEpsilonTransition(child.accept(), accept);
+
+            return new Fragment(start, accept);
+        }
+
+        @Override
+        public Fragment visit(CharClassNode charClass) {
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+
+            for (char c : charClass.chars()) {
+                builder.addTransition(start, c, accept);
+            }
+
+            return new Fragment(start, accept);
+        }
+
+        @Override
+        public Fragment visit(WildcardNode wildcard) {
+            String start = addNonFinalState();
+            String accept = addNonFinalState();
+
+            // Cover standard ASCII printable characters for the wildcard '.'
+            for (char c = 32; c <= 126; c++) {
+                builder.addTransition(start, c, accept);
+            }
+
+            return new Fragment(start, accept);
+        }
     }
 }

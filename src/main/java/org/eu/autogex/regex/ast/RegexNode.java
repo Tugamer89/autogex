@@ -1,5 +1,8 @@
 package org.eu.autogex.regex.ast;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * Base interface for all nodes in the Regular Expression Abstract Syntax Tree (AST). Utilizes Java
  * Records to define immutable node implementations concisely.
@@ -53,6 +56,38 @@ public interface RegexNode {
          * @return The result of the visitor's operation.
          */
         T visit(StarNode node);
+
+        /**
+         * Visits a PlusNode.
+         *
+         * @param node The PlusNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(PlusNode node);
+
+        /**
+         * Visits an OptionalNode.
+         *
+         * @param node The OptionalNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(OptionalNode node);
+
+        /**
+         * Visits a CharClassNode.
+         *
+         * @param node The CharClassNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(CharClassNode node);
+
+        /**
+         * Visits a WildcardNode.
+         *
+         * @param node The WildcardNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(WildcardNode node);
     }
 
     /**
@@ -126,6 +161,81 @@ public interface RegexNode {
                 return "(" + child.toString() + ")*";
             }
             return child.toString() + "*";
+        }
+    }
+
+    /**
+     * Represents the Plus operator, allowing one or more repetitions (e.g., "a+").
+     *
+     * @param child The node to which the plus operator is applied.
+     */
+    record PlusNode(RegexNode child) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
+        @Override
+        public String toString() {
+            if (child instanceof ConcatNode) {
+                return "(" + child.toString() + ")+";
+            }
+            return child.toString() + "+";
+        }
+    }
+
+    /**
+     * Represents the Optional operator, allowing zero or one occurrence (e.g., "a?").
+     *
+     * @param child The node to which the optional operator is applied.
+     */
+    record OptionalNode(RegexNode child) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
+        @Override
+        public String toString() {
+            if (child instanceof ConcatNode) {
+                return "(" + child.toString() + ")?";
+            }
+            return child.toString() + "?";
+        }
+    }
+
+    /**
+     * Represents a Character Class, allowing any character from a defined set (e.g., "[a-z]",
+     * "\d").
+     *
+     * @param chars The set of permitted characters.
+     */
+    record CharClassNode(Set<Character> chars) implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
+        @Override
+        public String toString() {
+            return "["
+                    + chars.stream().map(String::valueOf).sorted().collect(Collectors.joining())
+                    + "]";
+        }
+    }
+
+    /**
+     * Represents the Wildcard operator, matching any character in the known alphabet (e.g., ".").
+     */
+    record WildcardNode() implements RegexNode {
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visit(this);
+        }
+
+        @Override
+        public String toString() {
+            return ".";
         }
     }
 }

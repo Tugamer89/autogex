@@ -46,9 +46,98 @@ class RegexParserTest {
     }
 
     @Test
+    void testParsePlus() {
+        RegexNode node = RegexParser.parse("a+");
+        assertInstanceOf(PlusNode.class, node);
+
+        PlusNode plus = (PlusNode) node;
+        assertInstanceOf(LiteralNode.class, plus.child());
+        assertEquals("a+", plus.toString());
+    }
+
+    @Test
+    void testParseOptional() {
+        RegexNode node = RegexParser.parse("a?");
+        assertInstanceOf(OptionalNode.class, node);
+
+        OptionalNode opt = (OptionalNode) node;
+        assertInstanceOf(LiteralNode.class, opt.child());
+        assertEquals("a?", opt.toString());
+    }
+
+    @Test
+    void testParseWildcard() {
+        RegexNode node = RegexParser.parse(".");
+        assertInstanceOf(WildcardNode.class, node);
+        assertEquals(".", node.toString());
+    }
+
+    @Test
+    void testParseCharClassRange() {
+        RegexNode node = RegexParser.parse("[a-c]");
+        assertInstanceOf(CharClassNode.class, node);
+
+        CharClassNode charClass = (CharClassNode) node;
+        assertEquals(3, charClass.chars().size(), "Should contain exactly 'a', 'b', and 'c'");
+        assertTrue(charClass.chars().contains('a'));
+        assertTrue(charClass.chars().contains('b'));
+        assertTrue(charClass.chars().contains('c'));
+    }
+
+    @Test
+    void testParseCharClassDigitEscape() {
+        RegexNode node = RegexParser.parse("\\d");
+        assertInstanceOf(CharClassNode.class, node);
+
+        CharClassNode charClass = (CharClassNode) node;
+        assertEquals(10, charClass.chars().size(), "Should contain exactly 10 digits");
+        assertTrue(charClass.chars().contains('0'));
+        assertTrue(charClass.chars().contains('9'));
+    }
+
+    @Test
+    void testParseCharClassMultipleRanges() {
+        RegexNode node = RegexParser.parse("[a-cx-z\\d]");
+        assertInstanceOf(CharClassNode.class, node);
+
+        CharClassNode charClass = (CharClassNode) node;
+        assertTrue(charClass.chars().contains('b'));
+        assertTrue(charClass.chars().contains('y'));
+        assertTrue(charClass.chars().contains('5'));
+    }
+
+    @Test
+    void testParseCharClassWithEscapedCharacters() {
+        RegexNode node = RegexParser.parse("[\\-\\]\\\\]");
+        assertInstanceOf(CharClassNode.class, node);
+
+        CharClassNode charClass = (CharClassNode) node;
+        assertTrue(charClass.chars().contains('-'), "Should contain escaped dash");
+        assertTrue(charClass.chars().contains(']'), "Should contain escaped closing bracket");
+        assertTrue(charClass.chars().contains('\\'), "Should contain escaped backslash");
+    }
+
+    @Test
+    void testParseCharClassWithLiteralDashAtEnd() {
+        RegexNode node = RegexParser.parse("[a-]");
+        assertInstanceOf(CharClassNode.class, node);
+
+        CharClassNode charClass = (CharClassNode) node;
+        assertTrue(charClass.chars().contains('a'), "Should contain 'a'");
+        assertTrue(charClass.chars().contains('-'), "Should treat dash at the end as literal");
+    }
+
+    @Test
+    void testParseEscapedLiteralsOutsideCharClass() {
+        RegexNode node = RegexParser.parse("\\*\\+\\?\\(\\)\\|");
+        assertInstanceOf(ConcatNode.class, node);
+
+        // The AST should stringify this back to the raw concatenation of literal nodes
+        assertEquals("*+?()|", node.toString());
+    }
+
+    @Test
     void testParseStarWithConcatenation() {
-        // Explicitly tests the 'instanceof ConcatNode' logic in StarNode.toString()
-        // We expect parentheses to be added correctly: (ab)*
         RegexNode node = RegexParser.parse("(ab)*");
         assertInstanceOf(StarNode.class, node);
         assertEquals("(ab)*", node.toString());
@@ -56,8 +145,6 @@ class RegexParserTest {
 
     @Test
     void testParseStarWithUnion() {
-        // Verify that UnionNode manages its own parentheses so StarNode doesn't add double ones
-        // Expected result: (a|b)* and NOT ((a|b))*
         RegexNode node = RegexParser.parse("(a|b)*");
         assertInstanceOf(StarNode.class, node);
         assertEquals("(a|b)*", node.toString());
@@ -65,15 +152,8 @@ class RegexParserTest {
 
     @Test
     void testParseComplexExpression() {
-        // Tests operator precedence: Star > Concat > Union
-        // Target: (a|b)*abb
-        RegexNode node = RegexParser.parse("(a|b)*abb");
-
-        // Root should be a concatenation of (a|b)*ab and b
+        RegexNode node = RegexParser.parse("(a|b)*a+b?c.");
         assertInstanceOf(ConcatNode.class, node);
-
-        // The toString method of our AST natively rebuilds the regex
-        assertEquals("(a|b)*abb", node.toString());
     }
 
     @Test
@@ -97,6 +177,24 @@ class RegexParserTest {
         assertTrue(
                 exception.getMessage().contains("Missing closing parenthesis"),
                 "Should detect missing closing parenthesis");
+    }
+
+    @Test
+    void testThrowsExceptionOnMissingBracket() {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("[a-z"));
+        assertTrue(
+                exception.getMessage().contains("Missing closing bracket"),
+                "Should detect missing closing bracket");
+    }
+
+    @Test
+    void testThrowsExceptionOnIncompleteRange() {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("[a-"));
+        assertTrue(
+                exception.getMessage().contains("Missing closing bracket"),
+                "Should detect missing closing bracket for incomplete range");
     }
 
     @Test

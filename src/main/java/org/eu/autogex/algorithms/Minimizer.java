@@ -140,7 +140,6 @@ public class Minimizer {
 
     private static Set<State> getReachableStates(DFA dfa) {
         Set<State> reachable = new HashSet<>();
-        // ⚡ Bolt Performance Optimization:
         // ArrayDeque is preferred over LinkedList for queues in hot paths.
         // It provides better cache locality and avoids O(n) node allocation overhead.
         Queue<State> queue = new ArrayDeque<>();

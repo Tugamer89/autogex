@@ -60,7 +60,6 @@ public class Converter {
         Set<Character> alphabet = getAlphabet(nfa.getTransitionTable());
 
         Map<Set<State>, String> dfaStateNames = new HashMap<>();
-        // ⚡ Bolt Performance Optimization:
         // ArrayDeque is preferred over LinkedList for queues in hot paths.
         // It provides better cache locality and avoids O(n) node allocation overhead.
         Queue<Set<State>> queue = new ArrayDeque<>();

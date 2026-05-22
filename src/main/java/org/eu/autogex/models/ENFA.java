@@ -1,6 +1,7 @@
 package org.eu.autogex.models;
 
 import java.util.*;
+import java.util.ArrayDeque;
 import org.eu.autogex.core.AbstractAutomaton;
 import org.eu.autogex.core.AbstractAutomatonBuilder;
 import org.eu.autogex.core.State;
@@ -27,7 +28,10 @@ public class ENFA extends AbstractAutomaton {
      */
     public Set<State> epsilonClosure(Set<State> startStates) {
         Set<State> closure = new HashSet<>(startStates);
-        Queue<State> queue = new LinkedList<>(startStates);
+        // ⚡ Bolt Performance Optimization:
+        // ArrayDeque is preferred over LinkedList for queues in hot paths.
+        // It provides better cache locality and avoids O(n) node allocation overhead.
+        Queue<State> queue = new ArrayDeque<>(startStates);
 
         while (!queue.isEmpty()) {
             State currentState = queue.poll();

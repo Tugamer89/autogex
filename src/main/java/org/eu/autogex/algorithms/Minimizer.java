@@ -1,6 +1,7 @@
 package org.eu.autogex.algorithms;
 
 import java.util.*;
+import java.util.ArrayDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
@@ -139,7 +140,10 @@ public class Minimizer {
 
     private static Set<State> getReachableStates(DFA dfa) {
         Set<State> reachable = new HashSet<>();
-        Queue<State> queue = new LinkedList<>();
+        // ⚡ Bolt Performance Optimization:
+        // ArrayDeque is preferred over LinkedList for queues in hot paths.
+        // It provides better cache locality and avoids O(n) node allocation overhead.
+        Queue<State> queue = new ArrayDeque<>();
 
         reachable.add(dfa.getInitialState());
         queue.add(dfa.getInitialState());

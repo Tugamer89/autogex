@@ -106,7 +106,7 @@ public class MermaidExporter {
         // Declare state aliases to safely handle spaces or special characters in state names
         for (State s : allStates) {
             sb.append("    state \"")
-                    .append(s.getName())
+                    .append(escapeMermaidString(s.getName()))
                     .append("\" as ")
                     .append(sanitizeId(s))
                     .append("\n");
@@ -131,8 +131,13 @@ public class MermaidExporter {
                 .append(" --> ")
                 .append(to)
                 .append(" : ")
-                .append(label)
+                .append(escapeMermaidString(label))
                 .append("\n");
+    }
+
+    private static String escapeMermaidString(String text) {
+        if (text == null) return "";
+        return text.replace("\"", "&quot;");
     }
 
     /** Sanitizes the state name into a valid, safe identifier for Mermaid syntax. */

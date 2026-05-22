@@ -99,7 +99,7 @@ public class GraphvizExporter {
         if (!finalStates.isEmpty()) {
             String finalStatesList =
                     finalStates.stream()
-                            .map(s -> "\"" + s.getName() + "\"")
+                            .map(s -> "\"" + escapeDotString(s.getName()) + "\"")
                             .collect(Collectors.joining(" "));
             sb.append("  node [shape = doublecircle]; ").append(finalStatesList).append(";\n");
         }
@@ -110,7 +110,9 @@ public class GraphvizExporter {
         // Invisible entry node to point to the initial state
         sb.append("  __start0 [shape=none, label=\"\"];\n");
         if (initialState != null) {
-            sb.append("  __start0 -> \"").append(initialState.getName()).append("\";\n");
+            sb.append("  __start0 -> \"")
+                    .append(escapeDotString(initialState.getName()))
+                    .append("\";\n");
         }
 
         return sb;
@@ -119,12 +121,17 @@ public class GraphvizExporter {
     private static void appendTransition(
             StringBuilder sb, State source, String label, State target) {
         sb.append("  \"")
-                .append(source.getName())
+                .append(escapeDotString(source.getName()))
                 .append("\" -> \"")
-                .append(target.getName())
+                .append(escapeDotString(target.getName()))
                 .append("\" [label=\"")
-                .append(label)
+                .append(escapeDotString(label))
                 .append("\"];\n");
+    }
+
+    private static String escapeDotString(String text) {
+        if (text == null) return "";
+        return text.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private static String closeDot(StringBuilder sb) {

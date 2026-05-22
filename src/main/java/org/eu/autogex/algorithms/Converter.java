@@ -1,6 +1,7 @@
 package org.eu.autogex.algorithms;
 
 import java.util.*;
+import java.util.ArrayDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
@@ -59,7 +60,9 @@ public class Converter {
         Set<Character> alphabet = getAlphabet(nfa.getTransitionTable());
 
         Map<Set<State>, String> dfaStateNames = new HashMap<>();
-        Queue<Set<State>> queue = new LinkedList<>();
+        // ArrayDeque is preferred over LinkedList for queues in hot paths.
+        // It provides better cache locality and avoids O(n) node allocation overhead.
+        Queue<Set<State>> queue = new ArrayDeque<>();
         AtomicInteger stateCounter = new AtomicInteger(0);
 
         // The DFA initial state is the set containing only the NFA's initial state

@@ -13,6 +13,9 @@ import org.eu.autogex.regex.ast.RegexNode.*;
  */
 public class RegexParser {
 
+    /** Maximum allowed regex length to prevent StackOverflowError (DoS) */
+    private static final int MAX_REGEX_LENGTH = 2000;
+
     private final String input;
     private int position;
 
@@ -32,6 +35,13 @@ public class RegexParser {
     public static RegexNode parse(String regex) {
         if (regex == null || regex.isEmpty()) {
             throw new IllegalArgumentException("Regular expression cannot be null or empty.");
+        }
+
+        if (regex.length() > MAX_REGEX_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Regular expression exceeds maximum allowed length of "
+                            + MAX_REGEX_LENGTH
+                            + " characters (Security: DoS prevention).");
         }
 
         RegexParser parser = new RegexParser(regex);

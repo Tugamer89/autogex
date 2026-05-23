@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const updateSelects = (optionsHtml) => {
         document.querySelectorAll('select#version-switcher').forEach(switcher => {
             switcher.removeAttribute('onchange'); 
+            switcher.removeAttribute('disabled');
             switcher.innerHTML = optionsHtml;
             switcher.value = currentBase;
         });

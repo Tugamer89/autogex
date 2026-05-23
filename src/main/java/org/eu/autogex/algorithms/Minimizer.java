@@ -108,8 +108,6 @@ public class Minimizer {
             partitionToName.put(partition, name);
 
             // The partition is final if it contains at least one original final state.
-            // Collections.disjoint is faster than stream().anyMatch() and avoids stream allocation
-            // overhead
             boolean isFinal = !Collections.disjoint(partition, originalDfa.getFinalStates());
             builder.addState(name, isFinal);
 

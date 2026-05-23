@@ -160,6 +160,8 @@ public class Converter {
     }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
-        return superState.stream().anyMatch(finalStates::contains);
+        // Collections.disjoint is faster than stream().anyMatch() and avoids stream allocation
+        // overhead
+        return !Collections.disjoint(superState, finalStates);
     }
 }

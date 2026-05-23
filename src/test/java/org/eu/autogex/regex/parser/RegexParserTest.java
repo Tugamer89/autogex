@@ -171,6 +171,16 @@ class RegexParserTest {
     }
 
     @Test
+    void testThrowsExceptionOnExcessivelyLongString() {
+        String longRegex = "a".repeat(2001);
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> RegexParser.parse(longRegex));
+        assertTrue(
+                exception.getMessage().contains("exceeds maximum allowed length"),
+                "Should detect string exceeding maximum length for DoS prevention");
+    }
+
+    @Test
     void testThrowsExceptionOnMissingParenthesis() {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("(a|b"));

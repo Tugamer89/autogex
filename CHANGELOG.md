@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.6.0](https://github.com/Tugamer89/autogex/compare/v1.5.0...v1.6.0) (2026-05-23)
+
+
+### Features
+
+* **ui:** add loading state to documentation version switcher ([#73](https://github.com/Tugamer89/autogex/issues/73)) ([d8dc14a](https://github.com/Tugamer89/autogex/commit/d8dc14a4e810be40dc959da7c675e9b8612fe66e))
+
+
+### Bug Fixes
+
+* **security:** resolve potential DoS vulnerability in RegexParser ([#75](https://github.com/Tugamer89/autogex/issues/75)) ([60cabb2](https://github.com/Tugamer89/autogex/commit/60cabb21cf33b72eb95a4e4e6538b7ca529fff4b))
+
+
+### Performance Improvements
+
+* optimize checking final states using Collections.disjoint ([#74](https://github.com/Tugamer89/autogex/issues/74)) ([c93a202](https://github.com/Tugamer89/autogex/commit/c93a20275461e8d7070cd83a994c656258e8278b))
+
 ## [1.5.0](https://github.com/Tugamer89/autogex/compare/v1.4.0...v1.5.0) (2026-04-26)
 
 

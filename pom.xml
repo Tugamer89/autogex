@@ -184,8 +184,8 @@
                     <header><![CDATA[
                         <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
                             <img src="/logo.svg" alt="Autogex Logo" style="height: 24px;">
-                            <select id="version-switcher" aria-label="Select documentation version">
-                                <option value="/">Loading...</option>
+                            <select id="version-switcher" aria-label="Select documentation version" disabled>
+                                <option value="">Loading versions...</option>
                             </select>
                         </div>
                     ]]></header>

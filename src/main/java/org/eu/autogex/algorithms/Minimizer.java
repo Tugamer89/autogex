@@ -107,9 +107,8 @@ public class Minimizer {
             String name = "M" + counter.getAndIncrement();
             partitionToName.put(partition, name);
 
-            // The partition is final if it contains at least one original final state
-            boolean isFinal =
-                    partition.stream().anyMatch(s -> originalDfa.getFinalStates().contains(s));
+            // The partition is final if it contains at least one original final state.
+            boolean isFinal = !Collections.disjoint(partition, originalDfa.getFinalStates());
             builder.addState(name, isFinal);
 
             // The partition is initial if it contains the original initial state

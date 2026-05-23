@@ -160,6 +160,6 @@ public class Converter {
     }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
-        return superState.stream().anyMatch(finalStates::contains);
+        return !Collections.disjoint(superState, finalStates);
     }
 }

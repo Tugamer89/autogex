@@ -81,24 +81,15 @@ public class Converter {
             String currentName = dfaStateNames.get(currentSuperState);
 
             for (char symbol : alphabet) {
-                Set<State> nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);
-
-                if (nextSuperState.isEmpty()) {
-                    continue;
-                }
-
-                // If a new super-state is found, register it
-                String targetName =
-                        dfaStateNames.computeIfAbsent(
-                                nextSuperState,
-                                k -> {
-                                    String nextName = "D" + stateCounter.getAndIncrement();
-                                    builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
-                                    queue.add(k);
-                                    return nextName;
-                                });
-
-                builder.addTransition(currentName, symbol, targetName);
+                processSymbolTransitions(
+                        nfa,
+                        builder,
+                        dfaStateNames,
+                        queue,
+                        stateCounter,
+                        currentSuperState,
+                        currentName,
+                        symbol);
             }
         }
 
@@ -117,6 +108,35 @@ public class Converter {
     }
 
     // --- Helper Methods ---
+
+    /**
+     * Processes transitions for a specific symbol from a given super-state in the subset
+     * construction algorithm.
+     */
+    private static void processSymbolTransitions(
+            NFA nfa,
+            DFA.Builder builder,
+            Map<Set<State>, String> dfaStateNames,
+            Queue<Set<State>> queue,
+            AtomicInteger stateCounter,
+            Set<State> currentSuperState,
+            String currentName,
+            char symbol) {
+        Set<State> nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);
+
+        if (!nextSuperState.isEmpty()) {
+            String targetName =
+                    dfaStateNames.computeIfAbsent(
+                            nextSuperState,
+                            k -> {
+                                String nextName = "D" + stateCounter.getAndIncrement();
+                                builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
+                                queue.add(k);
+                                return nextName;
+                            });
+            builder.addTransition(currentName, symbol, targetName);
+        }
+    }
 
     /** Computes the reachable subset of states by reading a symbol. */
     private static Set<State> computeNextSuperState(

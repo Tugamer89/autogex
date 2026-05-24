@@ -1,11 +1,9 @@
 package org.eu.autogex.export;
 
-import java.util.Map;
 import java.util.Set;
+import org.eu.autogex.core.Automaton;
 import org.eu.autogex.core.State;
-import org.eu.autogex.models.DFA;
-import org.eu.autogex.models.ENFA;
-import org.eu.autogex.models.NFA;
+import org.eu.autogex.core.Transition;
 
 /**
  * Utility class for exporting automata to the Mermaid.js stateDiagram-v2 format. This enables
@@ -25,71 +23,26 @@ public class MermaidExporter {
      * @param dfa The Deterministic Finite Automaton.
      * @return The Mermaid language representation.
      */
-    public static String toMermaid(DFA dfa) {
-        StringBuilder sb =
-                buildHeader(dfa.getInitialState(), dfa.getFinalStates(), dfa.getStates());
-
-        for (Map.Entry<State, Map<Character, State>> entry : dfa.getTransitionTable().entrySet()) {
-            String sourceId = sanitizeId(entry.getKey());
-            for (Map.Entry<Character, State> transition : entry.getValue().entrySet()) {
-                appendTransition(
-                        sb,
-                        sourceId,
-                        transition.getKey().toString(),
-                        sanitizeId(transition.getValue()));
-            }
-        }
-
-        return sb.toString();
-    }
-
     /**
-     * Exports an NFA to a Mermaid format string.
+     * Exports an automaton to a Mermaid format string. Epsilon transitions (null keys) are
+     * represented with the 'ε' symbol.
      *
-     * @param nfa The Non-Deterministic Finite Automaton.
+     * @param automaton The Automaton (DFA, NFA, ENFA).
      * @return The Mermaid language representation.
      */
-    public static String toMermaid(NFA nfa) {
+    public static String toMermaid(Automaton automaton) {
         StringBuilder sb =
-                buildHeader(nfa.getInitialState(), nfa.getFinalStates(), nfa.getStates());
+                buildHeader(
+                        automaton.getInitialState(),
+                        automaton.getFinalStates(),
+                        automaton.getStates());
 
-        for (Map.Entry<State, Map<Character, Set<State>>> entry :
-                nfa.getTransitionTable().entrySet()) {
-            String sourceId = sanitizeId(entry.getKey());
-            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                for (State target : transition.getValue()) {
-                    appendTransition(
-                            sb, sourceId, transition.getKey().toString(), sanitizeId(target));
-                }
-            }
-        }
+        for (Transition transition : automaton.getTransitions()) {
+            String sourceId = sanitizeId(transition.from());
+            String label =
+                    transition.symbol() == null ? EPSILON_LABEL : transition.symbol().toString();
 
-        return sb.toString();
-    }
-
-    /**
-     * Exports an ENFA to a Mermaid format string. Epsilon transitions (null keys) are represented
-     * with the 'ε' symbol.
-     *
-     * @param enfa The Epsilon-NFA.
-     * @return The Mermaid language representation.
-     */
-    public static String toMermaid(ENFA enfa) {
-        StringBuilder sb =
-                buildHeader(enfa.getInitialState(), enfa.getFinalStates(), enfa.getStates());
-
-        for (Map.Entry<State, Map<Character, Set<State>>> entry :
-                enfa.getTransitionTable().entrySet()) {
-            String sourceId = sanitizeId(entry.getKey());
-            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                String label =
-                        transition.getKey() == null
-                                ? EPSILON_LABEL
-                                : transition.getKey().toString();
-                for (State target : transition.getValue()) {
-                    appendTransition(sb, sourceId, label, sanitizeId(target));
-                }
-            }
+            appendTransition(sb, sourceId, label, sanitizeId(transition.to()));
         }
 
         return sb.toString();

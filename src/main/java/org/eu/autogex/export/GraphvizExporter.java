@@ -1,12 +1,10 @@
 package org.eu.autogex.export;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.eu.autogex.core.Automaton;
 import org.eu.autogex.core.State;
-import org.eu.autogex.models.DFA;
-import org.eu.autogex.models.ENFA;
-import org.eu.autogex.models.NFA;
+import org.eu.autogex.core.Transition;
 
 /**
  * Utility class for exporting automata to the Graphviz DOT language format. This allows for easy
@@ -21,68 +19,20 @@ public class GraphvizExporter {
     }
 
     /**
-     * Exports a DFA to a DOT format string.
+     * Exports an automaton to a DOT format string. Epsilon transitions (null keys) are represented
+     * with the 'ε' symbol.
      *
-     * @param dfa The Deterministic Finite Automaton.
+     * @param automaton The Automaton (DFA, NFA, ENFA).
      * @return The DOT language representation.
      */
-    public static String toDot(DFA dfa) {
-        StringBuilder sb = buildDotHeader(dfa.getInitialState(), dfa.getFinalStates());
+    public static String toDot(Automaton automaton) {
+        StringBuilder sb = buildDotHeader(automaton.getInitialState(), automaton.getFinalStates());
 
-        for (Map.Entry<State, Map<Character, State>> entry : dfa.getTransitionTable().entrySet()) {
-            State source = entry.getKey();
-            for (Map.Entry<Character, State> transition : entry.getValue().entrySet()) {
-                appendTransition(sb, source, transition.getKey().toString(), transition.getValue());
-            }
-        }
+        for (Transition transition : automaton.getTransitions()) {
+            String label =
+                    transition.symbol() == null ? EPSILON_LABEL : transition.symbol().toString();
 
-        return closeDot(sb);
-    }
-
-    /**
-     * Exports an NFA to a DOT format string.
-     *
-     * @param nfa The Non-Deterministic Finite Automaton.
-     * @return The DOT language representation.
-     */
-    public static String toDot(NFA nfa) {
-        StringBuilder sb = buildDotHeader(nfa.getInitialState(), nfa.getFinalStates());
-
-        for (Map.Entry<State, Map<Character, Set<State>>> entry :
-                nfa.getTransitionTable().entrySet()) {
-            State source = entry.getKey();
-            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                for (State target : transition.getValue()) {
-                    appendTransition(sb, source, transition.getKey().toString(), target);
-                }
-            }
-        }
-
-        return closeDot(sb);
-    }
-
-    /**
-     * Exports an ENFA to a DOT format string. Epsilon transitions (null keys) are represented with
-     * the 'ε' symbol.
-     *
-     * @param enfa The Epsilon-NFA.
-     * @return The DOT language representation.
-     */
-    public static String toDot(ENFA enfa) {
-        StringBuilder sb = buildDotHeader(enfa.getInitialState(), enfa.getFinalStates());
-
-        for (Map.Entry<State, Map<Character, Set<State>>> entry :
-                enfa.getTransitionTable().entrySet()) {
-            State source = entry.getKey();
-            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                String label =
-                        transition.getKey() == null
-                                ? EPSILON_LABEL
-                                : transition.getKey().toString();
-                for (State target : transition.getValue()) {
-                    appendTransition(sb, source, label, target);
-                }
-            }
+            appendTransition(sb, transition.from(), label, transition.to());
         }
 
         return closeDot(sb);

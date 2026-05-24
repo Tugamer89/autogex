@@ -47,6 +47,11 @@ public class NFA extends AbstractAutomaton {
      *
      * @return The transition table.
      */
+    @Override
+    public Set<org.eu.autogex.core.Transition> getTransitions() {
+        return extractTransitions(transitionTable);
+    }
+
     public Map<State, Map<Character, Set<State>>> getTransitionTable() {
         return transitionTable;
     }

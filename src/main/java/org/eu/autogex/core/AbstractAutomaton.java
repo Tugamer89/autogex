@@ -56,4 +56,23 @@ public abstract class AbstractAutomaton implements Automaton {
         }
         return nextStates;
     }
+
+    /**
+     * Helper method to extract transitions from a transition table mapping to multiple states.
+     *
+     * @param transitionTable The transition table.
+     * @return The set of all transitions.
+     */
+    protected Set<Transition> extractTransitions(
+            Map<State, Map<Character, Set<State>>> transitionTable) {
+        Set<Transition> transitions = new HashSet<>();
+        for (Map.Entry<State, Map<Character, Set<State>>> entry : transitionTable.entrySet()) {
+            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
+                for (State target : transition.getValue()) {
+                    transitions.add(new Transition(entry.getKey(), transition.getKey(), target));
+                }
+            }
+        }
+        return transitions;
+    }
 }

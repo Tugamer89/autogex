@@ -28,6 +28,13 @@ public interface Automaton {
     Set<State> getFinalStates();
 
     /**
+     * Retrieves all the transitions defined in the automaton.
+     *
+     * @return A set containing all transitions.
+     */
+    Set<Transition> getTransitions();
+
+    /**
      * Processes the input string and returns a detailed execution trace.
      *
      * @param input The string to be evaluated.

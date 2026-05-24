@@ -38,8 +38,10 @@ jobs:
 
       - name: Identify Project Version from Tag
         id: meta
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          TAG_NAME=${{ github.ref_name }}
+          TAG_NAME=$REF_NAME
           VERSION=${TAG_NAME#v}
           MINOR_VERSION=$(echo $VERSION | cut -d. -f1,2)
           echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV

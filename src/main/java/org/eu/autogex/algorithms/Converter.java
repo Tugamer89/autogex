@@ -2,7 +2,6 @@ package org.eu.autogex.algorithms;
 
 import java.util.*;
 import java.util.ArrayDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
@@ -63,11 +62,10 @@ public class Converter {
         // ArrayDeque is preferred over LinkedList for queues in hot paths.
         // It provides better cache locality and avoids O(n) node allocation overhead.
         Queue<Set<State>> queue = new ArrayDeque<>();
-        AtomicInteger stateCounter = new AtomicInteger(0);
 
         // The DFA initial state is the set containing only the NFA's initial state
         Set<State> initialSuperState = Set.of(nfa.getInitialState());
-        String initialName = "D" + stateCounter.getAndIncrement();
+        String initialName = "D0";
 
         builder.addState(initialName, isFinal(initialSuperState, nfa.getFinalStates()));
         builder.setInitialState(initialName);
@@ -82,14 +80,7 @@ public class Converter {
 
             for (char symbol : alphabet) {
                 processSymbolTransitions(
-                        nfa,
-                        builder,
-                        dfaStateNames,
-                        queue,
-                        stateCounter,
-                        currentSuperState,
-                        currentName,
-                        symbol);
+                        nfa, builder, dfaStateNames, queue, currentSuperState, currentName, symbol);
             }
         }
 
@@ -118,7 +109,6 @@ public class Converter {
             DFA.Builder builder,
             Map<Set<State>, String> dfaStateNames,
             Queue<Set<State>> queue,
-            AtomicInteger stateCounter,
             Set<State> currentSuperState,
             String currentName,
             char symbol) {
@@ -129,7 +119,7 @@ public class Converter {
                     dfaStateNames.computeIfAbsent(
                             nextSuperState,
                             k -> {
-                                String nextName = "D" + stateCounter.getAndIncrement();
+                                String nextName = "D" + dfaStateNames.size();
                                 builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
                                 queue.add(k);
                                 return nextName;

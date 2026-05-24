@@ -34,6 +34,14 @@ public abstract class AbstractAutomaton implements Automaton {
         return finalStates;
     }
 
+    @Override
+    public Set<Transition> getTransitions() {
+        return extractTransitions(getTransitionTableAsSetMap());
+    }
+
+    // Let subclasses provide a generalized transition table map for transition extraction.
+    protected abstract Map<State, Map<Character, Set<State>>> getTransitionTableAsSetMap();
+
     /**
      * Calculates the next active states for non-deterministic automata. Protected and shared method
      * to avoid duplicated code between NFA and ENFA (SonarQube).

@@ -55,16 +55,16 @@ public class DFA extends AbstractAutomaton {
      * @return The transition table.
      */
     @Override
-    public Set<org.eu.autogex.core.Transition> getTransitions() {
-        Set<org.eu.autogex.core.Transition> transitions = new HashSet<>();
+    protected Map<State, Map<Character, Set<State>>> getTransitionTableAsSetMap() {
+        Map<State, Map<Character, Set<State>>> converted = new HashMap<>();
         for (Map.Entry<State, Map<Character, State>> entry : transitionTable.entrySet()) {
-            for (Map.Entry<Character, State> transition : entry.getValue().entrySet()) {
-                transitions.add(
-                        new org.eu.autogex.core.Transition(
-                                entry.getKey(), transition.getKey(), transition.getValue()));
+            Map<Character, Set<State>> inner = new HashMap<>();
+            for (Map.Entry<Character, State> trans : entry.getValue().entrySet()) {
+                inner.put(trans.getKey(), Set.of(trans.getValue()));
             }
+            converted.put(entry.getKey(), inner);
         }
-        return transitions;
+        return converted;
     }
 
     public Map<State, Map<Character, State>> getTransitionTable() {

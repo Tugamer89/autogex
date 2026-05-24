@@ -55,6 +55,32 @@ class MinimizerTest {
                 "Both DFAs must behave identically");
     }
 
+    @ParameterizedTest(name = "Testing Already Minimal DFA behavior with input: ''{0}''")
+    @ValueSource(strings = {"a", "b", "abbb", "aa", "bbaa", "ababa", "", "bbbb"})
+    void testMinimizeAlreadyMinimalDFA(String input) {
+        DFA alreadyMinimalDfa =
+                new DFA.Builder()
+                        .addState("q0", true)
+                        .addState("q1", false)
+                        .setInitialState("q0")
+                        .addTransition("q0", 'a', "q0")
+                        .addTransition("q0", 'b', "q1")
+                        .addTransition("q1", 'a', "q1")
+                        .addTransition("q1", 'b', "q1")
+                        .build();
+
+        assertEquals(2, alreadyMinimalDfa.getStates().size());
+
+        DFA minimizedDfa = Minimizer.minimize(alreadyMinimalDfa);
+
+        assertEquals(
+                2, minimizedDfa.getStates().size(), "The DFA should remain at exactly 2 states");
+        assertEquals(
+                alreadyMinimalDfa.accepts(input),
+                minimizedDfa.accepts(input),
+                "Both DFAs must behave identically");
+    }
+
     @Test
     void testUtilityClassConstructorThrowsException() throws Exception {
         Constructor<Minimizer> constructor = Minimizer.class.getDeclaredConstructor();

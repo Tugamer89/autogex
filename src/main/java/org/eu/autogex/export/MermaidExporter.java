@@ -137,7 +137,11 @@ public class MermaidExporter {
 
     private static String escapeMermaidString(String text) {
         if (text == null) return "";
-        return text.replace("\"", "&quot;");
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     /** Sanitizes the state name into a valid, safe identifier for Mermaid syntax. */

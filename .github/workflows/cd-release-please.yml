@@ -43,4 +43,6 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: gh release edit ${{ steps.release.outputs.tag_name }} --title "Autogex v${{ steps.release.outputs.version }}"
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: gh release edit "$TAG_NAME" --title "Autogex v$VERSION"

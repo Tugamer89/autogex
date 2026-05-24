@@ -38,8 +38,10 @@ jobs:
 
       - name: Identify Project Version from Tag
         id: meta
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          TAG_NAME=${{ github.ref_name }}
+          TAG_NAME=$REF_NAME
           VERSION=${TAG_NAME#v}
           MINOR_VERSION=$(echo $VERSION | cut -d. -f1,2)
           echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
@@ -47,6 +49,8 @@ jobs:
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Prepare Release Body
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           cat <<EOF > release_notes.md
           **Autogex** - A powerful Java engine for processing Finite State Automata and Regular Expressions.
@@ -91,11 +95,15 @@ jobs:
 
       - name: Locate Generated Documentation
         id: find_folder
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
       - name: Apply SEO Enhancements
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           sed -i \
             -e '/<meta name="description"/d' \
@@ -107,6 +115,8 @@ jobs:
             sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
       - name: Optimize Documentation Assets
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier terser svgo
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
@@ -121,6 +131,8 @@ jobs:
           keep_files: true
       
       - name: Copy SEO Files
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
           cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
@@ -129,6 +141,8 @@ jobs:
           cp src/main/javadoc/version-switcher.js ${{ steps.find_folder.outputs.javadoc_path }}/
       
       - name: Optimize Root Assets
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
           svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg

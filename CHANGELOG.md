@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.7.0](https://github.com/Tugamer89/autogex/compare/v1.6.0...v1.7.0) (2026-05-24)
+
+
+### Features
+
+* **ui:** improve javadoc header ux and accessibility ([#77](https://github.com/Tugamer89/autogex/issues/77)) ([f99ccc1](https://github.com/Tugamer89/autogex/commit/f99ccc14192b0a190fa8da0fe5745b04ca7effde))
+
+
+### Bug Fixes
+
+* **exporter:** escape HTML and newlines in GraphvizExporter to prevent XSS ([#87](https://github.com/Tugamer89/autogex/issues/87)) ([20c79c8](https://github.com/Tugamer89/autogex/commit/20c79c8b5e088884b81069b4d295f426889a352a))
+* **exporter:** prevent ReDoS vulnerability in MermaidExporter sanitization ([#86](https://github.com/Tugamer89/autogex/issues/86)) ([40b3981](https://github.com/Tugamer89/autogex/commit/40b3981adabdd4d1efa325db4a46a56334aec107))
+* **security:** [HIGH] resolve XSS in MermaidExporter ([#78](https://github.com/Tugamer89/autogex/issues/78)) ([2ac78ba](https://github.com/Tugamer89/autogex/commit/2ac78ba9d09d1297bb3595d873ada96e9b18880d))
+
+
+### Performance Improvements
+
+* optimize DFA Minimizer partition lookup with O(1) mapping ([#79](https://github.com/Tugamer89/autogex/issues/79)) ([c214eca](https://github.com/Tugamer89/autogex/commit/c214eca5d5af6d36d6b40d23eede2aa2e94429c8))
+
 ## [1.6.0](https://github.com/Tugamer89/autogex/compare/v1.5.0...v1.6.0) (2026-05-23)
 
 

@@ -74,6 +74,21 @@ class MermaidExporterTest {
     }
 
     @Test
+    void testXssEscape() {
+        DFA dfa =
+                new DFA.Builder()
+                        .addState("<script>alert(1)</script>", true)
+                        .setInitialState("<script>alert(1)</script>")
+                        .build();
+
+        String mermaid = MermaidExporter.toMermaid(dfa);
+
+        assertTrue(
+                mermaid.contains("state \"&lt;script&gt;alert(1)&lt;/script&gt;\""),
+                "Must escape XSS payloads securely in state names");
+    }
+
+    @Test
     void testUtilityClassConstructorThrowsException() throws Exception {
         Constructor<MermaidExporter> constructor = MermaidExporter.class.getDeclaredConstructor();
         assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));

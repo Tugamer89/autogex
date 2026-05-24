@@ -61,12 +61,15 @@ public class ThompsonConstructor {
             return name;
         }
 
+        private Fragment createEmptyFragment() {
+            return new Fragment(addNonFinalState(), addNonFinalState());
+        }
+
         @Override
         public Fragment visit(LiteralNode lit) {
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
-            builder.addTransition(start, lit.symbol(), accept);
-            return new Fragment(start, accept);
+            Fragment f = createEmptyFragment();
+            builder.addTransition(f.start(), lit.symbol(), f.accept());
+            return f;
         }
 
         @Override
@@ -82,83 +85,77 @@ public class ThompsonConstructor {
             Fragment left = union.left().accept(this);
             Fragment right = union.right().accept(this);
 
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
+            Fragment f = createEmptyFragment();
 
-            builder.addEpsilonTransition(start, left.start());
-            builder.addEpsilonTransition(start, right.start());
-            builder.addEpsilonTransition(left.accept(), accept);
-            builder.addEpsilonTransition(right.accept(), accept);
+            builder.addEpsilonTransition(f.start(), left.start());
+            builder.addEpsilonTransition(f.start(), right.start());
+            builder.addEpsilonTransition(left.accept(), f.accept());
+            builder.addEpsilonTransition(right.accept(), f.accept());
 
-            return new Fragment(start, accept);
+            return f;
         }
 
         @Override
         public Fragment visit(StarNode star) {
             Fragment child = star.child().accept(this);
 
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
+            Fragment f = createEmptyFragment();
 
-            builder.addEpsilonTransition(start, child.start());
-            builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)
+            builder.addEpsilonTransition(f.start(), child.start());
+            builder.addEpsilonTransition(f.start(), f.accept()); // Skip path (zero occurrences)
             builder.addEpsilonTransition(child.accept(), child.start()); // Loop path
-            builder.addEpsilonTransition(child.accept(), accept);
+            builder.addEpsilonTransition(child.accept(), f.accept());
 
-            return new Fragment(start, accept);
+            return f;
         }
 
         @Override
         public Fragment visit(PlusNode plus) {
             Fragment child = plus.child().accept(this);
 
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
+            Fragment f = createEmptyFragment();
 
-            builder.addEpsilonTransition(start, child.start());
+            builder.addEpsilonTransition(f.start(), child.start());
             builder.addEpsilonTransition(child.accept(), child.start()); // Loop path (one or more)
-            builder.addEpsilonTransition(child.accept(), accept);
+            builder.addEpsilonTransition(child.accept(), f.accept());
 
-            return new Fragment(start, accept);
+            return f;
         }
 
         @Override
         public Fragment visit(OptionalNode opt) {
             Fragment child = opt.child().accept(this);
 
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
+            Fragment f = createEmptyFragment();
 
-            builder.addEpsilonTransition(start, child.start());
-            builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)
-            builder.addEpsilonTransition(child.accept(), accept);
+            builder.addEpsilonTransition(f.start(), child.start());
+            builder.addEpsilonTransition(f.start(), f.accept()); // Skip path (zero occurrences)
+            builder.addEpsilonTransition(child.accept(), f.accept());
 
-            return new Fragment(start, accept);
+            return f;
         }
 
         @Override
         public Fragment visit(CharClassNode charClass) {
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
+            Fragment f = createEmptyFragment();
 
             for (char c : charClass.chars()) {
-                builder.addTransition(start, c, accept);
+                builder.addTransition(f.start(), c, f.accept());
             }
 
-            return new Fragment(start, accept);
+            return f;
         }
 
         @Override
         public Fragment visit(WildcardNode wildcard) {
-            String start = addNonFinalState();
-            String accept = addNonFinalState();
+            Fragment f = createEmptyFragment();
 
             // Cover standard ASCII printable characters for the wildcard '.'
             for (char c = 32; c <= 126; c++) {
-                builder.addTransition(start, c, accept);
+                builder.addTransition(f.start(), c, f.accept());
             }
 
-            return new Fragment(start, accept);
+            return f;
         }
     }
 }

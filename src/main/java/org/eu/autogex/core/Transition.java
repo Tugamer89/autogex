@@ -18,9 +18,17 @@ public record Transition(State from, Character symbol, State to) {
         return symbol == null;
     }
 
+    /**
+     * Returns a visual string representation of the symbol.
+     *
+     * @return The symbol as a String, or "ε" for epsilon transitions.
+     */
+    public String getLabel() {
+        return isEpsilon() ? "ε" : symbol.toString();
+    }
+
     @Override
     public String toString() {
-        String symStr = isEpsilon() ? "ε" : symbol.toString();
-        return from.getName() + " --" + symStr + "--> " + to.getName();
+        return from.getName() + " --" + getLabel() + "--> " + to.getName();
     }
 }

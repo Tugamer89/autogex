@@ -12,8 +12,6 @@ import org.eu.autogex.core.Transition;
  */
 public class GraphvizExporter {
 
-    private static final String EPSILON_LABEL = "ε";
-
     private GraphvizExporter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
@@ -29,10 +27,7 @@ public class GraphvizExporter {
         StringBuilder sb = buildDotHeader(automaton.getInitialState(), automaton.getFinalStates());
 
         for (Transition transition : automaton.getTransitions()) {
-            String label =
-                    transition.symbol() == null ? EPSILON_LABEL : transition.symbol().toString();
-
-            appendTransition(sb, transition.from(), label, transition.to());
+            appendTransition(sb, transition.from(), transition.getLabel(), transition.to());
         }
 
         return closeDot(sb);

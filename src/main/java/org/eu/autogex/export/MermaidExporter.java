@@ -11,8 +11,6 @@ import org.eu.autogex.core.Transition;
  */
 public class MermaidExporter {
 
-    private static final String EPSILON_LABEL = "ε";
-
     private MermaidExporter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
@@ -33,10 +31,8 @@ public class MermaidExporter {
 
         for (Transition transition : automaton.getTransitions()) {
             String sourceId = sanitizeId(transition.from());
-            String label =
-                    transition.symbol() == null ? EPSILON_LABEL : transition.symbol().toString();
 
-            appendTransition(sb, sourceId, label, sanitizeId(transition.to()));
+            appendTransition(sb, sourceId, transition.getLabel(), sanitizeId(transition.to()));
         }
 
         return sb.toString();

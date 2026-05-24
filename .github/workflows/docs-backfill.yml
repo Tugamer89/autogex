@@ -27,9 +27,11 @@ jobs:
 
       - name: Generate Tags List
         id: get-tags
+        env:
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
         run: |
-          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
-            echo "tags=[\"${{ github.event.inputs.tag_name }}\"]" >> $GITHUB_OUTPUT
+          if [ -n "$TAG_NAME" ]; then
+            echo "tags=[\"$TAG_NAME\"]" >> $GITHUB_OUTPUT
             echo "has_tags=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -95,6 +97,8 @@ jobs:
 
       - name: Identify Project Version from Tag
         id: version
+        env:
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
         run: |
           TAG=${{ matrix.tag }}
           CLEAN_VER=${TAG#v}
@@ -107,11 +111,15 @@ jobs:
 
       - name: Locate Generated Documentation
         id: find_folder
+        env:
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
         run: |
           FOLDER=$(find target -name "apidocs" -type d | head -n 1)
           echo "javadoc_path=$FOLDER" >> $GITHUB_OUTPUT
 
       - name: Apply SEO Enhancements
+        env:
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
         run: |
           sed -i \
             -e '/<meta name="description"/d' \
@@ -124,6 +132,8 @@ jobs:
 
       - name: Optimize Documentation Assets
         continue-on-error: true
+        env:
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
         run: |
           npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css || true

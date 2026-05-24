@@ -7,6 +7,22 @@ import org.junit.jupiter.api.Test;
 class RegexTest {
 
     @Test
+    void testInvalidRegexSyntax() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Regex("a("),
+                "Should throw exception for unmatched parenthesis");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Regex(""),
+                "Should throw exception for empty regex");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Regex(null),
+                "Should throw exception for null regex");
+    }
+
+    @Test
     void testRegexLiteral() {
         Regex regex = new Regex("abc");
 

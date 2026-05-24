@@ -2,7 +2,6 @@ package org.eu.autogex.algorithms;
 
 import java.util.*;
 import java.util.ArrayDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
@@ -63,11 +62,10 @@ public class Converter {
         // ArrayDeque is preferred over LinkedList for queues in hot paths.
         // It provides better cache locality and avoids O(n) node allocation overhead.
         Queue<Set<State>> queue = new ArrayDeque<>();
-        AtomicInteger stateCounter = new AtomicInteger(0);
 
         // The DFA initial state is the set containing only the NFA's initial state
         Set<State> initialSuperState = Set.of(nfa.getInitialState());
-        String initialName = "D" + stateCounter.getAndIncrement();
+        String initialName = "D0";
 
         builder.addState(initialName, isFinal(initialSuperState, nfa.getFinalStates()));
         builder.setInitialState(initialName);
@@ -81,24 +79,8 @@ public class Converter {
             String currentName = dfaStateNames.get(currentSuperState);
 
             for (char symbol : alphabet) {
-                Set<State> nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);
-
-                if (nextSuperState.isEmpty()) {
-                    continue;
-                }
-
-                // If a new super-state is found, register it
-                String targetName =
-                        dfaStateNames.computeIfAbsent(
-                                nextSuperState,
-                                k -> {
-                                    String nextName = "D" + stateCounter.getAndIncrement();
-                                    builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
-                                    queue.add(k);
-                                    return nextName;
-                                });
-
-                builder.addTransition(currentName, symbol, targetName);
+                processSymbolTransitions(
+                        nfa, builder, dfaStateNames, queue, currentSuperState, currentName, symbol);
             }
         }
 
@@ -117,6 +99,34 @@ public class Converter {
     }
 
     // --- Helper Methods ---
+
+    /**
+     * Processes transitions for a specific symbol from a given super-state in the subset
+     * construction algorithm.
+     */
+    private static void processSymbolTransitions(
+            NFA nfa,
+            DFA.Builder builder,
+            Map<Set<State>, String> dfaStateNames,
+            Queue<Set<State>> queue,
+            Set<State> currentSuperState,
+            String currentName,
+            char symbol) {
+        Set<State> nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);
+
+        if (!nextSuperState.isEmpty()) {
+            String targetName =
+                    dfaStateNames.computeIfAbsent(
+                            nextSuperState,
+                            k -> {
+                                String nextName = "D" + dfaStateNames.size();
+                                builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
+                                queue.add(k);
+                                return nextName;
+                            });
+            builder.addTransition(currentName, symbol, targetName);
+        }
+    }
 
     /** Computes the reachable subset of states by reading a symbol. */
     private static Set<State> computeNextSuperState(

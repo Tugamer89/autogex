@@ -2,7 +2,6 @@ package org.eu.autogex.algorithms;
 
 import java.util.*;
 import java.util.ArrayDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 
@@ -124,7 +123,6 @@ public class Minimizer {
             Map<State, Integer> stateToPartitionId) {
         DFA.Builder builder = new DFA.Builder();
         Map<Integer, String> partitionIdToName = new HashMap<>();
-        AtomicInteger counter = new AtomicInteger(0);
 
         // Register new states
         for (Set<State> partition : partitions) {

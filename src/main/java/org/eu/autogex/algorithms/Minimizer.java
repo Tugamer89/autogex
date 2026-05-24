@@ -27,9 +27,6 @@ public class Minimizer {
         // 2. Initial partition (Finals vs Non-Finals)
         Set<Set<State>> partitions = createInitialPartitions(dfa, reachableStates);
 
-        // Optimization: Maintain a map of State -> Partition ID for O(1) lookups during split.
-        // This avoids O(n^2) repeated scans of all partitions inside findPartitionContaining,
-        // reducing minimization time for a 4000-state DFA from ~1800ms to ~45ms.
         Map<State, Integer> stateToPartitionId = new HashMap<>();
         updateStateToPartitionMap(partitions, stateToPartitionId);
 

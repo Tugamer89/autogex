@@ -146,8 +146,7 @@ public class MermaidExporter {
 
     /**
      * Sanitizes the state name into a valid, safe identifier for Mermaid syntax. Replaces any
-     * non-alphanumeric character with an underscore to prevent syntax errors. Refactored from
-     * replaceAll to a loop to prevent ReDoS vulnerability and improve performance.
+     * non-alphanumeric character with an underscore to prevent syntax errors.
      */
     private static String sanitizeId(State state) {
         String name = state.getName();

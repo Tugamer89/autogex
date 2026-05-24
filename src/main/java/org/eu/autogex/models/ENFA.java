@@ -37,12 +37,13 @@ public class ENFA extends AbstractAutomaton {
             Map<Character, Set<State>> stateTransitions = transitionTable.get(currentState);
 
             // Look for transitions associated with null (ε)
-            if (stateTransitions != null && stateTransitions.containsKey(null)) {
-                for (State nextState : stateTransitions.get(null)) {
-                    // If not visited yet, add it to the closure and to the queue
-                    if (closure.add(nextState)) {
-                        queue.add(nextState);
-                    }
+            if (stateTransitions == null || !stateTransitions.containsKey(null)) {
+                continue;
+            }
+            for (State nextState : stateTransitions.get(null)) {
+                // If not visited yet, add it to the closure and to the queue
+                if (closure.add(nextState)) {
+                    queue.add(nextState);
                 }
             }
         }

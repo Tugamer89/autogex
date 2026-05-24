@@ -131,7 +131,12 @@ public class GraphvizExporter {
 
     private static String escapeDotString(String text) {
         if (text == null) return "";
-        return text.replace("\\", "\\\\").replace("\"", "\\\"");
+        return text.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     private static String closeDot(StringBuilder sb) {

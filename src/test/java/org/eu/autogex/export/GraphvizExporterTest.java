@@ -81,4 +81,19 @@ class GraphvizExporterTest {
                 assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertTrue(exception.getCause() instanceof UnsupportedOperationException);
     }
+
+    @Test
+    void testExportWithXSSPayload() {
+        DFA dfa =
+                new DFA.Builder()
+                        .addState("<script>alert('xss')</script>\n", false)
+                        .addState("q1", true)
+                        .setInitialState("<script>alert('xss')</script>\n")
+                        .addTransition("<script>alert('xss')</script>\n", 'a', "q1")
+                        .build();
+
+        String dot = GraphvizExporter.toDot(dfa);
+        assertTrue(dot.contains("&lt;script&gt;alert('xss')&lt;/script&gt;\\n"));
+        assertFalse(dot.contains("<script>"));
+    }
 }

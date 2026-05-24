@@ -88,6 +88,25 @@ class ConverterTest {
     }
 
     @Test
+    void testENFAToNFA_EmptyENFA() {
+        // ENFA with only an initial state and no transitions
+        ENFA enfa = new ENFA.Builder().addState("q0", false).setInitialState("q0").build();
+
+        NFA nfa = Converter.enfaToNfa(enfa);
+
+        assertEquals(enfa.accepts(""), nfa.accepts(""));
+        assertEquals(enfa.accepts("a"), nfa.accepts("a"));
+
+        // ENFA with only a final initial state and no transitions
+        ENFA finalEnfa = new ENFA.Builder().addState("q0", true).setInitialState("q0").build();
+
+        NFA finalNfa = Converter.enfaToNfa(finalEnfa);
+
+        assertEquals(finalEnfa.accepts(""), finalNfa.accepts(""));
+        assertEquals(finalEnfa.accepts("a"), finalNfa.accepts("a"));
+    }
+
+    @Test
     void testUtilityClassConstructorThrowsException() throws Exception {
         Constructor<Converter> constructor = Converter.class.getDeclaredConstructor();
         assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));

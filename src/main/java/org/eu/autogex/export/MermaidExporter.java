@@ -18,12 +18,6 @@ public class MermaidExporter {
     }
 
     /**
-     * Exports a DFA to a Mermaid format string.
-     *
-     * @param dfa The Deterministic Finite Automaton.
-     * @return The Mermaid language representation.
-     */
-    /**
      * Exports an automaton to a Mermaid format string. Epsilon transitions (null keys) are
      * represented with the 'ε' symbol.
      *

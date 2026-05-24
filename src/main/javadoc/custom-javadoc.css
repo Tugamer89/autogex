@@ -61,3 +61,13 @@ select#version-switcher option {
   color: var(--body-text-color, #000000);
   font-weight: normal;
 }
+
+select#version-switcher:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+select#version-switcher:disabled:hover {
+  background-color: transparent;
+  border-color: var(--header-text-color, #cccccc);
+}

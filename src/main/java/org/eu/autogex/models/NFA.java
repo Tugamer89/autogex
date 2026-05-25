@@ -38,7 +38,6 @@ public class NFA extends AbstractAutomaton {
             }
         }
 
-        // Optimization: avoided stream allocation overhead
         boolean isAccepted = !Collections.disjoint(currentStates, finalStates);
         return new ExecutionTrace(input, steps, isAccepted);
     }

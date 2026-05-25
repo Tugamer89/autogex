@@ -132,7 +132,6 @@ public class Converter {
     private static Set<State> computeNextSuperState(
             NFA nfa, Set<State> currentSuperState, char symbol) {
         Set<State> nextSuperState = new HashSet<>();
-        // Optimization: avoided double lookup (containsKey + get)
         for (State s : currentSuperState) {
             Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
             if (transitions != null) {
@@ -151,7 +150,6 @@ public class Converter {
      */
     private static Set<State> computeEnfaTargets(ENFA enfa, Set<State> qClosure, char symbol) {
         Set<State> targets = new HashSet<>();
-        // Optimization: avoided double lookup (containsKey + get)
         for (State p : qClosure) {
             Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
             if (transitions != null) {

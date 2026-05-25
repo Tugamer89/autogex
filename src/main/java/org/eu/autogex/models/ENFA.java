@@ -37,7 +37,6 @@ public class ENFA extends AbstractAutomaton {
             Map<Character, Set<State>> stateTransitions = transitionTable.get(currentState);
 
             // Look for transitions associated with null (ε)
-            // Optimization: avoided double lookup (containsKey + get)
             if (stateTransitions != null) {
                 Set<State> epsilonTargets = stateTransitions.get(null);
                 if (epsilonTargets != null) {
@@ -73,7 +72,6 @@ public class ENFA extends AbstractAutomaton {
             }
         }
 
-        // Optimization: avoided stream allocation overhead
         boolean isAccepted = !Collections.disjoint(currentStates, finalStates);
         return new ExecutionTrace(input, steps, isAccepted);
     }

@@ -31,7 +31,6 @@ public class DFA extends AbstractAutomaton {
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
 
             Set<State> nextStates = Collections.emptySet();
-            // Optimization: avoided double lookup (containsKey + get)
             if (stateTransitions != null) {
                 State target = stateTransitions.get(symbol);
                 if (target != null) {

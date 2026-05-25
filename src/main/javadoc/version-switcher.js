@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll('select#version-switcher').forEach(switcher => {
             switcher.removeAttribute('onchange'); 
             switcher.removeAttribute('disabled');
+            switcher.removeAttribute('aria-busy');
             switcher.innerHTML = optionsHtml;
             switcher.value = currentBase;
         });

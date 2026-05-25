@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/Tugamer89/autogex/compare/v1.7.1...v1.7.2) (2026-05-25)
+
+
+### Performance Improvements
+
+* optimize automaton transition lookups and acceptance checks ([#93](https://github.com/Tugamer89/autogex/issues/93)) ([d89067a](https://github.com/Tugamer89/autogex/commit/d89067ad0c2ad85935726bc014c43c4f970ed62a))
+
 ## [1.7.1](https://github.com/Tugamer89/autogex/compare/v1.7.0...v1.7.1) (2026-05-25)
 
 

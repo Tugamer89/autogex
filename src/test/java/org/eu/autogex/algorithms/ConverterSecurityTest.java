@@ -16,8 +16,9 @@ class ConverterSecurityTest {
             sb.append("(a|b)");
         }
 
+        String pattern = sb.toString();
         IllegalStateException exception =
-                assertThrows(IllegalStateException.class, () -> new Regex(sb.toString()));
+                assertThrows(IllegalStateException.class, () -> new Regex(pattern));
         assertTrue(
                 exception.getMessage().contains("DFA state limit exceeded"),
                 "Should detect state explosion to prevent DoS");

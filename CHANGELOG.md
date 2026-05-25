@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.1](https://github.com/Tugamer89/autogex/compare/v1.7.0...v1.7.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* **security:** [HIGH] resolve ReDoS vulnerability in DFA conversion ([#94](https://github.com/Tugamer89/autogex/issues/94)) ([2de9ee9](https://github.com/Tugamer89/autogex/commit/2de9ee97281883e171158fe3f3a492b897675562))
+* **ui:** improve Javadoc header accessibility and UX ([#95](https://github.com/Tugamer89/autogex/issues/95)) ([1f80e0f](https://github.com/Tugamer89/autogex/commit/1f80e0f5e7301520811faa08ebc8fe5bb3cd4c19))
+
 ## [1.7.0](https://github.com/Tugamer89/autogex/compare/v1.6.0...v1.7.0) (2026-05-24)
 
 

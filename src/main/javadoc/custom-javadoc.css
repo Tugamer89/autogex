@@ -71,3 +71,9 @@ select#version-switcher:disabled:hover {
   background-color: transparent;
   border-color: var(--header-text-color, #cccccc);
 }
+
+.header-logo-link:focus-visible {
+  outline: 2px solid #4AA0C7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

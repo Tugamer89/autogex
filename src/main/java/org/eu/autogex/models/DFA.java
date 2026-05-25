@@ -30,10 +30,13 @@ public class DFA extends AbstractAutomaton {
             State currentState = currentStates.iterator().next();
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
 
-            Set<State> nextStates =
-                    (stateTransitions != null && stateTransitions.containsKey(symbol))
-                            ? Set.of(stateTransitions.get(symbol))
-                            : Collections.emptySet();
+            Set<State> nextStates = Collections.emptySet();
+            if (stateTransitions != null) {
+                State target = stateTransitions.get(symbol);
+                if (target != null) {
+                    nextStates = Set.of(target);
+                }
+            }
 
             steps.add(new ExecutionStep(currentStates, symbol, nextStates));
             currentStates = nextStates;

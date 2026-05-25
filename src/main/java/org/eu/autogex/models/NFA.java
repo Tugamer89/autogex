@@ -38,7 +38,7 @@ public class NFA extends AbstractAutomaton {
             }
         }
 
-        boolean isAccepted = currentStates.stream().anyMatch(finalStates::contains);
+        boolean isAccepted = !Collections.disjoint(currentStates, finalStates);
         return new ExecutionTrace(input, steps, isAccepted);
     }
 

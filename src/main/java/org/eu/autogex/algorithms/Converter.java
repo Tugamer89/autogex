@@ -141,10 +141,12 @@ public class Converter {
         Set<State> nextSuperState = new HashSet<>();
         for (State s : currentSuperState) {
             Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
-            if (transitions == null || !transitions.containsKey(symbol)) {
-                continue;
+            if (transitions != null) {
+                Set<State> targets = transitions.get(symbol);
+                if (targets != null) {
+                    nextSuperState.addAll(targets);
+                }
             }
-            nextSuperState.addAll(transitions.get(symbol));
         }
         return nextSuperState;
     }
@@ -157,10 +159,12 @@ public class Converter {
         Set<State> targets = new HashSet<>();
         for (State p : qClosure) {
             Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
-            if (transitions == null || !transitions.containsKey(symbol)) {
-                continue;
+            if (transitions != null) {
+                Set<State> symbolTargets = transitions.get(symbol);
+                if (symbolTargets != null) {
+                    targets.addAll(enfa.epsilonClosure(symbolTargets));
+                }
             }
-            targets.addAll(enfa.epsilonClosure(transitions.get(symbol)));
         }
         return targets;
     }

@@ -10,6 +10,9 @@ import org.eu.autogex.models.NFA;
 /** Utility class for Finite State Automata conversion. */
 public class Converter {
 
+    /** Maximum allowed states in a DFA to prevent state explosion (DoS). */
+    private static final int MAX_DFA_STATES = 10000;
+
     private Converter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
@@ -119,6 +122,10 @@ public class Converter {
                     dfaStateNames.computeIfAbsent(
                             nextSuperState,
                             k -> {
+                                if (dfaStateNames.size() >= MAX_DFA_STATES) {
+                                    throw new IllegalStateException(
+                                            "DFA state limit exceeded (Security: DoS prevention).");
+                                }
                                 String nextName = "D" + dfaStateNames.size();
                                 builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
                                 queue.add(k);

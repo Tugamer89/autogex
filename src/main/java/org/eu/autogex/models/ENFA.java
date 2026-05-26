@@ -52,6 +52,31 @@ public class ENFA extends AbstractAutomaton {
         return closure;
     }
 
+    /**
+     * Fast-path evaluation of an input string bypassing ExecutionTrace generation. Overrides the
+     * default method to minimize memory allocation and maximize performance.
+     *
+     * @param input The string to be evaluated.
+     * @return true if the string is accepted, false otherwise.
+     */
+    @Override
+    public boolean accepts(String input) {
+        Set<State> currentStates = epsilonClosure(Set.of(initialState));
+
+        for (int i = 0; i < input.length(); i++) {
+            char symbol = input.charAt(i);
+
+            Set<State> moveResult = computeNextStates(currentStates, symbol, transitionTable);
+            currentStates = epsilonClosure(moveResult);
+
+            if (currentStates.isEmpty()) {
+                return false;
+            }
+        }
+
+        return !Collections.disjoint(currentStates, finalStates);
+    }
+
     @Override
     public ExecutionTrace execute(String input) {
         List<ExecutionStep> steps = new ArrayList<>();

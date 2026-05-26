@@ -199,6 +199,7 @@
                         <script>
                             window.addEventListener('load', function() {
                                 hljs.highlightAll();
+                                document.querySelectorAll('pre').forEach(function(el) { el.setAttribute('tabindex', '0'); });
                             });
                         </script>
                         <script src="/version-switcher.js"></script>

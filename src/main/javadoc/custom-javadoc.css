@@ -77,3 +77,8 @@ select#version-switcher:disabled:hover {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+pre:focus-visible {
+  outline: 2px solid #4AA0C7;
+  outline-offset: 2px;
+}

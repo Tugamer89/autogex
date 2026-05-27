@@ -199,7 +199,11 @@
                         <script>
                             window.addEventListener('load', function() {
                                 hljs.highlightAll();
-                                document.querySelectorAll('pre').forEach(function(el) { el.setAttribute('tabindex', '0'); el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Code snippet'); });
+                                document.querySelectorAll('pre').forEach(function(el) {
+                                    el.setAttribute('tabindex', '0');
+                                    el.setAttribute('role', 'region');
+                                    el.setAttribute('aria-label', 'Code snippet');
+                                });
                             });
                         </script>
                         <script src="/version-switcher.js"></script>

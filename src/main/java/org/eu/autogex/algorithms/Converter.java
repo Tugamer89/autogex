@@ -27,9 +27,12 @@ public class Converter {
         NFA.Builder builder = new NFA.Builder();
         Set<Character> alphabet = getAlphabet(enfa.getTransitionTable());
 
+        Map<State, Set<State>> epsilonClosures = new HashMap<>();
+
         // 1. & 2. Add states and recalculate final states based on closures
         for (State s : enfa.getStates()) {
             Set<State> closure = enfa.epsilonClosure(Set.of(s));
+            epsilonClosures.put(s, closure);
             boolean isFinal = isFinal(closure, enfa.getFinalStates());
             builder.addState(s.getName(), isFinal);
         }
@@ -39,10 +42,10 @@ public class Converter {
 
         // 3. Compute new transitions for each state across the alphabet
         for (State q : enfa.getStates()) {
-            Set<State> qClosure = enfa.epsilonClosure(Set.of(q));
+            Set<State> qClosure = epsilonClosures.get(q);
 
             for (char a : alphabet) {
-                Set<State> targets = computeEnfaTargets(enfa, qClosure, a);
+                Set<State> targets = computeEnfaTargets(enfa, qClosure, a, epsilonClosures);
                 for (State target : targets) {
                     builder.addTransition(q.getName(), a, target.getName());
                 }
@@ -153,16 +156,19 @@ public class Converter {
 
     /**
      * Computes target states for an ENFA starting from a closure, reading a symbol, and applying
-     * the ε-closure to the result.
+     * the ε-closure to the result (utilizing pre-computed closures for performance).
      */
-    private static Set<State> computeEnfaTargets(ENFA enfa, Set<State> qClosure, char symbol) {
+    private static Set<State> computeEnfaTargets(
+            ENFA enfa, Set<State> qClosure, char symbol, Map<State, Set<State>> epsilonClosures) {
         Set<State> targets = new HashSet<>();
         for (State p : qClosure) {
             Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
             if (transitions != null) {
                 Set<State> symbolTargets = transitions.get(symbol);
                 if (symbolTargets != null) {
-                    targets.addAll(enfa.epsilonClosure(symbolTargets));
+                    for (State st : symbolTargets) {
+                        targets.addAll(epsilonClosures.get(st));
+                    }
                 }
             }
         }

@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.8.0](https://github.com/Tugamer89/autogex/compare/v1.7.2...v1.8.0) (2026-05-27)
+
+
+### Features
+
+* **ui:** add keyboard navigation and focus states for code blocks ([#98](https://github.com/Tugamer89/autogex/issues/98)) ([4fb0498](https://github.com/Tugamer89/autogex/commit/4fb04987d475ca489f36bb00b2eb922dfd4192ff))
+* **ui:** improve documentation accessibility and keyboard support ([#103](https://github.com/Tugamer89/autogex/issues/103)) ([2c3b7ff](https://github.com/Tugamer89/autogex/commit/2c3b7ff6ff05d3925d25cced66193e82d64ac4e6))
+
+
+### Bug Fixes
+
+* **security:** [MEDIUM] resolve Mermaid syntax injection via newlines ([#105](https://github.com/Tugamer89/autogex/issues/105)) ([a8f6178](https://github.com/Tugamer89/autogex/commit/a8f6178816f9083a45e3674b4098e7416628fa88))
+
+
+### Performance Improvements
+
+* Cache epsilon closures in enfaToNfa conversion ([#104](https://github.com/Tugamer89/autogex/issues/104)) ([1ef7cb1](https://github.com/Tugamer89/autogex/commit/1ef7cb1b0252613d060e6bc3d2b918a912cefcfa))
+* optimize automaton string acceptance by bypassing execution trace ([#99](https://github.com/Tugamer89/autogex/issues/99)) ([bf3b98e](https://github.com/Tugamer89/autogex/commit/bf3b98e306d04bfb699667ebc84d66df12d95860))
+
 ## [1.7.2](https://github.com/Tugamer89/autogex/compare/v1.7.1...v1.7.2) (2026-05-25)
 
 

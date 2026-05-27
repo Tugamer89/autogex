@@ -186,8 +186,8 @@
                             <a href="/" aria-label="Go to homepage" title="Go to homepage" class="header-logo-link" style="display: flex;">
                                 <img src="/logo.svg" alt="" aria-hidden="true" style="height: 24px;">
                             </a>
-                            <select id="version-switcher" aria-label="Select documentation version" title="Select documentation version" aria-busy="true" disabled>
-                                <option value="">Loading documentation versions...</option>
+                            <select id="version-switcher" aria-label="Select documentation version" title="Loading documentation versions..." aria-busy="true" disabled>
+                                <option value="">Loading versions...</option>
                             </select>
                         </div>
                     ]]></header>

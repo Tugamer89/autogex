@@ -52,8 +52,8 @@ select#version-switcher:hover {
 }
 
 select#version-switcher:focus {
-  border-color: #4AA0C7;
-  box-shadow: 0 0 0 2px rgba(74, 160, 199, 0.3);
+  border-color: #005fcc;
+  box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.3);
 }
 
 select#version-switcher option {
@@ -73,12 +73,12 @@ select#version-switcher:disabled:hover {
 }
 
 .header-logo-link:focus-visible {
-  outline: 2px solid #4AA0C7;
+  outline: 2px solid #005fcc;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 pre:focus-visible {
-  outline: 2px solid #4AA0C7;
+  outline: 2px solid #005fcc;
   outline-offset: 2px;
 }

@@ -27,8 +27,6 @@ public class Converter {
         NFA.Builder builder = new NFA.Builder();
         Set<Character> alphabet = getAlphabet(enfa.getTransitionTable());
 
-        // Cache epsilon closures for each state to avoid redundant computations (~30% faster NFA
-        // conversion)
         Map<State, Set<State>> epsilonClosures = new HashMap<>();
 
         // 1. & 2. Add states and recalculate final states based on closures

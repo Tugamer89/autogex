@@ -137,7 +137,9 @@ public class MermaidExporter {
 
     private static String escapeMermaidString(String text) {
         if (text == null) return "";
-        return text.replace("&", "&amp;")
+        return text.replace("\r", "")
+                .replace("\n", "\\n")
+                .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")

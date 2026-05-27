@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             switcher.removeAttribute('onchange'); 
             switcher.removeAttribute('disabled');
             switcher.removeAttribute('aria-busy');
+            switcher.setAttribute('title', 'Select documentation version');
             switcher.innerHTML = optionsHtml;
             switcher.value = currentBase;
         });

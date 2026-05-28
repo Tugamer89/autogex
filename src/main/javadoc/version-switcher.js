@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentBase = getBase(currentPath);
     document.body.addEventListener('change', (e) => {
         if (e.target?.id === 'version-switcher') {
+            e.target.disabled = true;
+            e.target.setAttribute('aria-busy', 'true');
+
             const targetBase = e.target.value;
             
             let remainder = currentPath.substring(currentBase.length);

@@ -16,13 +16,18 @@ public class RegexParser {
     /** Maximum allowed regex length to prevent StackOverflowError (DoS) */
     private static final int MAX_REGEX_LENGTH = 2000;
 
+    /** Maximum allowed nesting depth to prevent StackOverflowError (DoS) */
+    private static final int MAX_DEPTH = 500;
+
     private final String input;
     private int position;
+    private int depth;
 
     /** Private constructor to enforce the use of the static parse method. */
     private RegexParser(String input) {
         this.input = input.replaceAll("\\s+", ""); // Remove whitespaces for simplicity
         this.position = 0;
+        this.depth = 0;
     }
 
     /**
@@ -127,7 +132,13 @@ public class RegexParser {
      */
     private RegexNode parseBase() {
         if (match('(')) {
+            depth++;
+            if (depth > MAX_DEPTH) {
+                throw new IllegalArgumentException(
+                        "Regex pattern is too deeply nested (Security: DoS prevention).");
+            }
             RegexNode node = parseRegex();
+            depth--;
             if (!match(')')) {
                 throw new IllegalArgumentException("Missing closing parenthesis ')'.");
             }

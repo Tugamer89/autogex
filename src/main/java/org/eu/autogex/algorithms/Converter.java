@@ -62,7 +62,6 @@ public class Converter {
      */
     public static DFA nfaToDfa(NFA nfa) {
         DFA.Builder builder = new DFA.Builder();
-        Set<Character> alphabet = getAlphabet(nfa.getTransitionTable());
 
         Map<Set<State>, String> dfaStateNames = new HashMap<>();
         // ArrayDeque is preferred over LinkedList for queues in hot paths.
@@ -84,9 +83,38 @@ public class Converter {
             Set<State> currentSuperState = queue.poll();
             String currentName = dfaStateNames.get(currentSuperState);
 
-            for (char symbol : alphabet) {
-                processSymbolTransitions(
-                        nfa, builder, dfaStateNames, queue, currentSuperState, currentName, symbol);
+            Map<Character, Set<State>> symbolToTargets = new HashMap<>();
+            for (State s : currentSuperState) {
+                Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
+                if (transitions != null) {
+                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                        Character symbol = entry.getKey();
+                        Set<State> targets = symbolToTargets.get(symbol);
+                        if (targets == null) {
+                            targets = new HashSet<>();
+                            symbolToTargets.put(symbol, targets);
+                        }
+                        targets.addAll(entry.getValue());
+                    }
+                }
+            }
+
+            for (Map.Entry<Character, Set<State>> entry : symbolToTargets.entrySet()) {
+                char symbol = entry.getKey();
+                Set<State> nextSuperState = entry.getValue();
+
+                String targetName = dfaStateNames.get(nextSuperState);
+                if (targetName == null) {
+                    if (dfaStateNames.size() >= MAX_DFA_STATES) {
+                        throw new IllegalStateException(
+                                "DFA state limit exceeded (Security: DoS prevention).");
+                    }
+                    targetName = "D" + dfaStateNames.size();
+                    builder.addState(targetName, isFinal(nextSuperState, nfa.getFinalStates()));
+                    dfaStateNames.put(nextSuperState, targetName);
+                    queue.add(nextSuperState);
+                }
+                builder.addTransition(currentName, symbol, targetName);
             }
         }
 
@@ -105,54 +133,6 @@ public class Converter {
     }
 
     // --- Helper Methods ---
-
-    /**
-     * Processes transitions for a specific symbol from a given super-state in the subset
-     * construction algorithm.
-     */
-    private static void processSymbolTransitions(
-            NFA nfa,
-            DFA.Builder builder,
-            Map<Set<State>, String> dfaStateNames,
-            Queue<Set<State>> queue,
-            Set<State> currentSuperState,
-            String currentName,
-            char symbol) {
-        Set<State> nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);
-
-        if (!nextSuperState.isEmpty()) {
-            String targetName =
-                    dfaStateNames.computeIfAbsent(
-                            nextSuperState,
-                            k -> {
-                                if (dfaStateNames.size() >= MAX_DFA_STATES) {
-                                    throw new IllegalStateException(
-                                            "DFA state limit exceeded (Security: DoS prevention).");
-                                }
-                                String nextName = "D" + dfaStateNames.size();
-                                builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
-                                queue.add(k);
-                                return nextName;
-                            });
-            builder.addTransition(currentName, symbol, targetName);
-        }
-    }
-
-    /** Computes the reachable subset of states by reading a symbol. */
-    private static Set<State> computeNextSuperState(
-            NFA nfa, Set<State> currentSuperState, char symbol) {
-        Set<State> nextSuperState = new HashSet<>();
-        for (State s : currentSuperState) {
-            Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
-            if (transitions != null) {
-                Set<State> targets = transitions.get(symbol);
-                if (targets != null) {
-                    nextSuperState.addAll(targets);
-                }
-            }
-        }
-        return nextSuperState;
-    }
 
     /**
      * Computes target states for an ENFA starting from a closure, reading a symbol, and applying

@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.9.0](https://github.com/Tugamer89/autogex/compare/v1.8.0...v1.9.0) (2026-05-28)
+
+
+### Features
+
+* **ui:** add immediate interaction feedback and smooth navigation to Javadoc UI ([#107](https://github.com/Tugamer89/autogex/issues/107)) ([c5cf676](https://github.com/Tugamer89/autogex/commit/c5cf676ffdda2ee10aafb1f8ffb893117caf6a9a))
+
+
+### Bug Fixes
+
+* **security:** [MEDIUM] resolve StackOverflowError vulnerability in RegexParser ([#108](https://github.com/Tugamer89/autogex/issues/108)) ([03518ec](https://github.com/Tugamer89/autogex/commit/03518ece1b31ce9f02b7809920ca56743bc3b3b5))
+
+
+### Performance Improvements
+
+* optimize nfa to dfa subset construction performance ([#109](https://github.com/Tugamer89/autogex/issues/109)) ([046853b](https://github.com/Tugamer89/autogex/commit/046853b8d4cef31613cf0df6a3d9f18609850e70))
+
 ## [1.8.0](https://github.com/Tugamer89/autogex/compare/v1.7.2...v1.8.0) (2026-05-27)
 
 

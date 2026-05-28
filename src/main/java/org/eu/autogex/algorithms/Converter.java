@@ -83,8 +83,6 @@ public class Converter {
             Set<State> currentSuperState = queue.poll();
             String currentName = dfaStateNames.get(currentSuperState);
 
-            // Performance: Compute target states only for active symbols present in the subset,
-            // avoiding O(|S| x |Alphabet|) checks for missing transitions.
             Map<Character, Set<State>> symbolToTargets = new HashMap<>();
             for (State s : currentSuperState) {
                 Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);

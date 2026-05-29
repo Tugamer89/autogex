@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target?.id === 'version-switcher') {
             e.target.disabled = true;
             e.target.setAttribute('aria-busy', 'true');
+            e.target.title = "Navigating to selected version...";
+
+            if (e.target.options[e.target.selectedIndex]) {
+                e.target.options[e.target.selectedIndex].text = "Navigating...";
+            }
 
             const targetBase = e.target.value;
             

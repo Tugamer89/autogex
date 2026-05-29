@@ -26,6 +26,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
+    const escapeHtml = (unsafe) => {
+        if (unsafe == null) return '';
+        return String(unsafe)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     const updateSelects = (optionsHtml) => {
         document.querySelectorAll('select#version-switcher').forEach(switcher => {
             switcher.removeAttribute('onchange'); 
@@ -59,7 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const minor = v.split('.').slice(0, 2).join('.');
                 if (!minorVersions.has(minor)) {
                     minorVersions.add(minor);
-                    options += `<option value="/${minor}.x/">Version ${minor}.x</option>`;
+                    const safeMinor = escapeHtml(minor);
+                    options += `<option value="/${safeMinor}.x/">Version ${safeMinor}.x</option>`;
                 }
             });
 
@@ -71,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let options = '<option value="/">Latest Stable</option><option value="/dev/">Development (main)</option>';
             const match = new RegExp(/^\/(\d+\.\d+\.x)(?:\/|$)/).exec(currentPath);
             if (match && currentBase !== '/dev/' && currentBase !== '/') {
-                options += `<option value="${currentBase}">Version ${match[1]}</option>`;
+                options += `<option value="${escapeHtml(currentBase)}">Version ${escapeHtml(match[1])}</option>`;
             }
             updateSelects(options);
         });

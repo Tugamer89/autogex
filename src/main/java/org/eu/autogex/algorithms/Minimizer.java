@@ -96,8 +96,6 @@ public class Minimizer {
         return partitions;
     }
 
-    // Record used instead of Map for the behavior signature to avoid allocations and improve
-    // performance
     private static final class BehaviorSignature {
         private final int[] targets;
         private final int hashCode;

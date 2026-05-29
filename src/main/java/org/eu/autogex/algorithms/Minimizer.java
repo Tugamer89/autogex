@@ -22,6 +22,11 @@ public class Minimizer {
         // 1. Remove unreachable states
         Set<State> reachableStates = getReachableStates(dfa);
         Set<Character> alphabet = getAlphabet(dfa);
+        char[] alphabetArray = new char[alphabet.size()];
+        int idx = 0;
+        for (char c : alphabet) {
+            alphabetArray[idx++] = c;
+        }
 
         // 2. Initial partition (Finals vs Non-Finals)
         Set<Set<State>> partitions = createInitialPartitions(dfa, reachableStates);
@@ -37,8 +42,8 @@ public class Minimizer {
 
             for (Set<State> group : partitions) {
                 // Split the group based on behavior (transition destinations)
-                Map<Map<Character, Integer>, Set<State>> subGroups =
-                        splitGroup(dfa, group, alphabet, stateToPartitionId);
+                Map<BehaviorSignature, Set<State>> subGroups =
+                        splitGroup(dfa, group, alphabetArray, stateToPartitionId);
 
                 newPartitions.addAll(subGroups.values());
 
@@ -91,24 +96,54 @@ public class Minimizer {
         return partitions;
     }
 
-    private static Map<Map<Character, Integer>, Set<State>> splitGroup(
+    private static final class BehaviorSignature {
+        private final int[] targets;
+        private final int hashCode;
+
+        public BehaviorSignature(int[] targets) {
+            this.targets = targets;
+            this.hashCode = Arrays.hashCode(targets);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BehaviorSignature that = (BehaviorSignature) o;
+            return Arrays.equals(targets, that.targets);
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+    }
+
+    private static Map<BehaviorSignature, Set<State>> splitGroup(
             DFA dfa,
             Set<State> group,
-            Set<Character> alphabet,
+            char[] alphabetArray,
             Map<State, Integer> stateToPartitionId) {
 
         // Maps the behavioral "signature" of a state to the subgroup of states sharing it
-        Map<Map<Character, Integer>, Set<State>> subGroups = new HashMap<>();
+        Map<BehaviorSignature, Set<State>> subGroups = new HashMap<>();
 
         for (State s : group) {
             // The signature is: "For each character, which partition do I end up in?"
-            Map<Character, Integer> behaviorSignature = new HashMap<>();
+            int[] targets = new int[alphabetArray.length];
+            Map<Character, State> transitions = dfa.getTransitionTable().get(s);
 
-            for (char symbol : alphabet) {
-                State destination = getDestination(dfa, s, symbol);
-                Integer targetPartitionId = stateToPartitionId.get(destination);
-                behaviorSignature.put(symbol, targetPartitionId != null ? targetPartitionId : -1);
+            for (int i = 0; i < alphabetArray.length; i++) {
+                if (transitions == null) {
+                    targets[i] = -1;
+                    continue;
+                }
+                State destination = transitions.get(alphabetArray[i]);
+                Integer targetPartitionId =
+                        destination != null ? stateToPartitionId.get(destination) : null;
+                targets[i] = targetPartitionId != null ? targetPartitionId : -1;
             }
+            BehaviorSignature behaviorSignature = new BehaviorSignature(targets);
 
             subGroups.computeIfAbsent(behaviorSignature, k -> new HashSet<>()).add(s);
         }

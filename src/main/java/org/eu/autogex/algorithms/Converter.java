@@ -43,26 +43,8 @@ public class Converter {
         for (State q : enfa.getStates()) {
             Set<State> qClosure = epsilonClosures.get(q);
 
-            Map<Character, Set<State>> reachableTargets = new HashMap<>();
-
-            for (State p : qClosure) {
-                Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
-                if (transitions != null) {
-                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
-                        Character a = entry.getKey();
-                        if (a == null) continue;
-
-                        Set<State> targetsForA = reachableTargets.get(a);
-                        if (targetsForA == null) {
-                            targetsForA = new HashSet<>();
-                            reachableTargets.put(a, targetsForA);
-                        }
-                        for (State st : entry.getValue()) {
-                            targetsForA.addAll(epsilonClosures.get(st));
-                        }
-                    }
-                }
-            }
+            Map<Character, Set<State>> reachableTargets =
+                    computeReachableTargets(enfa, qClosure, epsilonClosures);
 
             for (Map.Entry<Character, Set<State>> entry : reachableTargets.entrySet()) {
                 char a = entry.getKey();
@@ -153,6 +135,31 @@ public class Converter {
     }
 
     // --- Helper Methods ---
+
+    private static Map<Character, Set<State>> computeReachableTargets(
+            ENFA enfa, Set<State> qClosure, Map<State, Set<State>> epsilonClosures) {
+        Map<Character, Set<State>> reachableTargets = new HashMap<>();
+
+        for (State p : qClosure) {
+            Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
+            if (transitions != null) {
+                for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                    Character a = entry.getKey();
+                    if (a == null) continue;
+
+                    Set<State> targetsForA = reachableTargets.get(a);
+                    if (targetsForA == null) {
+                        targetsForA = new HashSet<>();
+                        reachableTargets.put(a, targetsForA);
+                    }
+                    for (State st : entry.getValue()) {
+                        targetsForA.addAll(epsilonClosures.get(st));
+                    }
+                }
+            }
+        }
+        return reachableTargets;
+    }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
         return !Collections.disjoint(superState, finalStates);

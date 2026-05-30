@@ -79,6 +79,11 @@ public class ENFA extends AbstractAutomaton {
 
     @Override
     public ExecutionTrace execute(String input) {
+        if (input.length() > ExecutionTrace.MAX_TRACE_INPUT_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Input string too large for tracing (Security: DoS prevention).");
+        }
+
         List<ExecutionStep> steps = new ArrayList<>();
 
         // Start from the ε-closure of the initial state

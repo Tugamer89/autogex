@@ -8,6 +8,9 @@ import java.util.List;
  */
 public class ExecutionTrace {
 
+    /** Maximum allowed input length for tracing to prevent memory exhaustion (DoS). */
+    public static final int MAX_TRACE_INPUT_LENGTH = 10000;
+
     private static final String SEPARATOR = "=========================================%n";
     private final String input;
     private final List<ExecutionStep> steps;

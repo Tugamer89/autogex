@@ -48,6 +48,11 @@ public class DFA extends AbstractAutomaton {
 
     @Override
     public ExecutionTrace execute(String input) {
+        if (input.length() > ExecutionTrace.MAX_TRACE_INPUT_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Input string too large for tracing (Security: DoS prevention).");
+        }
+
         List<ExecutionStep> steps = new ArrayList<>();
         Set<State> currentStates = Set.of(initialState);
 

@@ -1,4 +1,3 @@
-<!-- -->
 <p align="center">
   <img src="https://autogex.eu.org/logo.svg" alt="Autogex Logo" width="500">
 </p>

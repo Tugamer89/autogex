@@ -25,7 +25,6 @@ public class Converter {
      */
     public static NFA enfaToNfa(ENFA enfa) {
         NFA.Builder builder = new NFA.Builder();
-        Set<Character> alphabet = getAlphabet(enfa.getTransitionTable());
 
         Map<State, Set<State>> epsilonClosures = new HashMap<>();
 
@@ -40,13 +39,34 @@ public class Converter {
         // The initial state remains the same
         builder.setInitialState(enfa.getInitialState().getName());
 
-        // 3. Compute new transitions for each state across the alphabet
+        // 3. Compute new transitions for each state
         for (State q : enfa.getStates()) {
             Set<State> qClosure = epsilonClosures.get(q);
 
-            for (char a : alphabet) {
-                Set<State> targets = computeEnfaTargets(enfa, qClosure, a, epsilonClosures);
-                for (State target : targets) {
+            Map<Character, Set<State>> reachableTargets = new HashMap<>();
+
+            for (State p : qClosure) {
+                Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
+                if (transitions != null) {
+                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                        Character a = entry.getKey();
+                        if (a == null) continue;
+
+                        Set<State> targetsForA = reachableTargets.get(a);
+                        if (targetsForA == null) {
+                            targetsForA = new HashSet<>();
+                            reachableTargets.put(a, targetsForA);
+                        }
+                        for (State st : entry.getValue()) {
+                            targetsForA.addAll(epsilonClosures.get(st));
+                        }
+                    }
+                }
+            }
+
+            for (Map.Entry<Character, Set<State>> entry : reachableTargets.entrySet()) {
+                char a = entry.getKey();
+                for (State target : entry.getValue()) {
                     builder.addTransition(q.getName(), a, target.getName());
                 }
             }
@@ -133,41 +153,6 @@ public class Converter {
     }
 
     // --- Helper Methods ---
-
-    /**
-     * Computes target states for an ENFA starting from a closure, reading a symbol, and applying
-     * the ε-closure to the result (utilizing pre-computed closures for performance).
-     */
-    private static Set<State> computeEnfaTargets(
-            ENFA enfa, Set<State> qClosure, char symbol, Map<State, Set<State>> epsilonClosures) {
-        Set<State> targets = new HashSet<>();
-        for (State p : qClosure) {
-            Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
-            if (transitions != null) {
-                Set<State> symbolTargets = transitions.get(symbol);
-                if (symbolTargets != null) {
-                    for (State st : symbolTargets) {
-                        targets.addAll(epsilonClosures.get(st));
-                    }
-                }
-            }
-        }
-        return targets;
-    }
-
-    private static Set<Character> getAlphabet(
-            Map<State, Map<Character, Set<State>>> transitionTable) {
-        Set<Character> alphabet = new HashSet<>();
-        for (Map<Character, Set<State>> transitions : transitionTable.values()) {
-            for (Character c : transitions.keySet()) {
-                if (c == null) {
-                    continue;
-                }
-                alphabet.add(c);
-            }
-        }
-        return alphabet;
-    }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
         return !Collections.disjoint(superState, finalStates);

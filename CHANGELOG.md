@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.10.0](https://github.com/Tugamer89/autogex/compare/v1.9.0...v1.10.0) (2026-05-30)
+
+
+### Features
+
+* **ui:** add copy button to code snippets ([#118](https://github.com/Tugamer89/autogex/issues/118)) ([8c745c5](https://github.com/Tugamer89/autogex/commit/8c745c5cf8a1b8567f2cd63de3d559b3d775ddc6))
+
+
+### Bug Fixes
+
+* Fix command injection 1891539288993348266 ([#121](https://github.com/Tugamer89/autogex/issues/121)) ([a5ca4bb](https://github.com/Tugamer89/autogex/commit/a5ca4bb9058b6ffd112ae408d4f65e0a9a063aa4))
+
+
+### Performance Improvements
+
+* [performance improvement] optimize Minimizer splitGroup signature allocation ([#115](https://github.com/Tugamer89/autogex/issues/115)) ([cf127f3](https://github.com/Tugamer89/autogex/commit/cf127f3f38f1218e37476b32184a3cfd9a9f7697))
+* optimize ENFA to NFA state target computation ([#120](https://github.com/Tugamer89/autogex/issues/120)) ([1386939](https://github.com/Tugamer89/autogex/commit/13869390d7c02907af8593c7ce5c2400f542647e))
+
 ## [1.9.0](https://github.com/Tugamer89/autogex/compare/v1.8.0...v1.9.0) (2026-05-28)
 
 

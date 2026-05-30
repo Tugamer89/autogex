@@ -94,3 +94,38 @@ pre:focus-visible {
   outline: 2px solid #005fcc;
   outline-offset: 2px;
 }
+
+.code-snippet-wrapper {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px;
+  background-color: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  color: #57606a;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-btn:hover {
+  background-color: #ebecf0;
+}
+
+.copy-btn:focus-visible {
+  outline: 2px solid #005fcc;
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.code-snippet-wrapper:hover .copy-btn {
+  opacity: 1;
+}

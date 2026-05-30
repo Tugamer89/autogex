@@ -136,6 +136,10 @@ public class Converter {
 
     // --- Helper Methods ---
 
+    /**
+     * Computes the mapping of reachable target states for each character transitioning out of an
+     * epsilon closure.
+     */
     private static Map<Character, Set<State>> computeReachableTargets(
             ENFA enfa, Set<State> qClosure, Map<State, Set<State>> epsilonClosures) {
         Map<Character, Set<State>> reachableTargets = new HashMap<>();
@@ -147,11 +151,8 @@ public class Converter {
                     Character a = entry.getKey();
                     if (a == null) continue;
 
-                    Set<State> targetsForA = reachableTargets.get(a);
-                    if (targetsForA == null) {
-                        targetsForA = new HashSet<>();
-                        reachableTargets.put(a, targetsForA);
-                    }
+                    Set<State> targetsForA =
+                            reachableTargets.computeIfAbsent(a, k -> new HashSet<>());
                     for (State st : entry.getValue()) {
                         targetsForA.addAll(epsilonClosures.get(st));
                     }

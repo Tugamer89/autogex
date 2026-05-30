@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegexParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.regex.parser</a> &gt; <span class="el_source">RegexParser.java</span></div><h1>RegexParser.java</h1><pre class="source lang-java linenums">package org.eu.autogex.regex.parser;
+
+import java.util.HashSet;
+import java.util.Set;
+import org.eu.autogex.regex.ast.RegexNode;
+import org.eu.autogex.regex.ast.RegexNode.*;
+
+/**
+ * A Recursive Descent Parser that converts a Regular Expression string into an Abstract Syntax Tree
+ * (AST). * Grammar implemented: Regex -&gt; Term ( '|' Term )* Term -&gt; Factor ( Factor )* (Implicit
+ * concatenation) Factor -&gt; Base ( '*' | '+' | '?' )* Base -&gt; char | '(' Regex ')' | '.' | '['
+ * charClass ']' | '\d'
+ */
+public class RegexParser {
+
+    /** Maximum allowed regex length to prevent StackOverflowError (DoS) */
+    private static final int MAX_REGEX_LENGTH = 2000;
+
+    private final String input;
+    private int position;
+
+    /** Private constructor to enforce the use of the static parse method. */
+<span class="fc" id="L23">    private RegexParser(String input) {</span>
+<span class="fc" id="L24">        this.input = input.replaceAll(&quot;\\s+&quot;, &quot;&quot;); // Remove whitespaces for simplicity</span>
+<span class="fc" id="L25">        this.position = 0;</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     * Parses a regular expression string into an AST.
+     *
+     * @param regex The regular expression string to parse.
+     * @return The root node of the generated AST.
+     * @throws IllegalArgumentException If the regex syntax is invalid.
+     */
+    public static RegexNode parse(String regex) {
+<span class="fc bfc" id="L36" title="All 4 branches covered.">        if (regex == null || regex.isEmpty()) {</span>
+<span class="fc" id="L37">            throw new IllegalArgumentException(&quot;Regular expression cannot be null or empty.&quot;);</span>
+        }
+
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (regex.length() &gt; MAX_REGEX_LENGTH) {</span>
+<span class="fc" id="L41">            throw new IllegalArgumentException(</span>
+                    &quot;Regular expression exceeds maximum allowed length of &quot;
+                            + MAX_REGEX_LENGTH
+                            + &quot; characters (Security: DoS prevention).&quot;);
+        }
+
+<span class="fc" id="L47">        RegexParser parser = new RegexParser(regex);</span>
+<span class="fc" id="L48">        RegexNode root = parser.parseRegex();</span>
+
+        // If we finished parsing but haven't reached the end of the string, there's a syntax error
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (parser.hasNext()) {</span>
+<span class="fc" id="L52">            throw new IllegalArgumentException(</span>
+<span class="fc" id="L53">                    &quot;Unexpected character at index &quot; + parser.position + &quot;: &quot; + parser.peek());</span>
+        }
+
+<span class="fc" id="L56">        return root;</span>
+    }
+
+    // --- Recursive Parsing Methods ---
+
+    /**
+     * Parses a full Regex, handling the Union ('|') operator.
+     *
+     * @return The RegexNode representing the parsed expression.
+     */
+    private RegexNode parseRegex() {
+<span class="fc" id="L67">        RegexNode left = parseTerm();</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        while (match('|')) {</span>
+<span class="fc" id="L70">            RegexNode right = parseTerm();</span>
+<span class="fc" id="L71">            left = new UnionNode(left, right);</span>
+<span class="fc" id="L72">        }</span>
+
+<span class="fc" id="L74">        return left;</span>
+    }
+
+    /**
+     * Parses a Term, handling implicit Concatenation.
+     *
+     * @return The RegexNode representing the term.
+     */
+    private RegexNode parseTerm() {
+<span class="fc" id="L83">        RegexNode left = parseFactor();</span>
+
+        // Continue concatenating as long as the next character is part of a new Factor
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        while (hasNext()</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                &amp;&amp; peek() != '|'</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">                &amp;&amp; peek() != ')'</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                &amp;&amp; peek() != '*'</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">                &amp;&amp; peek() != '+'</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                &amp;&amp; peek() != '?') {</span>
+<span class="fc" id="L92">            RegexNode right = parseFactor();</span>
+<span class="fc" id="L93">            left = new ConcatNode(left, right);</span>
+<span class="fc" id="L94">        }</span>
+
+<span class="fc" id="L96">        return left;</span>
+    }
+
+    /**
+     * Parses a Factor, handling the Kleene Star ('*'), Plus ('+'), and Optional ('?') operators.
+     *
+     * @return The RegexNode representing the factor.
+     */
+    private RegexNode parseFactor() {
+<span class="fc" id="L105">        RegexNode base = parseBase();</span>
+
+<span class="fc bfc" id="L107" title="All 8 branches covered.">        while (hasNext() &amp;&amp; (peek() == '*' || peek() == '+' || peek() == '?')) {</span>
+<span class="fc" id="L108">            char op = next();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if (op == '*') {</span>
+<span class="fc" id="L110">                base = new StarNode(base);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            } else if (op == '+') {</span>
+<span class="fc" id="L112">                base = new PlusNode(base);</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">            } else if (op == '?') {</span>
+<span class="fc" id="L114">                base = new OptionalNode(base);</span>
+            }
+<span class="fc" id="L116">        }</span>
+
+<span class="fc" id="L118">        return base;</span>
+    }
+
+    /**
+     * Parses a Base, which is either a parenthesized Regex, a Character Class, a Wildcard, or a
+     * single Literal.
+     *
+     * @return The RegexNode representing the base element.
+     * @throws IllegalArgumentException if the syntax is incorrect.
+     */
+    private RegexNode parseBase() {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (match('(')) {</span>
+<span class="fc" id="L130">            RegexNode node = parseRegex();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            if (!match(')')) {</span>
+<span class="fc" id="L132">                throw new IllegalArgumentException(&quot;Missing closing parenthesis ')'.&quot;);</span>
+            }
+<span class="fc" id="L134">            return node;</span>
+        }
+
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (match('.')) {</span>
+<span class="fc" id="L138">            return new WildcardNode();</span>
+        }
+
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (match('[')) {</span>
+<span class="fc" id="L142">            return parseCharClass();</span>
+        }
+
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (match('\\')) {</span>
+<span class="fc" id="L146">            char escaped = next();</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">            if (escaped == 'd') {</span>
+<span class="fc" id="L148">                return new CharClassNode(getDigitSet());</span>
+            }
+<span class="fc" id="L150">            return new LiteralNode(escaped);</span>
+        }
+
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        if (!hasNext()</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">                || peek() == '|'</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                || peek() == ')'</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">                || peek() == '*'</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">                || peek() == '+'</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">                || peek() == '?') {</span>
+<span class="fc" id="L159">            throw new IllegalArgumentException(</span>
+                    &quot;Invalid token at index &quot; + position + &quot;. Expected literal or '('.&quot;);
+        }
+
+<span class="fc" id="L163">        return new LiteralNode(next());</span>
+    }
+
+    /**
+     * Parses a character class inside brackets (e.g. [a-z0-9]).
+     *
+     * @return A CharClassNode representing the accepted set of characters.
+     * @throws IllegalArgumentException if the bracket is never closed.
+     */
+    private RegexNode parseCharClass() {
+<span class="fc" id="L173">        Set&lt;Character&gt; chars = new HashSet&lt;&gt;();</span>
+
+<span class="fc bfc" id="L175" title="All 4 branches covered.">        while (hasNext() &amp;&amp; peek() != ']') {</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">            if (match('\\')) {</span>
+<span class="fc" id="L177">                parseEscapedCharInClass(chars);</span>
+            } else {
+<span class="fc" id="L179">                parseLiteralOrRangeInClass(chars);</span>
+            }
+        }
+
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (!match(']')) {</span>
+<span class="fc" id="L184">            throw new IllegalArgumentException(&quot;Missing closing bracket ']' for character class.&quot;);</span>
+        }
+
+<span class="fc" id="L187">        return new CharClassNode(chars);</span>
+    }
+
+    /**
+     * Helper method to parse escaped characters (e.g. \d, \-) inside a character class.
+     *
+     * @param chars The set of characters being populated.
+     */
+    private void parseEscapedCharInClass(Set&lt;Character&gt; chars) {
+<span class="fc" id="L196">        char escaped = next();</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if (escaped == 'd') {</span>
+<span class="fc" id="L198">            chars.addAll(getDigitSet());</span>
+        } else {
+<span class="fc" id="L200">            chars.add(escaped);</span>
+        }
+<span class="fc" id="L202">    }</span>
+
+    /**
+     * Helper method to parse individual literals or character ranges (e.g. a-z) inside a character
+     * class.
+     *
+     * @param chars The set of characters being populated.
+     */
+    private void parseLiteralOrRangeInClass(Set&lt;Character&gt; chars) {
+<span class="fc" id="L211">        char startChar = next();</span>
+
+        // Check for range indicator (e.g. 'a-z')
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        if (hasNext()</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">                &amp;&amp; peek() == '-'</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">                &amp;&amp; position + 1 &lt; input.length()</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">                &amp;&amp; input.charAt(position + 1) != ']') {</span>
+<span class="fc" id="L218">            match('-'); // Consume '-'</span>
+<span class="fc" id="L219">            char endChar = next();</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">            for (char c = startChar; c &lt;= endChar; c++) {</span>
+<span class="fc" id="L221">                chars.add(c);</span>
+            }
+<span class="fc" id="L223">        } else {</span>
+<span class="fc" id="L224">            chars.add(startChar);</span>
+        }
+<span class="fc" id="L226">    }</span>
+
+    // --- Utility Methods for Token Navigation ---
+
+    private boolean hasNext() {
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        return position &lt; input.length();</span>
+    }
+
+    private char peek() {
+<span class="fc" id="L235">        return input.charAt(position);</span>
+    }
+
+    private char next() {
+<span class="fc" id="L239">        return input.charAt(position++);</span>
+    }
+
+    private boolean match(char expected) {
+<span class="fc bfc" id="L243" title="All 4 branches covered.">        if (hasNext() &amp;&amp; peek() == expected) {</span>
+<span class="fc" id="L244">            position++;</span>
+<span class="fc" id="L245">            return true;</span>
+        }
+<span class="fc" id="L247">        return false;</span>
+    }
+
+    private Set&lt;Character&gt; getDigitSet() {
+<span class="fc" id="L251">        Set&lt;Character&gt; digits = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">        for (char c = '0'; c &lt;= '9'; c++) {</span>
+<span class="fc" id="L253">            digits.add(c);</span>
+        }
+<span class="fc" id="L255">        return digits;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

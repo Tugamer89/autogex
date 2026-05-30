@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Automaton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.core</a> &gt; <span class="el_source">Automaton.java</span></div><h1>Automaton.java</h1><pre class="source lang-java linenums">package org.eu.autogex.core;
+
+import java.util.Set;
+import org.eu.autogex.trace.ExecutionTrace;
+
+/** Base interface for all types of Automata (DFA, NFA, ENFA). */
+public interface Automaton {
+
+    /**
+     * Retrieves all the states within the automaton.
+     *
+     * @return A set containing all states.
+     */
+    Set&lt;State&gt; getStates();
+
+    /**
+     * Retrieves the starting state of the automaton.
+     *
+     * @return The initial state.
+     */
+    State getInitialState();
+
+    /**
+     * Retrieves all the accepting (final) states of the automaton.
+     *
+     * @return A set containing all final states.
+     */
+    Set&lt;State&gt; getFinalStates();
+
+    /**
+     * Processes the input string and returns a detailed execution trace.
+     *
+     * @param input The string to be evaluated.
+     * @return An ExecutionTrace detailing the entire state traversal.
+     */
+    ExecutionTrace execute(String input);
+
+    /**
+     * The main method that checks whether the input string belongs to the language recognized by
+     * the automaton L(M).
+     *
+     * @param input The string to be evaluated.
+     * @return true if the string is accepted, false otherwise.
+     */
+    default boolean accepts(String input) {
+<span class="fc" id="L46">        return execute(input).isAccepted();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

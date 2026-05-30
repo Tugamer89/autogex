@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Converter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.algorithms</a> &gt; <span class="el_source">Converter.java</span></div><h1>Converter.java</h1><pre class="source lang-java linenums">package org.eu.autogex.algorithms;
+
+import java.util.*;
+import java.util.ArrayDeque;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.eu.autogex.core.State;
+import org.eu.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.models.NFA;
+
+/** Utility class for Finite State Automata conversion. */
+public class Converter {
+
+<span class="fc" id="L14">    private Converter() {</span>
+<span class="fc" id="L15">        throw new UnsupportedOperationException(&quot;Utility class cannot be instantiated&quot;);</span>
+    }
+
+    /**
+     * Converts an ε-NFA into an NFA. Applies the ε-elimination algorithm.
+     *
+     * @param enfa The source ε-NFA.
+     * @return The equivalent NFA.
+     */
+    public static NFA enfaToNfa(ENFA enfa) {
+<span class="fc" id="L25">        NFA.Builder builder = new NFA.Builder();</span>
+<span class="fc" id="L26">        Set&lt;Character&gt; alphabet = getAlphabet(enfa.getTransitionTable());</span>
+
+        // 1. &amp; 2. Add states and recalculate final states based on closures
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        for (State s : enfa.getStates()) {</span>
+<span class="fc" id="L30">            Set&lt;State&gt; closure = enfa.epsilonClosure(Set.of(s));</span>
+<span class="fc" id="L31">            boolean isFinal = isFinal(closure, enfa.getFinalStates());</span>
+<span class="fc" id="L32">            builder.addState(s.getName(), isFinal);</span>
+<span class="fc" id="L33">        }</span>
+
+        // The initial state remains the same
+<span class="fc" id="L36">        builder.setInitialState(enfa.getInitialState().getName());</span>
+
+        // 3. Compute new transitions for each state across the alphabet
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        for (State q : enfa.getStates()) {</span>
+<span class="fc" id="L40">            Set&lt;State&gt; qClosure = enfa.epsilonClosure(Set.of(q));</span>
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            for (char a : alphabet) {</span>
+<span class="fc" id="L43">                Set&lt;State&gt; targets = computeEnfaTargets(enfa, qClosure, a);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                for (State target : targets) {</span>
+<span class="fc" id="L45">                    builder.addTransition(q.getName(), a, target.getName());</span>
+<span class="fc" id="L46">                }</span>
+<span class="fc" id="L47">            }</span>
+<span class="fc" id="L48">        }</span>
+<span class="fc" id="L49">        return builder.build();</span>
+    }
+
+    /**
+     * Converts an NFA into a DFA. Applies the Rabin-Scott Subset Construction algorithm.
+     *
+     * @param nfa The source NFA.
+     * @return The equivalent DFA.
+     */
+    public static DFA nfaToDfa(NFA nfa) {
+<span class="fc" id="L59">        DFA.Builder builder = new DFA.Builder();</span>
+<span class="fc" id="L60">        Set&lt;Character&gt; alphabet = getAlphabet(nfa.getTransitionTable());</span>
+
+<span class="fc" id="L62">        Map&lt;Set&lt;State&gt;, String&gt; dfaStateNames = new HashMap&lt;&gt;();</span>
+        // ArrayDeque is preferred over LinkedList for queues in hot paths.
+        // It provides better cache locality and avoids O(n) node allocation overhead.
+<span class="fc" id="L65">        Queue&lt;Set&lt;State&gt;&gt; queue = new ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L66">        AtomicInteger stateCounter = new AtomicInteger(0);</span>
+
+        // The DFA initial state is the set containing only the NFA's initial state
+<span class="fc" id="L69">        Set&lt;State&gt; initialSuperState = Set.of(nfa.getInitialState());</span>
+<span class="fc" id="L70">        String initialName = &quot;D&quot; + stateCounter.getAndIncrement();</span>
+
+<span class="fc" id="L72">        builder.addState(initialName, isFinal(initialSuperState, nfa.getFinalStates()));</span>
+<span class="fc" id="L73">        builder.setInitialState(initialName);</span>
+
+<span class="fc" id="L75">        dfaStateNames.put(initialSuperState, initialName);</span>
+<span class="fc" id="L76">        queue.add(initialSuperState);</span>
+
+        // Explore all possible subsets
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        while (!queue.isEmpty()) {</span>
+<span class="fc" id="L80">            Set&lt;State&gt; currentSuperState = queue.poll();</span>
+<span class="fc" id="L81">            String currentName = dfaStateNames.get(currentSuperState);</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            for (char symbol : alphabet) {</span>
+<span class="fc" id="L84">                Set&lt;State&gt; nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);</span>
+
+<span class="fc bfc" id="L86" title="All 2 branches covered.">                if (nextSuperState.isEmpty()) {</span>
+<span class="fc" id="L87">                    continue;</span>
+                }
+
+                // If a new super-state is found, register it
+<span class="fc" id="L91">                String targetName =</span>
+<span class="fc" id="L92">                        dfaStateNames.computeIfAbsent(</span>
+                                nextSuperState,
+                                k -&gt; {
+<span class="fc" id="L95">                                    String nextName = &quot;D&quot; + stateCounter.getAndIncrement();</span>
+<span class="fc" id="L96">                                    builder.addState(nextName, isFinal(k, nfa.getFinalStates()));</span>
+<span class="fc" id="L97">                                    queue.add(k);</span>
+<span class="fc" id="L98">                                    return nextName;</span>
+                                });
+
+<span class="fc" id="L101">                builder.addTransition(currentName, symbol, targetName);</span>
+<span class="fc" id="L102">            }</span>
+<span class="fc" id="L103">        }</span>
+
+<span class="fc" id="L105">        return builder.build();</span>
+    }
+
+    /**
+     * Convenience method that applies the full transformation chain: ENFA -&gt; NFA -&gt; DFA.
+     *
+     * @param enfa The source ε-NFA.
+     * @return The equivalent DFA.
+     */
+    public static DFA enfaToDfa(ENFA enfa) {
+<span class="fc" id="L115">        NFA intermediateNfa = enfaToNfa(enfa);</span>
+<span class="fc" id="L116">        return nfaToDfa(intermediateNfa);</span>
+    }
+
+    // --- Helper Methods ---
+
+    /** Computes the reachable subset of states by reading a symbol. */
+    private static Set&lt;State&gt; computeNextSuperState(
+            NFA nfa, Set&lt;State&gt; currentSuperState, char symbol) {
+<span class="fc" id="L124">        Set&lt;State&gt; nextSuperState = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (State s : currentSuperState) {</span>
+<span class="fc" id="L126">            Map&lt;Character, Set&lt;State&gt;&gt; transitions = nfa.getTransitionTable().get(s);</span>
+<span class="fc bfc" id="L127" title="All 4 branches covered.">            if (transitions != null &amp;&amp; transitions.containsKey(symbol)) {</span>
+<span class="fc" id="L128">                nextSuperState.addAll(transitions.get(symbol));</span>
+            }
+<span class="fc" id="L130">        }</span>
+<span class="fc" id="L131">        return nextSuperState;</span>
+    }
+
+    /**
+     * Computes target states for an ENFA starting from a closure, reading a symbol, and applying
+     * the ε-closure to the result.
+     */
+    private static Set&lt;State&gt; computeEnfaTargets(ENFA enfa, Set&lt;State&gt; qClosure, char symbol) {
+<span class="fc" id="L139">        Set&lt;State&gt; targets = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        for (State p : qClosure) {</span>
+<span class="fc" id="L141">            Map&lt;Character, Set&lt;State&gt;&gt; transitions = enfa.getTransitionTable().get(p);</span>
+<span class="fc bfc" id="L142" title="All 4 branches covered.">            if (transitions != null &amp;&amp; transitions.containsKey(symbol)) {</span>
+<span class="fc" id="L143">                targets.addAll(enfa.epsilonClosure(transitions.get(symbol)));</span>
+            }
+<span class="fc" id="L145">        }</span>
+<span class="fc" id="L146">        return targets;</span>
+    }
+
+    private static Set&lt;Character&gt; getAlphabet(
+            Map&lt;State, Map&lt;Character, Set&lt;State&gt;&gt;&gt; transitionTable) {
+<span class="fc" id="L151">        Set&lt;Character&gt; alphabet = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        for (Map&lt;Character, Set&lt;State&gt;&gt; transitions : transitionTable.values()) {</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">            for (Character c : transitions.keySet()) {</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                if (c != null) {</span>
+<span class="fc" id="L155">                    alphabet.add(c);</span>
+                }
+<span class="fc" id="L157">            }</span>
+<span class="fc" id="L158">        }</span>
+<span class="fc" id="L159">        return alphabet;</span>
+    }
+
+    private static boolean isFinal(Set&lt;State&gt; superState, Set&lt;State&gt; finalStates) {
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        return !Collections.disjoint(superState, finalStates);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

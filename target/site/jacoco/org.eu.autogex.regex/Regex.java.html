@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Regex.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.regex</a> &gt; <span class="el_source">Regex.java</span></div><h1>Regex.java</h1><pre class="source lang-java linenums">package org.eu.autogex.regex;
+
+import org.eu.autogex.algorithms.Converter;
+import org.eu.autogex.algorithms.Minimizer;
+import org.eu.autogex.algorithms.ThompsonConstructor;
+import org.eu.autogex.export.GraphvizExporter;
+import org.eu.autogex.export.MermaidExporter;
+import org.eu.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.regex.ast.RegexNode;
+import org.eu.autogex.regex.parser.RegexParser;
+
+/**
+ * Facade class representing a compiled Regular Expression. Under the hood, it parses the regex,
+ * builds an ENFA, converts it to a DFA, and minimizes it.
+ */
+public class Regex {
+
+    private final String pattern;
+    private final DFA minimalDfa;
+
+    /**
+     * Compiles the given regular expression into a highly optimized Minimal DFA.
+     *
+     * @param pattern The regular expression string (e.g., &quot;(a|b)*abb&quot;).
+     * @throws IllegalArgumentException If the regex syntax is invalid.
+     */
+<span class="fc" id="L28">    public Regex(String pattern) {</span>
+<span class="fc" id="L29">        this.pattern = pattern;</span>
+
+        // 1. Parse string to AST
+<span class="fc" id="L32">        RegexNode ast = RegexParser.parse(pattern);</span>
+
+        // 2. Apply Thompson's Construction (AST -&gt; ENFA)
+<span class="fc" id="L35">        ENFA enfa = ThompsonConstructor.construct(ast);</span>
+
+        // 3. Apply Subset Construction (ENFA -&gt; DFA)
+<span class="fc" id="L38">        DFA rawDfa = Converter.enfaToDfa(enfa);</span>
+
+        // 4. Apply Moore's Partitioning (DFA -&gt; Minimal DFA)
+<span class="fc" id="L41">        this.minimalDfa = Minimizer.minimize(rawDfa);</span>
+<span class="fc" id="L42">    }</span>
+
+    /**
+     * Checks if the input string perfectly matches the regular expression.
+     *
+     * @param input The string to test.
+     * @return True if the string is accepted by the underlying automaton, false otherwise.
+     */
+    public boolean matches(String input) {
+<span class="fc" id="L51">        return minimalDfa.accepts(input);</span>
+    }
+
+    /**
+     * Exports the compiled minimal DFA to the Graphviz DOT language format. This string can be
+     * rendered using Graphviz tools or online viewers.
+     *
+     * @return The DOT graph representation.
+     */
+    public String toDotGraph() {
+<span class="fc" id="L61">        return GraphvizExporter.toDot(minimalDfa);</span>
+    }
+
+    /**
+     * Exports the compiled minimal DFA to the Mermaid.js stateDiagram-v2 format. This string can be
+     * natively rendered in GitHub Markdown without external viewers.
+     *
+     * @return The Mermaid.js graph representation.
+     */
+    public String toMermaidGraph() {
+<span class="fc" id="L71">        return MermaidExporter.toMermaid(minimalDfa);</span>
+    }
+
+    /**
+     * Retrieves the underlying compiled and minimized DFA.
+     *
+     * @return The minimal DFA.
+     */
+    public DFA getAutomaton() {
+<span class="fc" id="L80">        return minimalDfa;</span>
+    }
+
+    /**
+     * Retrieves the original regular expression pattern.
+     *
+     * @return The pattern string.
+     */
+    public String getPattern() {
+<span class="fc" id="L89">        return pattern;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractAutomaton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.core</a> &gt; <span class="el_source">AbstractAutomaton.java</span></div><h1>AbstractAutomaton.java</h1><pre class="source lang-java linenums">package org.eu.autogex.core;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Abstract base class for all automata models. Centralizes the management of states and their
+ * respective getters.
+ */
+public abstract class AbstractAutomaton implements Automaton {
+    protected final Set&lt;State&gt; states;
+    protected final State initialState;
+    protected final Set&lt;State&gt; finalStates;
+
+<span class="fc" id="L16">    protected AbstractAutomaton(AbstractAutomatonBuilder&lt;?, ?&gt; builder) {</span>
+<span class="fc" id="L17">        this.states = Set.copyOf(builder.getStatesMap().values());</span>
+<span class="fc" id="L18">        this.initialState = builder.getInitialState();</span>
+<span class="fc" id="L19">        this.finalStates = Set.copyOf(builder.getFinalStates());</span>
+<span class="fc" id="L20">    }</span>
+
+    @Override
+    public Set&lt;State&gt; getStates() {
+<span class="fc" id="L24">        return states;</span>
+    }
+
+    @Override
+    public State getInitialState() {
+<span class="fc" id="L29">        return initialState;</span>
+    }
+
+    @Override
+    public Set&lt;State&gt; getFinalStates() {
+<span class="fc" id="L34">        return finalStates;</span>
+    }
+
+    /**
+     * Calculates the next active states for non-deterministic automata. Protected and shared method
+     * to avoid duplicated code between NFA and ENFA (SonarQube).
+     *
+     * @param currentStates The set of current states.
+     * @param symbol The symbol read from the input.
+     * @param transitionTable The transition table of the child automaton.
+     * @return The set of new reachable states.
+     */
+    protected Set&lt;State&gt; computeNextStates(
+            Set&lt;State&gt; currentStates,
+            char symbol,
+            Map&lt;State, Map&lt;Character, Set&lt;State&gt;&gt;&gt; transitionTable) {
+<span class="fc" id="L50">        Set&lt;State&gt; nextStates = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        for (State state : currentStates) {</span>
+<span class="fc" id="L52">            Map&lt;Character, Set&lt;State&gt;&gt; stateTransitions = transitionTable.get(state);</span>
+<span class="fc bfc" id="L53" title="All 4 branches covered.">            if (stateTransitions != null &amp;&amp; stateTransitions.containsKey(symbol)) {</span>
+<span class="fc" id="L54">                nextStates.addAll(stateTransitions.get(symbol));</span>
+            }
+<span class="fc" id="L56">        }</span>
+<span class="fc" id="L57">        return nextStates;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,17 @@
+org/eu/autogex/models/NFATest.class
+org/eu/autogex/algorithms/ThompsonConstructorTest.class
+org/eu/autogex/algorithms/ConverterTest.class
+org/eu/autogex/regex/parser/RegexParserTest.class
+org/eu/autogex/models/ENFATest.class
+org/eu/autogex/AutoGexTest.class
+org/eu/autogex/trace/ExecutionTraceTest.class
+org/eu/autogex/regex/RegexTest.class
+org/eu/autogex/models/DFATest.class
+org/eu/autogex/core/TransitionTest.class
+org/eu/autogex/algorithms/ThompsonConstructorTest$1.class
+org/eu/autogex/export/GraphvizExporterTest.class
+org/eu/autogex/UsageExamplesTest.class
+org/eu/autogex/regex/ast/RegexNodeTest.class
+org/eu/autogex/core/StateTest.class
+org/eu/autogex/algorithms/MinimizerTest.class
+org/eu/autogex/export/MermaidExporterTest.class

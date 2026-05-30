@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphvizExporter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.export</a> &gt; <span class="el_source">GraphvizExporter.java</span></div><h1>GraphvizExporter.java</h1><pre class="source lang-java linenums">package org.eu.autogex.export;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.eu.autogex.core.State;
+import org.eu.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.models.NFA;
+
+/**
+ * Utility class for exporting automata to the Graphviz DOT language format. This allows for easy
+ * visual representation of DFA, NFA, and ENFA models.
+ */
+public class GraphvizExporter {
+
+    private static final String EPSILON_LABEL = &quot;ε&quot;;
+
+<span class="fc" id="L19">    private GraphvizExporter() {</span>
+<span class="fc" id="L20">        throw new UnsupportedOperationException(&quot;Utility class cannot be instantiated&quot;);</span>
+    }
+
+    /**
+     * Exports a DFA to a DOT format string.
+     *
+     * @param dfa The Deterministic Finite Automaton.
+     * @return The DOT language representation.
+     */
+    public static String toDot(DFA dfa) {
+<span class="fc" id="L30">        StringBuilder sb = buildDotHeader(dfa.getInitialState(), dfa.getFinalStates());</span>
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        for (Map.Entry&lt;State, Map&lt;Character, State&gt;&gt; entry : dfa.getTransitionTable().entrySet()) {</span>
+<span class="fc" id="L33">            State source = entry.getKey();</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            for (Map.Entry&lt;Character, State&gt; transition : entry.getValue().entrySet()) {</span>
+<span class="fc" id="L35">                appendTransition(sb, source, transition.getKey().toString(), transition.getValue());</span>
+<span class="fc" id="L36">            }</span>
+<span class="fc" id="L37">        }</span>
+
+<span class="fc" id="L39">        return closeDot(sb);</span>
+    }
+
+    /**
+     * Exports an NFA to a DOT format string.
+     *
+     * @param nfa The Non-Deterministic Finite Automaton.
+     * @return The DOT language representation.
+     */
+    public static String toDot(NFA nfa) {
+<span class="fc" id="L49">        StringBuilder sb = buildDotHeader(nfa.getInitialState(), nfa.getFinalStates());</span>
+
+        for (Map.Entry&lt;State, Map&lt;Character, Set&lt;State&gt;&gt;&gt; entry :
+<span class="fc bfc" id="L52" title="All 2 branches covered.">                nfa.getTransitionTable().entrySet()) {</span>
+<span class="fc" id="L53">            State source = entry.getKey();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            for (Map.Entry&lt;Character, Set&lt;State&gt;&gt; transition : entry.getValue().entrySet()) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">                for (State target : transition.getValue()) {</span>
+<span class="fc" id="L56">                    appendTransition(sb, source, transition.getKey().toString(), target);</span>
+<span class="fc" id="L57">                }</span>
+<span class="fc" id="L58">            }</span>
+<span class="fc" id="L59">        }</span>
+
+<span class="fc" id="L61">        return closeDot(sb);</span>
+    }
+
+    /**
+     * Exports an ENFA to a DOT format string. Epsilon transitions (null keys) are represented with
+     * the 'ε' symbol.
+     *
+     * @param enfa The Epsilon-NFA.
+     * @return The DOT language representation.
+     */
+    public static String toDot(ENFA enfa) {
+<span class="fc" id="L72">        StringBuilder sb = buildDotHeader(enfa.getInitialState(), enfa.getFinalStates());</span>
+
+        for (Map.Entry&lt;State, Map&lt;Character, Set&lt;State&gt;&gt;&gt; entry :
+<span class="fc bfc" id="L75" title="All 2 branches covered.">                enfa.getTransitionTable().entrySet()) {</span>
+<span class="fc" id="L76">            State source = entry.getKey();</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            for (Map.Entry&lt;Character, Set&lt;State&gt;&gt; transition : entry.getValue().entrySet()) {</span>
+                String label =
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                        transition.getKey() == null</span>
+<span class="fc" id="L80">                                ? EPSILON_LABEL</span>
+<span class="fc" id="L81">                                : transition.getKey().toString();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                for (State target : transition.getValue()) {</span>
+<span class="fc" id="L83">                    appendTransition(sb, source, label, target);</span>
+<span class="fc" id="L84">                }</span>
+<span class="fc" id="L85">            }</span>
+<span class="fc" id="L86">        }</span>
+
+<span class="fc" id="L88">        return closeDot(sb);</span>
+    }
+
+    // --- Private Helper Methods ---
+
+    private static StringBuilder buildDotHeader(State initialState, Set&lt;State&gt; finalStates) {
+<span class="fc" id="L94">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L95">        sb.append(&quot;digraph Automaton {\n&quot;);</span>
+<span class="fc" id="L96">        sb.append(&quot;  rankdir=LR;\n&quot;); // Left-to-Right orientation</span>
+
+        // Define final states appearance (Double Circle)
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (!finalStates.isEmpty()) {</span>
+<span class="fc" id="L100">            String finalStatesList =</span>
+<span class="fc" id="L101">                    finalStates.stream()</span>
+<span class="fc" id="L102">                            .map(s -&gt; &quot;\&quot;&quot; + escapeDotString(s.getName()) + &quot;\&quot;&quot;)</span>
+<span class="fc" id="L103">                            .collect(Collectors.joining(&quot; &quot;));</span>
+<span class="fc" id="L104">            sb.append(&quot;  node [shape = doublecircle]; &quot;).append(finalStatesList).append(&quot;;\n&quot;);</span>
+        }
+
+        // Reset to default node appearance (Single Circle)
+<span class="fc" id="L108">        sb.append(&quot;  node [shape = circle];\n&quot;);</span>
+
+        // Invisible entry node to point to the initial state
+<span class="fc" id="L111">        sb.append(&quot;  __start0 [shape=none, label=\&quot;\&quot;];\n&quot;);</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (initialState != null) {</span>
+<span class="fc" id="L113">            sb.append(&quot;  __start0 -&gt; \&quot;&quot;)</span>
+<span class="fc" id="L114">                    .append(escapeDotString(initialState.getName()))</span>
+<span class="fc" id="L115">                    .append(&quot;\&quot;;\n&quot;);</span>
+        }
+
+<span class="fc" id="L118">        return sb;</span>
+    }
+
+    private static void appendTransition(
+            StringBuilder sb, State source, String label, State target) {
+<span class="fc" id="L123">        sb.append(&quot;  \&quot;&quot;)</span>
+<span class="fc" id="L124">                .append(escapeDotString(source.getName()))</span>
+<span class="fc" id="L125">                .append(&quot;\&quot; -&gt; \&quot;&quot;)</span>
+<span class="fc" id="L126">                .append(escapeDotString(target.getName()))</span>
+<span class="fc" id="L127">                .append(&quot;\&quot; [label=\&quot;&quot;)</span>
+<span class="fc" id="L128">                .append(escapeDotString(label))</span>
+<span class="fc" id="L129">                .append(&quot;\&quot;];\n&quot;);</span>
+<span class="fc" id="L130">    }</span>
+
+    private static String escapeDotString(String text) {
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if (text == null) return &quot;&quot;;</span>
+<span class="fc" id="L134">        return text.replace(&quot;\\&quot;, &quot;\\\\&quot;).replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;);</span>
+    }
+
+    private static String closeDot(StringBuilder sb) {
+<span class="fc" id="L138">        sb.append(&quot;}\n&quot;);</span>
+<span class="fc" id="L139">        return sb.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

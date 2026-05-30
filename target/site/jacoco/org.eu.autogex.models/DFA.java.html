@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DFA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.models</a> &gt; <span class="el_source">DFA.java</span></div><h1>DFA.java</h1><pre class="source lang-java linenums">package org.eu.autogex.models;
+
+import java.util.*;
+import org.eu.autogex.core.AbstractAutomaton;
+import org.eu.autogex.core.AbstractAutomatonBuilder;
+import org.eu.autogex.core.State;
+import org.eu.autogex.trace.ExecutionStep;
+import org.eu.autogex.trace.ExecutionTrace;
+
+/** Deterministic Finite Automaton (DFA). */
+public class DFA extends AbstractAutomaton {
+
+    // Map: Source State -&gt; (Map: Character -&gt; Target State)
+    private final Map&lt;State, Map&lt;Character, State&gt;&gt; transitionTable;
+
+    private DFA(Builder builder) {
+<span class="fc" id="L17">        super(builder);</span>
+<span class="fc" id="L18">        this.transitionTable = Map.copyOf(builder.transitionTable);</span>
+<span class="fc" id="L19">    }</span>
+
+    @Override
+    public ExecutionTrace execute(String input) {
+<span class="fc" id="L23">        List&lt;ExecutionStep&gt; steps = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L24">        Set&lt;State&gt; currentStates = Set.of(initialState);</span>
+
+        // Initial setup step
+<span class="fc" id="L27">        steps.add(new ExecutionStep(Collections.emptySet(), null, currentStates));</span>
+
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        for (char symbol : input.toCharArray()) {</span>
+<span class="fc" id="L30">            State currentState = currentStates.iterator().next();</span>
+<span class="fc" id="L31">            Map&lt;Character, State&gt; stateTransitions = transitionTable.get(currentState);</span>
+
+            Set&lt;State&gt; nextStates =
+<span class="fc bfc" id="L34" title="All 4 branches covered.">                    (stateTransitions != null &amp;&amp; stateTransitions.containsKey(symbol))</span>
+<span class="fc" id="L35">                            ? Set.of(stateTransitions.get(symbol))</span>
+<span class="fc" id="L36">                            : Collections.emptySet();</span>
+
+<span class="fc" id="L38">            steps.add(new ExecutionStep(currentStates, symbol, nextStates));</span>
+<span class="fc" id="L39">            currentStates = nextStates;</span>
+
+            // If there is no defined transition, the string is rejected (Trap state)
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            if (currentStates.isEmpty()) {</span>
+<span class="fc" id="L43">                break;</span>
+            }
+        }
+
+<span class="fc" id="L47">        boolean isAccepted =</span>
+<span class="fc bfc" id="L48" title="All 4 branches covered.">                !currentStates.isEmpty() &amp;&amp; finalStates.contains(currentStates.iterator().next());</span>
+<span class="fc" id="L49">        return new ExecutionTrace(input, steps, isAccepted);</span>
+    }
+
+    /**
+     * Retrieves the internal transition table of the DFA.
+     *
+     * @return The transition table.
+     */
+    public Map&lt;State, Map&lt;Character, State&gt;&gt; getTransitionTable() {
+<span class="fc" id="L58">        return transitionTable;</span>
+    }
+
+    /** Builder pattern to construct the DFA fluently. */
+    public static class Builder extends AbstractAutomatonBuilder&lt;Builder, DFA&gt; {
+
+<span class="fc" id="L64">        private final Map&lt;State, Map&lt;Character, State&gt;&gt; transitionTable = new HashMap&lt;&gt;();</span>
+
+        /** Default constructor for DFA Builder. */
+<span class="fc" id="L67">        public Builder() {</span>
+            // Empty constructor since fields are initialized at declaration.
+            // Required explicitly to maintain Javadoc and satisfy SonarQube rules.
+<span class="fc" id="L70">        }</span>
+
+        @Override
+        protected Builder self() {
+<span class="fc" id="L74">            return this;</span>
+        }
+
+        /**
+         * Adds a transition between two states.
+         *
+         * @param fromName The name of the source state.
+         * @param symbol The character required to trigger the transition.
+         * @param toName The name of the destination state.
+         * @return The current builder instance.
+         */
+        public Builder addTransition(String fromName, char symbol, String toName) {
+<span class="fc" id="L86">            State[] transitionStates = getTransitionStatesOrThrow(fromName, toName);</span>
+<span class="fc" id="L87">            transitionTable</span>
+<span class="fc" id="L88">                    .computeIfAbsent(transitionStates[0], k -&gt; new HashMap&lt;&gt;())</span>
+<span class="fc" id="L89">                    .put(symbol, transitionStates[1]);</span>
+<span class="fc" id="L90">            return self();</span>
+        }
+
+        @Override
+        public DFA build() {
+<span class="fc" id="L95">            validate();</span>
+<span class="fc" id="L96">            return new DFA(this);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

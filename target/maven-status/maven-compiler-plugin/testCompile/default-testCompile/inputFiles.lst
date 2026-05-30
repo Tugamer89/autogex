@@ -1,0 +1,16 @@
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/AutoGexTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/UsageExamplesTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/algorithms/ConverterTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/algorithms/MinimizerTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/algorithms/ThompsonConstructorTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/core/StateTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/core/TransitionTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/export/GraphvizExporterTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/export/MermaidExporterTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/models/DFATest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/models/ENFATest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/models/NFATest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/regex/RegexTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/regex/ast/RegexNodeTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/regex/parser/RegexParserTest.java
+/home/tuga/repos/autogex/src/test/java/org/eu/autogex/trace/ExecutionTraceTest.java

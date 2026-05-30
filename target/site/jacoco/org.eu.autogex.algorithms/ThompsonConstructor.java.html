@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThompsonConstructor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.algorithms</a> &gt; <span class="el_source">ThompsonConstructor.java</span></div><h1>ThompsonConstructor.java</h1><pre class="source lang-java linenums">package org.eu.autogex.algorithms;
+
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.regex.ast.RegexNode;
+import org.eu.autogex.regex.ast.RegexNode.*;
+
+/**
+ * Implements Thompson's Construction algorithm to convert an Abstract Syntax Tree (AST) of a
+ * regular expression into an Epsilon-NFA (ENFA).
+ */
+public class ThompsonConstructor {
+
+    private final ENFA.Builder builder;
+    private int stateCounter;
+
+<span class="fc" id="L16">    private ThompsonConstructor() {</span>
+<span class="fc" id="L17">        this.builder = new ENFA.Builder();</span>
+<span class="fc" id="L18">        this.stateCounter = 0;</span>
+<span class="fc" id="L19">    }</span>
+
+    /**
+     * Converts a Regex AST into an ENFA.
+     *
+     * @param ast The root node of the parsed Regular Expression.
+     * @return The constructed ENFA.
+     */
+    public static ENFA construct(RegexNode ast) {
+<span class="fc" id="L28">        ThompsonConstructor constructor = new ThompsonConstructor();</span>
+<span class="fc" id="L29">        Fragment rootFragment = constructor.generateFragment(ast);</span>
+
+        // Create a single global final state for the completed automaton
+<span class="fc" id="L32">        String finalState = constructor.newStateName();</span>
+<span class="fc" id="L33">        constructor.builder.addState(finalState, true);</span>
+
+        // Connect the root fragment's accept state to the global final state
+<span class="fc" id="L36">        constructor.builder.addEpsilonTransition(rootFragment.accept(), finalState);</span>
+
+        // Set the initial state
+<span class="fc" id="L39">        constructor.builder.setInitialState(rootFragment.start());</span>
+
+<span class="fc" id="L41">        return constructor.builder.build();</span>
+    }
+
+    /** Represents a partially built ENFA with a single start and a single accept state. */
+<span class="fc" id="L45">    private record Fragment(String start, String accept) {}</span>
+
+    private String newStateName() {
+<span class="fc" id="L48">        return &quot;q&quot; + (stateCounter++);</span>
+    }
+
+    private Fragment generateFragment(RegexNode node) {
+<span class="fc" id="L52">        return node.accept(new AstVisitor());</span>
+    }
+
+    /** Visitor implementation to traverse the AST and build ENFA fragments using Polymorphism. */
+<span class="fc" id="L56">    private class AstVisitor implements RegexNode.Visitor&lt;Fragment&gt; {</span>
+
+        private String addNonFinalState() {
+<span class="fc" id="L59">            String name = newStateName();</span>
+<span class="fc" id="L60">            builder.addState(name, false);</span>
+<span class="fc" id="L61">            return name;</span>
+        }
+
+        @Override
+        public Fragment visit(LiteralNode lit) {
+<span class="fc" id="L66">            String start = addNonFinalState();</span>
+<span class="fc" id="L67">            String accept = addNonFinalState();</span>
+<span class="fc" id="L68">            builder.addTransition(start, lit.symbol(), accept);</span>
+<span class="fc" id="L69">            return new Fragment(start, accept);</span>
+        }
+
+        @Override
+        public Fragment visit(ConcatNode concat) {
+<span class="fc" id="L74">            Fragment left = concat.left().accept(this);</span>
+<span class="fc" id="L75">            Fragment right = concat.right().accept(this);</span>
+<span class="fc" id="L76">            builder.addEpsilonTransition(left.accept(), right.start());</span>
+<span class="fc" id="L77">            return new Fragment(left.start(), right.accept());</span>
+        }
+
+        @Override
+        public Fragment visit(UnionNode union) {
+<span class="fc" id="L82">            Fragment left = union.left().accept(this);</span>
+<span class="fc" id="L83">            Fragment right = union.right().accept(this);</span>
+
+<span class="fc" id="L85">            String start = addNonFinalState();</span>
+<span class="fc" id="L86">            String accept = addNonFinalState();</span>
+
+<span class="fc" id="L88">            builder.addEpsilonTransition(start, left.start());</span>
+<span class="fc" id="L89">            builder.addEpsilonTransition(start, right.start());</span>
+<span class="fc" id="L90">            builder.addEpsilonTransition(left.accept(), accept);</span>
+<span class="fc" id="L91">            builder.addEpsilonTransition(right.accept(), accept);</span>
+
+<span class="fc" id="L93">            return new Fragment(start, accept);</span>
+        }
+
+        @Override
+        public Fragment visit(StarNode star) {
+<span class="fc" id="L98">            Fragment child = star.child().accept(this);</span>
+
+<span class="fc" id="L100">            String start = addNonFinalState();</span>
+<span class="fc" id="L101">            String accept = addNonFinalState();</span>
+
+<span class="fc" id="L103">            builder.addEpsilonTransition(start, child.start());</span>
+<span class="fc" id="L104">            builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)</span>
+<span class="fc" id="L105">            builder.addEpsilonTransition(child.accept(), child.start()); // Loop path</span>
+<span class="fc" id="L106">            builder.addEpsilonTransition(child.accept(), accept);</span>
+
+<span class="fc" id="L108">            return new Fragment(start, accept);</span>
+        }
+
+        @Override
+        public Fragment visit(PlusNode plus) {
+<span class="fc" id="L113">            Fragment child = plus.child().accept(this);</span>
+
+<span class="fc" id="L115">            String start = addNonFinalState();</span>
+<span class="fc" id="L116">            String accept = addNonFinalState();</span>
+
+<span class="fc" id="L118">            builder.addEpsilonTransition(start, child.start());</span>
+<span class="fc" id="L119">            builder.addEpsilonTransition(child.accept(), child.start()); // Loop path (one or more)</span>
+<span class="fc" id="L120">            builder.addEpsilonTransition(child.accept(), accept);</span>
+
+<span class="fc" id="L122">            return new Fragment(start, accept);</span>
+        }
+
+        @Override
+        public Fragment visit(OptionalNode opt) {
+<span class="fc" id="L127">            Fragment child = opt.child().accept(this);</span>
+
+<span class="fc" id="L129">            String start = addNonFinalState();</span>
+<span class="fc" id="L130">            String accept = addNonFinalState();</span>
+
+<span class="fc" id="L132">            builder.addEpsilonTransition(start, child.start());</span>
+<span class="fc" id="L133">            builder.addEpsilonTransition(start, accept); // Skip path (zero occurrences)</span>
+<span class="fc" id="L134">            builder.addEpsilonTransition(child.accept(), accept);</span>
+
+<span class="fc" id="L136">            return new Fragment(start, accept);</span>
+        }
+
+        @Override
+        public Fragment visit(CharClassNode charClass) {
+<span class="fc" id="L141">            String start = addNonFinalState();</span>
+<span class="fc" id="L142">            String accept = addNonFinalState();</span>
+
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            for (char c : charClass.chars()) {</span>
+<span class="fc" id="L145">                builder.addTransition(start, c, accept);</span>
+<span class="fc" id="L146">            }</span>
+
+<span class="fc" id="L148">            return new Fragment(start, accept);</span>
+        }
+
+        @Override
+        public Fragment visit(WildcardNode wildcard) {
+<span class="fc" id="L153">            String start = addNonFinalState();</span>
+<span class="fc" id="L154">            String accept = addNonFinalState();</span>
+
+            // Cover standard ASCII printable characters for the wildcard '.'
+<span class="fc bfc" id="L157" title="All 2 branches covered.">            for (char c = 32; c &lt;= 126; c++) {</span>
+<span class="fc" id="L158">                builder.addTransition(start, c, accept);</span>
+            }
+
+<span class="fc" id="L161">            return new Fragment(start, accept);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

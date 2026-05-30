@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractAutomatonBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.core</a> &gt; <span class="el_source">AbstractAutomatonBuilder.java</span></div><h1>AbstractAutomatonBuilder.java</h1><pre class="source lang-java linenums">package org.eu.autogex.core;
+
+import java.util.*;
+
+/**
+ * Abstract builder based on the Curiously Recurring Template Pattern (CRTP). Allows sharing state
+ * creation logic among all specific Builders (DFA, NFA, ENFA) while maintaining fluid method
+ * chaining.
+ *
+ * @param &lt;B&gt; The concrete Builder type (e.g., DFA.Builder)
+ * @param &lt;A&gt; The Automaton type to build (e.g., DFA)
+ */
+public abstract class AbstractAutomatonBuilder&lt;
+        B extends AbstractAutomatonBuilder&lt;B, A&gt;, A extends Automaton&gt; {
+
+<span class="fc" id="L16">    protected final Map&lt;String, State&gt; states = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L17">    protected final Set&lt;State&gt; finalStates = new HashSet&lt;&gt;();</span>
+    protected State initialState;
+
+    /** Default constructor for the abstract builder. */
+<span class="fc" id="L21">    protected AbstractAutomatonBuilder() {</span>
+        // Empty constructor since fields are initialized at declaration.
+        // Required explicitly to maintain Javadoc and satisfy SonarQube rules.
+<span class="fc" id="L24">    }</span>
+
+    /**
+     * Abstract method that each concrete Builder must implement by returning 'this'. Ensures that
+     * chaining returns the correct type.
+     *
+     * @return The current builder instance.
+     */
+    protected abstract B self();
+
+    /**
+     * Adds a new state to the automaton.
+     *
+     * @param name The name of the state.
+     * @param isFinal True if the state is an accepting state.
+     * @return The current builder instance.
+     */
+    public B addState(String name, boolean isFinal) {
+<span class="fc" id="L42">        State state = new State(name, isFinal);</span>
+<span class="fc" id="L43">        states.put(name, state);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (isFinal) {</span>
+<span class="fc" id="L45">            finalStates.add(state);</span>
+        }
+<span class="fc" id="L47">        return self();</span>
+    }
+
+    /**
+     * Sets the initial state of the automaton.
+     *
+     * @param name The name of an already added state.
+     * @return The current builder instance.
+     */
+    public B setInitialState(String name) {
+<span class="fc" id="L57">        this.initialState = states.get(name);</span>
+<span class="fc" id="L58">        return self();</span>
+    }
+
+    /**
+     * Performs integrity checks common to all builders.
+     *
+     * @throws IllegalStateException if the builder configuration is invalid.
+     */
+    protected void validate() {
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (initialState == null) {</span>
+<span class="fc" id="L68">            throw new IllegalStateException(</span>
+                    &quot;The initial state must be set before calling build().&quot;);
+        }
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Validates and retrieves the states for a transition. Shared among all concrete builders to
+     * prevent code duplication.
+     *
+     * @param fromName The name of the source state.
+     * @param toName The name of the destination state.
+     * @return An array containing [sourceState, targetState].
+     * @throws IllegalArgumentException if either state does not exist.
+     */
+    protected State[] getTransitionStatesOrThrow(String fromName, String toName) {
+<span class="fc" id="L83">        State from = states.get(fromName);</span>
+<span class="fc" id="L84">        State to = states.get(toName);</span>
+<span class="fc bfc" id="L85" title="All 4 branches covered.">        if (from == null || to == null) {</span>
+<span class="fc" id="L86">            throw new IllegalArgumentException(&quot;State not found. Add it first using addState.&quot;);</span>
+        }
+<span class="fc" id="L88">        return new State[] {from, to};</span>
+    }
+
+    /**
+     * Builds and returns the final automaton instance.
+     *
+     * @return The compiled automaton.
+     */
+    public abstract A build();
+
+    /**
+     * Gets the map of all registered states.
+     *
+     * @return The states map.
+     */
+    public Map&lt;String, State&gt; getStatesMap() {
+<span class="fc" id="L104">        return states;</span>
+    }
+
+    /**
+     * Gets the set of all registered final states.
+     *
+     * @return The final states set.
+     */
+    public Set&lt;State&gt; getFinalStates() {
+<span class="fc" id="L113">        return finalStates;</span>
+    }
+
+    /**
+     * Gets the registered initial state.
+     *
+     * @return The initial state.
+     */
+    public State getInitialState() {
+<span class="fc" id="L122">        return initialState;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

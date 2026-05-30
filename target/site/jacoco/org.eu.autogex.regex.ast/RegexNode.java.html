@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegexNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.regex.ast</a> &gt; <span class="el_source">RegexNode.java</span></div><h1>RegexNode.java</h1><pre class="source lang-java linenums">package org.eu.autogex.regex.ast;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Base interface for all nodes in the Regular Expression Abstract Syntax Tree (AST). Utilizes Java
+ * Records to define immutable node implementations concisely.
+ */
+public interface RegexNode {
+
+    /**
+     * Accepts a visitor to apply an operation on this node.
+     *
+     * @param visitor The visitor applying the operation.
+     * @param &lt;T&gt; The return type of the visitor.
+     * @return The result of the visitor's operation.
+     */
+    &lt;T&gt; T accept(Visitor&lt;T&gt; visitor);
+
+    /**
+     * The Visitor interface for the AST nodes.
+     *
+     * @param &lt;T&gt; The return type of the visitor operations.
+     */
+    interface Visitor&lt;T&gt; {
+
+        /**
+         * Visits a LiteralNode.
+         *
+         * @param node The LiteralNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(LiteralNode node);
+
+        /**
+         * Visits a ConcatNode.
+         *
+         * @param node The ConcatNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(ConcatNode node);
+
+        /**
+         * Visits a UnionNode.
+         *
+         * @param node The UnionNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(UnionNode node);
+
+        /**
+         * Visits a StarNode.
+         *
+         * @param node The StarNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(StarNode node);
+
+        /**
+         * Visits a PlusNode.
+         *
+         * @param node The PlusNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(PlusNode node);
+
+        /**
+         * Visits an OptionalNode.
+         *
+         * @param node The OptionalNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(OptionalNode node);
+
+        /**
+         * Visits a CharClassNode.
+         *
+         * @param node The CharClassNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(CharClassNode node);
+
+        /**
+         * Visits a WildcardNode.
+         *
+         * @param node The WildcardNode to visit.
+         * @return The result of the visitor's operation.
+         */
+        T visit(WildcardNode node);
+    }
+
+    /**
+     * Represents a single literal character in the regex (e.g., 'a', 'b').
+     *
+     * @param symbol The character symbol.
+     */
+<span class="fc" id="L98">    record LiteralNode(char symbol) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L101">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc" id="L106">            return String.valueOf(symbol);</span>
+        }
+    }
+
+    /**
+     * Represents the concatenation of two regular expressions (e.g., &quot;ab&quot;). Note: Concatenation is
+     * usually implicit in regex strings.
+     *
+     * @param left The left operand of the concatenation.
+     * @param right The right operand of the concatenation.
+     */
+<span class="fc" id="L117">    record ConcatNode(RegexNode left, RegexNode right) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L120">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc" id="L125">            return left.toString() + right.toString();</span>
+        }
+    }
+
+    /**
+     * Represents the union (OR) of two regular expressions (e.g., &quot;a|b&quot;).
+     *
+     * @param left The left operand of the union.
+     * @param right The right operand of the union.
+     */
+<span class="fc" id="L135">    record UnionNode(RegexNode left, RegexNode right) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L138">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc" id="L143">            return &quot;(&quot; + left.toString() + &quot;|&quot; + right.toString() + &quot;)&quot;;</span>
+        }
+    }
+
+    /**
+     * Represents the Kleene Star operator, allowing zero or more repetitions (e.g., &quot;a*&quot;).
+     *
+     * @param child The node to which the star operator is applied.
+     */
+<span class="fc" id="L152">    record StarNode(RegexNode child) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L155">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc bfc" id="L160" title="All 2 branches covered.">            if (child instanceof ConcatNode) {</span>
+<span class="fc" id="L161">                return &quot;(&quot; + child.toString() + &quot;)*&quot;;</span>
+            }
+<span class="fc" id="L163">            return child.toString() + &quot;*&quot;;</span>
+        }
+    }
+
+    /**
+     * Represents the Plus operator, allowing one or more repetitions (e.g., &quot;a+&quot;).
+     *
+     * @param child The node to which the plus operator is applied.
+     */
+<span class="fc" id="L172">    record PlusNode(RegexNode child) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L175">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            if (child instanceof ConcatNode) {</span>
+<span class="fc" id="L181">                return &quot;(&quot; + child.toString() + &quot;)+&quot;;</span>
+            }
+<span class="fc" id="L183">            return child.toString() + &quot;+&quot;;</span>
+        }
+    }
+
+    /**
+     * Represents the Optional operator, allowing zero or one occurrence (e.g., &quot;a?&quot;).
+     *
+     * @param child The node to which the optional operator is applied.
+     */
+<span class="fc" id="L192">    record OptionalNode(RegexNode child) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L195">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc bfc" id="L200" title="All 2 branches covered.">            if (child instanceof ConcatNode) {</span>
+<span class="fc" id="L201">                return &quot;(&quot; + child.toString() + &quot;)?&quot;;</span>
+            }
+<span class="fc" id="L203">            return child.toString() + &quot;?&quot;;</span>
+        }
+    }
+
+    /**
+     * Represents a Character Class, allowing any character from a defined set (e.g., &quot;[a-z]&quot;,
+     * &quot;\d&quot;).
+     *
+     * @param chars The set of permitted characters.
+     */
+<span class="fc" id="L213">    record CharClassNode(Set&lt;Character&gt; chars) implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L216">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc" id="L221">            return &quot;[&quot;</span>
+<span class="fc" id="L222">                    + chars.stream().map(String::valueOf).sorted().collect(Collectors.joining())</span>
+                    + &quot;]&quot;;
+        }
+    }
+
+    /**
+     * Represents the Wildcard operator, matching any character in the known alphabet (e.g., &quot;.&quot;).
+     */
+<span class="fc" id="L230">    record WildcardNode() implements RegexNode {</span>
+        @Override
+        public &lt;T&gt; T accept(Visitor&lt;T&gt; visitor) {
+<span class="fc" id="L233">            return visitor.visit(this);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="fc" id="L238">            return &quot;.&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

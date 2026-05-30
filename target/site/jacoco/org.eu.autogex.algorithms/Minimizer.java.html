@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Minimizer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Autogex</a> &gt; <a href="index.source.html" class="el_package">org.eu.autogex.algorithms</a> &gt; <span class="el_source">Minimizer.java</span></div><h1>Minimizer.java</h1><pre class="source lang-java linenums">package org.eu.autogex.algorithms;
+
+import java.util.*;
+import java.util.ArrayDeque;
+import org.eu.autogex.core.State;
+import org.eu.autogex.models.DFA;
+
+/** Utility class for DFA minimization. Implements Moore's partition refinement algorithm. */
+public class Minimizer {
+
+<span class="fc" id="L11">    private Minimizer() {</span>
+<span class="fc" id="L12">        throw new UnsupportedOperationException(&quot;Utility class cannot be instantiated&quot;);</span>
+    }
+
+    /**
+     * Minimizes a DFA, returning a new equivalent DFA with the minimum number of states.
+     *
+     * @param dfa The source DFA to minimize.
+     * @return The minimal DFA.
+     */
+    public static DFA minimize(DFA dfa) {
+        // 1. Remove unreachable states
+<span class="fc" id="L23">        Set&lt;State&gt; reachableStates = getReachableStates(dfa);</span>
+<span class="fc" id="L24">        Set&lt;Character&gt; alphabet = getAlphabet(dfa);</span>
+
+        // 2. Initial partition (Finals vs Non-Finals)
+<span class="fc" id="L27">        Set&lt;Set&lt;State&gt;&gt; partitions = createInitialPartitions(dfa, reachableStates);</span>
+
+<span class="fc" id="L29">        Map&lt;State, Integer&gt; stateToPartitionId = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L30">        updateStateToPartitionMap(partitions, stateToPartitionId);</span>
+
+        // 3. Iterative partition refinement (until Fixed Point is reached)
+<span class="fc" id="L33">        boolean changed = true;</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        while (changed) {</span>
+<span class="fc" id="L35">            changed = false;</span>
+<span class="fc" id="L36">            Set&lt;Set&lt;State&gt;&gt; newPartitions = new HashSet&lt;&gt;();</span>
+
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            for (Set&lt;State&gt; group : partitions) {</span>
+                // Split the group based on behavior (transition destinations)
+<span class="fc" id="L40">                Map&lt;Map&lt;Character, Integer&gt;, Set&lt;State&gt;&gt; subGroups =</span>
+<span class="fc" id="L41">                        splitGroup(dfa, group, alphabet, stateToPartitionId);</span>
+
+<span class="fc" id="L43">                newPartitions.addAll(subGroups.values());</span>
+
+                // If a group was split into 2 or more subgroups, the partition has changed
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                if (subGroups.size() &gt; 1) {</span>
+<span class="fc" id="L47">                    changed = true;</span>
+                }
+<span class="fc" id="L49">            }</span>
+<span class="fc" id="L50">            partitions = newPartitions;</span>
+
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (changed) {</span>
+<span class="fc" id="L53">                updateStateToPartitionMap(partitions, stateToPartitionId);</span>
+            }
+<span class="fc" id="L55">        }</span>
+
+        // 4. Rebuild the Minimized DFA
+<span class="fc" id="L58">        return buildMinimalDfa(dfa, partitions, alphabet, stateToPartitionId);</span>
+    }
+
+    private static void updateStateToPartitionMap(
+            Set&lt;Set&lt;State&gt;&gt; partitions, Map&lt;State, Integer&gt; stateToPartitionId) {
+<span class="fc" id="L63">        stateToPartitionId.clear();</span>
+<span class="fc" id="L64">        int partitionId = 0;</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        for (Set&lt;State&gt; partition : partitions) {</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for (State state : partition) {</span>
+<span class="fc" id="L67">                stateToPartitionId.put(state, partitionId);</span>
+<span class="fc" id="L68">            }</span>
+<span class="fc" id="L69">            partitionId++;</span>
+<span class="fc" id="L70">        }</span>
+<span class="fc" id="L71">    }</span>
+
+    // --- Helper Methods ---
+
+    private static Set&lt;Set&lt;State&gt;&gt; createInitialPartitions(DFA dfa, Set&lt;State&gt; reachableStates) {
+<span class="fc" id="L76">        Set&lt;State&gt; finalGroup = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L77">        Set&lt;State&gt; nonFinalGroup = new HashSet&lt;&gt;();</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        for (State s : reachableStates) {</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            if (dfa.getFinalStates().contains(s)) {</span>
+<span class="fc" id="L81">                finalGroup.add(s);</span>
+            } else {
+<span class="fc" id="L83">                nonFinalGroup.add(s);</span>
+            }
+<span class="fc" id="L85">        }</span>
+
+<span class="fc" id="L87">        Set&lt;Set&lt;State&gt;&gt; partitions = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (!finalGroup.isEmpty()) partitions.add(finalGroup);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (!nonFinalGroup.isEmpty()) partitions.add(nonFinalGroup);</span>
+
+<span class="fc" id="L91">        return partitions;</span>
+    }
+
+    private static Map&lt;Map&lt;Character, Integer&gt;, Set&lt;State&gt;&gt; splitGroup(
+            DFA dfa,
+            Set&lt;State&gt; group,
+            Set&lt;Character&gt; alphabet,
+            Map&lt;State, Integer&gt; stateToPartitionId) {
+
+        // Maps the behavioral &quot;signature&quot; of a state to the subgroup of states sharing it
+<span class="fc" id="L101">        Map&lt;Map&lt;Character, Integer&gt;, Set&lt;State&gt;&gt; subGroups = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        for (State s : group) {</span>
+            // The signature is: &quot;For each character, which partition do I end up in?&quot;
+<span class="fc" id="L105">            Map&lt;Character, Integer&gt; behaviorSignature = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            for (char symbol : alphabet) {</span>
+<span class="fc" id="L108">                State destination = getDestination(dfa, s, symbol);</span>
+<span class="fc" id="L109">                Integer targetPartitionId = stateToPartitionId.get(destination);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">                behaviorSignature.put(symbol, targetPartitionId != null ? targetPartitionId : -1);</span>
+<span class="fc" id="L111">            }</span>
+
+<span class="fc" id="L113">            subGroups.computeIfAbsent(behaviorSignature, k -&gt; new HashSet&lt;&gt;()).add(s);</span>
+<span class="fc" id="L114">        }</span>
+
+<span class="fc" id="L116">        return subGroups;</span>
+    }
+
+    private static DFA buildMinimalDfa(
+            DFA originalDfa,
+            Set&lt;Set&lt;State&gt;&gt; partitions,
+            Set&lt;Character&gt; alphabet,
+            Map&lt;State, Integer&gt; stateToPartitionId) {
+<span class="fc" id="L124">        DFA.Builder builder = new DFA.Builder();</span>
+<span class="fc" id="L125">        Map&lt;Integer, String&gt; partitionIdToName = new HashMap&lt;&gt;();</span>
+
+        // Register new states
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for (Set&lt;State&gt; partition : partitions) {</span>
+<span class="fc" id="L129">            State representative = partition.iterator().next();</span>
+<span class="fc" id="L130">            int partId = stateToPartitionId.get(representative);</span>
+<span class="fc" id="L131">            String name = &quot;M&quot; + partId;</span>
+<span class="fc" id="L132">            partitionIdToName.put(partId, name);</span>
+
+            // The partition is final if it contains at least one original final state.
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            boolean isFinal = !Collections.disjoint(partition, originalDfa.getFinalStates());</span>
+<span class="fc" id="L136">            builder.addState(name, isFinal);</span>
+
+            // The partition is initial if it contains the original initial state
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            if (partition.contains(originalDfa.getInitialState())) {</span>
+<span class="fc" id="L140">                builder.setInitialState(name);</span>
+            }
+<span class="fc" id="L142">        }</span>
+
+        // Create transitions (taking a &quot;representative&quot; element for each partition is sufficient)
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        for (Set&lt;State&gt; partition : partitions) {</span>
+<span class="fc" id="L146">            State representative = partition.iterator().next();</span>
+<span class="fc" id="L147">            int partId = stateToPartitionId.get(representative);</span>
+<span class="fc" id="L148">            String currentName = partitionIdToName.get(partId);</span>
+
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            for (char symbol : alphabet) {</span>
+<span class="fc" id="L151">                State dest = getDestination(originalDfa, representative, symbol);</span>
+<span class="fc" id="L152">                Integer targetPartitionId = stateToPartitionId.get(dest);</span>
+
+                // Link the transition if valid
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                if (targetPartitionId != null) {</span>
+<span class="fc" id="L156">                    builder.addTransition(</span>
+<span class="fc" id="L157">                            currentName, symbol, partitionIdToName.get(targetPartitionId));</span>
+                }
+<span class="fc" id="L159">            }</span>
+<span class="fc" id="L160">        }</span>
+
+<span class="fc" id="L162">        return builder.build();</span>
+    }
+
+    private static Set&lt;State&gt; getReachableStates(DFA dfa) {
+<span class="fc" id="L166">        Set&lt;State&gt; reachable = new HashSet&lt;&gt;();</span>
+        // ArrayDeque is preferred over LinkedList for queues in hot paths.
+        // It provides better cache locality and avoids O(n) node allocation overhead.
+<span class="fc" id="L169">        Queue&lt;State&gt; queue = new ArrayDeque&lt;&gt;();</span>
+
+<span class="fc" id="L171">        reachable.add(dfa.getInitialState());</span>
+<span class="fc" id="L172">        queue.add(dfa.getInitialState());</span>
+
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        while (!queue.isEmpty()) {</span>
+<span class="fc" id="L175">            State current = queue.poll();</span>
+<span class="fc" id="L176">            Map&lt;Character, State&gt; transitions = dfa.getTransitionTable().get(current);</span>
+
+<span class="fc bfc" id="L178" title="All 2 branches covered.">            if (transitions != null) {</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                for (State nextState : transitions.values()) {</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">                    if (reachable.add(nextState)) {</span>
+<span class="fc" id="L181">                        queue.add(nextState);</span>
+                    }
+<span class="fc" id="L183">                }</span>
+            }
+<span class="fc" id="L185">        }</span>
+<span class="fc" id="L186">        return reachable;</span>
+    }
+
+    private static State getDestination(DFA dfa, State source, char symbol) {
+<span class="fc" id="L190">        Map&lt;Character, State&gt; transitions = dfa.getTransitionTable().get(source);</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        return transitions != null ? transitions.get(symbol) : null;</span>
+    }
+
+    private static Set&lt;Character&gt; getAlphabet(DFA dfa) {
+<span class="fc" id="L195">        Set&lt;Character&gt; alphabet = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        for (Map&lt;Character, State&gt; transitions : dfa.getTransitionTable().values()) {</span>
+<span class="fc" id="L197">            alphabet.addAll(transitions.keySet());</span>
+<span class="fc" id="L198">        }</span>
+<span class="fc" id="L199">        return alphabet;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

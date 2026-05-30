@@ -108,11 +108,35 @@ jobs:
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
             sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
+      - name: Copy SEO Files
+        run: |
+          cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/logo.svg ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/favicon.svg ${{ steps.find_folder.outputs.javadoc_path }}/
+          cp src/main/javadoc/version-switcher.js ${{ steps.find_folder.outputs.javadoc_path }}/
+
       - name: Optimize Documentation Assets
         run: |
           npm install -g --no-audit --no-fund --ignore-scripts clean-css-cli html-minifier terser svgo
           cleancss -O3 -o ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css ${{ steps.find_folder.outputs.javadoc_path }}/resource-files/custom-javadoc.css
+          terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
+          svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg
+          svgo ${{ steps.find_folder.outputs.javadoc_path }}/favicon.svg
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec html-minifier --collapse-whitespace --conservative-collapse --remove-comments --minify-js true --minify-css true -o {} {} \;
+
+      - name: Publish Latest Documentation to Pages (Root)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
+          destination_dir: .
+          keep_files: true
+
+      - name: De-index Versioned Documentation
+        run: |
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i 's|<link rel="canonical"[^>]*>||g' {} +
+          find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec sed -i 's|<head>|<head><meta name="robots" content="noindex, nofollow">|i' {} +
 
       - name: Publish Versioned Documentation to Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -121,14 +145,6 @@ jobs:
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
           destination_dir: ${{ env.DOCS_VERSION }}
           keep_files: true
-      
-      - name: Copy SEO Files
-        run: |
-          cp src/main/javadoc/robots.txt ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/8c8a09117f884afb9d9769c48698cf19.txt ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/logo.svg ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/favicon.svg ${{ steps.find_folder.outputs.javadoc_path }}/
-          cp src/main/javadoc/version-switcher.js ${{ steps.find_folder.outputs.javadoc_path }}/
       
       - name: Optimize Root Assets
         run: |

@@ -52,7 +52,9 @@ jobs:
             ${{ steps.find_folder.outputs.javadoc_path }}/index.html
 
           find ${{ steps.find_folder.outputs.javadoc_path }} -name "*.html" -exec \
-            sed -i '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
+            sed -i \
+            -e '/<head>/a <meta name="robots" content="noindex, nofollow">' \
+            -e '/<head>/a <link rel="icon" type="image/svg+xml" href="/favicon.svg">' {} +
 
       - name: Optimize Documentation Assets
         run: |

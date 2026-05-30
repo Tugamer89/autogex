@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentBase = getBase(currentPath);
     document.body.addEventListener('change', (e) => {
         if (e.target?.id === 'version-switcher') {
+            e.target.disabled = true;
+            e.target.setAttribute('aria-busy', 'true');
+
             const targetBase = e.target.value;
             
             let remainder = currentPath.substring(currentBase.length);
@@ -27,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll('select#version-switcher').forEach(switcher => {
             switcher.removeAttribute('onchange'); 
             switcher.removeAttribute('disabled');
+            switcher.removeAttribute('aria-busy');
+            switcher.setAttribute('title', 'Select documentation version');
             switcher.innerHTML = optionsHtml;
             switcher.value = currentBase;
         });

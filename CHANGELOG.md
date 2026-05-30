@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.9.0](https://github.com/Tugamer89/autogex/compare/v1.8.0...v1.9.0) (2026-05-28)
+
+
+### Features
+
+* **ui:** add immediate interaction feedback and smooth navigation to Javadoc UI ([#107](https://github.com/Tugamer89/autogex/issues/107)) ([c5cf676](https://github.com/Tugamer89/autogex/commit/c5cf676ffdda2ee10aafb1f8ffb893117caf6a9a))
+
+
+### Bug Fixes
+
+* **security:** [MEDIUM] resolve StackOverflowError vulnerability in RegexParser ([#108](https://github.com/Tugamer89/autogex/issues/108)) ([03518ec](https://github.com/Tugamer89/autogex/commit/03518ece1b31ce9f02b7809920ca56743bc3b3b5))
+
+
+### Performance Improvements
+
+* optimize nfa to dfa subset construction performance ([#109](https://github.com/Tugamer89/autogex/issues/109)) ([046853b](https://github.com/Tugamer89/autogex/commit/046853b8d4cef31613cf0df6a3d9f18609850e70))
+
+## [1.8.0](https://github.com/Tugamer89/autogex/compare/v1.7.2...v1.8.0) (2026-05-27)
+
+
+### Features
+
+* **ui:** add keyboard navigation and focus states for code blocks ([#98](https://github.com/Tugamer89/autogex/issues/98)) ([4fb0498](https://github.com/Tugamer89/autogex/commit/4fb04987d475ca489f36bb00b2eb922dfd4192ff))
+* **ui:** improve documentation accessibility and keyboard support ([#103](https://github.com/Tugamer89/autogex/issues/103)) ([2c3b7ff](https://github.com/Tugamer89/autogex/commit/2c3b7ff6ff05d3925d25cced66193e82d64ac4e6))
+
+
+### Bug Fixes
+
+* **security:** [MEDIUM] resolve Mermaid syntax injection via newlines ([#105](https://github.com/Tugamer89/autogex/issues/105)) ([a8f6178](https://github.com/Tugamer89/autogex/commit/a8f6178816f9083a45e3674b4098e7416628fa88))
+
+
+### Performance Improvements
+
+* Cache epsilon closures in enfaToNfa conversion ([#104](https://github.com/Tugamer89/autogex/issues/104)) ([1ef7cb1](https://github.com/Tugamer89/autogex/commit/1ef7cb1b0252613d060e6bc3d2b918a912cefcfa))
+* optimize automaton string acceptance by bypassing execution trace ([#99](https://github.com/Tugamer89/autogex/issues/99)) ([bf3b98e](https://github.com/Tugamer89/autogex/commit/bf3b98e306d04bfb699667ebc84d66df12d95860))
+
+## [1.7.2](https://github.com/Tugamer89/autogex/compare/v1.7.1...v1.7.2) (2026-05-25)
+
+
+### Performance Improvements
+
+* optimize automaton transition lookups and acceptance checks ([#93](https://github.com/Tugamer89/autogex/issues/93)) ([d89067a](https://github.com/Tugamer89/autogex/commit/d89067ad0c2ad85935726bc014c43c4f970ed62a))
+
+## [1.7.1](https://github.com/Tugamer89/autogex/compare/v1.7.0...v1.7.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* **security:** [HIGH] resolve ReDoS vulnerability in DFA conversion ([#94](https://github.com/Tugamer89/autogex/issues/94)) ([2de9ee9](https://github.com/Tugamer89/autogex/commit/2de9ee97281883e171158fe3f3a492b897675562))
+* **ui:** improve Javadoc header accessibility and UX ([#95](https://github.com/Tugamer89/autogex/issues/95)) ([1f80e0f](https://github.com/Tugamer89/autogex/commit/1f80e0f5e7301520811faa08ebc8fe5bb3cd4c19))
+
+## [1.7.0](https://github.com/Tugamer89/autogex/compare/v1.6.0...v1.7.0) (2026-05-24)
+
+
+### Features
+
+* **ui:** improve javadoc header ux and accessibility ([#77](https://github.com/Tugamer89/autogex/issues/77)) ([f99ccc1](https://github.com/Tugamer89/autogex/commit/f99ccc14192b0a190fa8da0fe5745b04ca7effde))
+
+
+### Bug Fixes
+
+* **exporter:** escape HTML and newlines in GraphvizExporter to prevent XSS ([#87](https://github.com/Tugamer89/autogex/issues/87)) ([20c79c8](https://github.com/Tugamer89/autogex/commit/20c79c8b5e088884b81069b4d295f426889a352a))
+* **exporter:** prevent ReDoS vulnerability in MermaidExporter sanitization ([#86](https://github.com/Tugamer89/autogex/issues/86)) ([40b3981](https://github.com/Tugamer89/autogex/commit/40b3981adabdd4d1efa325db4a46a56334aec107))
+* **security:** [HIGH] resolve XSS in MermaidExporter ([#78](https://github.com/Tugamer89/autogex/issues/78)) ([2ac78ba](https://github.com/Tugamer89/autogex/commit/2ac78ba9d09d1297bb3595d873ada96e9b18880d))
+
+
+### Performance Improvements
+
+* optimize DFA Minimizer partition lookup with O(1) mapping ([#79](https://github.com/Tugamer89/autogex/issues/79)) ([c214eca](https://github.com/Tugamer89/autogex/commit/c214eca5d5af6d36d6b40d23eede2aa2e94429c8))
+
 ## [1.6.0](https://github.com/Tugamer89/autogex/compare/v1.5.0...v1.6.0) (2026-05-23)
 
 

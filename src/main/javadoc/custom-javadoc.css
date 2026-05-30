@@ -1,5 +1,9 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css');
 
+html {
+  scroll-behavior: smooth;
+}
+
 body, .block, .summary, .details {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
 }
@@ -52,8 +56,8 @@ select#version-switcher:hover {
 }
 
 select#version-switcher:focus {
-  border-color: #4AA0C7;
-  box-shadow: 0 0 0 2px rgba(74, 160, 199, 0.3);
+  border-color: #005fcc;
+  box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.3);
 }
 
 select#version-switcher option {
@@ -70,4 +74,58 @@ select#version-switcher:disabled {
 select#version-switcher:disabled:hover {
   background-color: transparent;
   border-color: var(--header-text-color, #cccccc);
+}
+
+.header-logo-link {
+  transition: opacity 0.2s ease;
+}
+
+.header-logo-link:hover {
+  opacity: 0.8;
+}
+
+.header-logo-link:focus-visible {
+  outline: 2px solid #005fcc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+pre:focus-visible {
+  outline: 2px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.code-snippet-wrapper {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px;
+  background-color: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  color: #57606a;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-btn:hover {
+  background-color: #ebecf0;
+}
+
+.copy-btn:focus-visible {
+  outline: 2px solid #005fcc;
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.code-snippet-wrapper:hover .copy-btn {
+  opacity: 1;
 }

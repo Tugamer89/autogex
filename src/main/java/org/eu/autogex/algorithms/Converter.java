@@ -2,7 +2,6 @@ package org.eu.autogex.algorithms;
 
 import java.util.*;
 import java.util.ArrayDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
@@ -10,6 +9,9 @@ import org.eu.autogex.models.NFA;
 
 /** Utility class for Finite State Automata conversion. */
 public class Converter {
+
+    /** Maximum allowed states in a DFA to prevent state explosion (DoS). */
+    private static final int MAX_DFA_STATES = 10000;
 
     private Converter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -25,9 +27,12 @@ public class Converter {
         NFA.Builder builder = new NFA.Builder();
         Set<Character> alphabet = getAlphabet(enfa.getTransitionTable());
 
+        Map<State, Set<State>> epsilonClosures = new HashMap<>();
+
         // 1. & 2. Add states and recalculate final states based on closures
         for (State s : enfa.getStates()) {
             Set<State> closure = enfa.epsilonClosure(Set.of(s));
+            epsilonClosures.put(s, closure);
             boolean isFinal = isFinal(closure, enfa.getFinalStates());
             builder.addState(s.getName(), isFinal);
         }
@@ -37,10 +42,10 @@ public class Converter {
 
         // 3. Compute new transitions for each state across the alphabet
         for (State q : enfa.getStates()) {
-            Set<State> qClosure = enfa.epsilonClosure(Set.of(q));
+            Set<State> qClosure = epsilonClosures.get(q);
 
             for (char a : alphabet) {
-                Set<State> targets = computeEnfaTargets(enfa, qClosure, a);
+                Set<State> targets = computeEnfaTargets(enfa, qClosure, a, epsilonClosures);
                 for (State target : targets) {
                     builder.addTransition(q.getName(), a, target.getName());
                 }
@@ -57,17 +62,15 @@ public class Converter {
      */
     public static DFA nfaToDfa(NFA nfa) {
         DFA.Builder builder = new DFA.Builder();
-        Set<Character> alphabet = getAlphabet(nfa.getTransitionTable());
 
         Map<Set<State>, String> dfaStateNames = new HashMap<>();
         // ArrayDeque is preferred over LinkedList for queues in hot paths.
         // It provides better cache locality and avoids O(n) node allocation overhead.
         Queue<Set<State>> queue = new ArrayDeque<>();
-        AtomicInteger stateCounter = new AtomicInteger(0);
 
         // The DFA initial state is the set containing only the NFA's initial state
         Set<State> initialSuperState = Set.of(nfa.getInitialState());
-        String initialName = "D" + stateCounter.getAndIncrement();
+        String initialName = "D0";
 
         builder.addState(initialName, isFinal(initialSuperState, nfa.getFinalStates()));
         builder.setInitialState(initialName);
@@ -80,24 +83,37 @@ public class Converter {
             Set<State> currentSuperState = queue.poll();
             String currentName = dfaStateNames.get(currentSuperState);
 
-            for (char symbol : alphabet) {
-                Set<State> nextSuperState = computeNextSuperState(nfa, currentSuperState, symbol);
-
-                if (nextSuperState.isEmpty()) {
-                    continue;
+            Map<Character, Set<State>> symbolToTargets = new HashMap<>();
+            for (State s : currentSuperState) {
+                Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
+                if (transitions != null) {
+                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                        Character symbol = entry.getKey();
+                        Set<State> targets = symbolToTargets.get(symbol);
+                        if (targets == null) {
+                            targets = new HashSet<>();
+                            symbolToTargets.put(symbol, targets);
+                        }
+                        targets.addAll(entry.getValue());
+                    }
                 }
+            }
 
-                // If a new super-state is found, register it
-                String targetName =
-                        dfaStateNames.computeIfAbsent(
-                                nextSuperState,
-                                k -> {
-                                    String nextName = "D" + stateCounter.getAndIncrement();
-                                    builder.addState(nextName, isFinal(k, nfa.getFinalStates()));
-                                    queue.add(k);
-                                    return nextName;
-                                });
+            for (Map.Entry<Character, Set<State>> entry : symbolToTargets.entrySet()) {
+                char symbol = entry.getKey();
+                Set<State> nextSuperState = entry.getValue();
 
+                String targetName = dfaStateNames.get(nextSuperState);
+                if (targetName == null) {
+                    if (dfaStateNames.size() >= MAX_DFA_STATES) {
+                        throw new IllegalStateException(
+                                "DFA state limit exceeded (Security: DoS prevention).");
+                    }
+                    targetName = "D" + dfaStateNames.size();
+                    builder.addState(targetName, isFinal(nextSuperState, nfa.getFinalStates()));
+                    dfaStateNames.put(nextSuperState, targetName);
+                    queue.add(nextSuperState);
+                }
                 builder.addTransition(currentName, symbol, targetName);
             }
         }
@@ -118,29 +134,22 @@ public class Converter {
 
     // --- Helper Methods ---
 
-    /** Computes the reachable subset of states by reading a symbol. */
-    private static Set<State> computeNextSuperState(
-            NFA nfa, Set<State> currentSuperState, char symbol) {
-        Set<State> nextSuperState = new HashSet<>();
-        for (State s : currentSuperState) {
-            Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
-            if (transitions != null && transitions.containsKey(symbol)) {
-                nextSuperState.addAll(transitions.get(symbol));
-            }
-        }
-        return nextSuperState;
-    }
-
     /**
      * Computes target states for an ENFA starting from a closure, reading a symbol, and applying
-     * the ε-closure to the result.
+     * the ε-closure to the result (utilizing pre-computed closures for performance).
      */
-    private static Set<State> computeEnfaTargets(ENFA enfa, Set<State> qClosure, char symbol) {
+    private static Set<State> computeEnfaTargets(
+            ENFA enfa, Set<State> qClosure, char symbol, Map<State, Set<State>> epsilonClosures) {
         Set<State> targets = new HashSet<>();
         for (State p : qClosure) {
             Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
-            if (transitions != null && transitions.containsKey(symbol)) {
-                targets.addAll(enfa.epsilonClosure(transitions.get(symbol)));
+            if (transitions != null) {
+                Set<State> symbolTargets = transitions.get(symbol);
+                if (symbolTargets != null) {
+                    for (State st : symbolTargets) {
+                        targets.addAll(epsilonClosures.get(st));
+                    }
+                }
             }
         }
         return targets;
@@ -151,9 +160,10 @@ public class Converter {
         Set<Character> alphabet = new HashSet<>();
         for (Map<Character, Set<State>> transitions : transitionTable.values()) {
             for (Character c : transitions.keySet()) {
-                if (c != null) {
-                    alphabet.add(c);
+                if (c == null) {
+                    continue;
                 }
+                alphabet.add(c);
             }
         }
         return alphabet;

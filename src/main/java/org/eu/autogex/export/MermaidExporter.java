@@ -137,16 +137,31 @@ public class MermaidExporter {
 
     private static String escapeMermaidString(String text) {
         if (text == null) return "";
-        return text.replace("&", "&amp;")
+        return text.replace("\r", "")
+                .replace("\n", "\\n")
+                .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&#39;");
     }
 
-    /** Sanitizes the state name into a valid, safe identifier for Mermaid syntax. */
+    /**
+     * Sanitizes the state name into a valid, safe identifier for Mermaid syntax. Replaces any
+     * non-alphanumeric character with an underscore to prevent syntax errors.
+     */
     private static String sanitizeId(State state) {
-        // Replaces any non-alphanumeric character with an underscore to prevent syntax errors
-        return "s_" + state.getName().replaceAll("[^a-zA-Z0-9]", "_");
+        String name = state.getName();
+        StringBuilder sb = new StringBuilder(name.length() + 2);
+        sb.append("s_");
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+                sb.append(c);
+            } else {
+                sb.append('_');
+            }
+        }
+        return sb.toString();
     }
 }

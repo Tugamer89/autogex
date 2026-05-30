@@ -4,7 +4,7 @@
 
     <groupId>org.eu.autogex</groupId>
     <artifactId>autogex</artifactId>
-    <version>1.6.0</version>
+    <version>1.9.0</version>
 
     <name>Autogex</name>
     <description>
@@ -70,7 +70,7 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <java>
                         <googleJavaFormat>
@@ -93,7 +93,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.6</version>
             </plugin>
 
             <plugin>
@@ -144,7 +144,7 @@
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
-                <version>1.25.0</version>
+                <version>1.25.3</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.pitest</groupId>
@@ -183,10 +183,10 @@
 
                     <header><![CDATA[
                         <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
-                            <a href="/" aria-label="Go to homepage" title="Go to homepage" style="display: flex;">
-                                <img src="/logo.svg" alt="Autogex Logo" style="height: 24px;">
+                            <a href="/" aria-label="Go to homepage" title="Go to homepage" class="header-logo-link" style="display: flex;">
+                                <img src="/logo.svg" alt="" aria-hidden="true" style="height: 24px;">
                             </a>
-                            <select id="version-switcher" aria-label="Select documentation version" title="Select documentation version" disabled>
+                            <select id="version-switcher" aria-label="Select documentation version" title="Loading documentation versions..." aria-busy="true" disabled>
                                 <option value="">Loading versions...</option>
                             </select>
                         </div>
@@ -199,6 +199,31 @@
                         <script>
                             window.addEventListener('load', function() {
                                 hljs.highlightAll();
+                                document.querySelectorAll('pre').forEach(function(el) {
+                                    el.setAttribute('tabindex', '0');
+                                    el.setAttribute('role', 'region');
+                                    el.setAttribute('aria-label', 'Code snippet');
+
+                                    var wrapper = document.createElement('div');
+                                    wrapper.className = 'code-snippet-wrapper';
+                                    el.parentNode.insertBefore(wrapper, el);
+                                    wrapper.appendChild(el);
+
+                                    var copyBtn = document.createElement('button');
+                                    copyBtn.className = 'copy-btn';
+                                    copyBtn.setAttribute('aria-label', 'Copy code');
+                                    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+
+                                    copyBtn.addEventListener('click', function() {
+                                        navigator.clipboard.writeText(el.innerText).then(function() {
+                                            copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                                            setTimeout(function() {
+                                                copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+                                            }, 2000);
+                                        });
+                                    });
+                                    wrapper.appendChild(copyBtn);
+                                });
                             });
                         </script>
                         <script src="/version-switcher.js"></script>

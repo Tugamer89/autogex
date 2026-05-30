@@ -18,6 +18,34 @@ public class DFA extends AbstractAutomaton {
         this.transitionTable = Map.copyOf(builder.transitionTable);
     }
 
+    /**
+     * Fast-path evaluation of an input string bypassing ExecutionTrace generation. Overrides the
+     * default method to minimize memory allocation and maximize performance.
+     *
+     * @param input The string to be evaluated.
+     * @return true if the string is accepted, false otherwise.
+     */
+    @Override
+    public boolean accepts(String input) {
+        State currentState = initialState;
+
+        for (int i = 0; i < input.length(); i++) {
+            char symbol = input.charAt(i);
+            Map<Character, State> stateTransitions = transitionTable.get(currentState);
+
+            if (stateTransitions == null) {
+                return false;
+            }
+
+            currentState = stateTransitions.get(symbol);
+            if (currentState == null) {
+                return false;
+            }
+        }
+
+        return finalStates.contains(currentState);
+    }
+
     @Override
     public ExecutionTrace execute(String input) {
         List<ExecutionStep> steps = new ArrayList<>();
@@ -30,10 +58,13 @@ public class DFA extends AbstractAutomaton {
             State currentState = currentStates.iterator().next();
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
 
-            Set<State> nextStates =
-                    (stateTransitions != null && stateTransitions.containsKey(symbol))
-                            ? Set.of(stateTransitions.get(symbol))
-                            : Collections.emptySet();
+            Set<State> nextStates = Collections.emptySet();
+            if (stateTransitions != null) {
+                State target = stateTransitions.get(symbol);
+                if (target != null) {
+                    nextStates = Set.of(target);
+                }
+            }
 
             steps.add(new ExecutionStep(currentStates, symbol, nextStates));
             currentStates = nextStates;

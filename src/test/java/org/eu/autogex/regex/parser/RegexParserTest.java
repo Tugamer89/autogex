@@ -181,6 +181,30 @@ class RegexParserTest {
     }
 
     @Test
+    void testThrowsExceptionOnDeeplyNestedParentheses() {
+        StringBuilder sb = new StringBuilder();
+        // Since MAX_REGEX_LENGTH is 2000, we should ensure the string is <= 2000
+        // to bypass the max length check and trigger the depth check.
+        // E.g., 600 parens open + 1 char + 600 parens close = 1201 chars, which is <= 2000 but >
+        // 500 depth.
+        for (int i = 0; i < 600; i++) {
+            sb.append("(");
+        }
+        sb.append("a");
+        for (int i = 0; i < 600; i++) {
+            sb.append(")");
+        }
+        String deepRegex = sb.toString();
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> RegexParser.parse(deepRegex));
+        assertTrue(
+                exception.getMessage().contains("too deeply nested"),
+                "Should detect pattern that is too deeply nested to prevent StackOverflowError: "
+                        + exception.getMessage());
+    }
+
+    @Test
     void testThrowsExceptionOnMissingParenthesis() {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("(a|b"));

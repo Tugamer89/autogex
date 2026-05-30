@@ -18,6 +18,30 @@ public class NFA extends AbstractAutomaton {
         this.transitionTable = Map.copyOf(builder.transitionTable);
     }
 
+    /**
+     * Fast-path evaluation of an input string bypassing ExecutionTrace generation. Overrides the
+     * default method to minimize memory allocation and maximize performance.
+     *
+     * @param input The string to be evaluated.
+     * @return true if the string is accepted, false otherwise.
+     */
+    @Override
+    public boolean accepts(String input) {
+        Set<State> currentStates = Set.of(initialState);
+
+        for (int i = 0; i < input.length(); i++) {
+            char symbol = input.charAt(i);
+
+            currentStates = computeNextStates(currentStates, symbol, transitionTable);
+
+            if (currentStates.isEmpty()) {
+                return false;
+            }
+        }
+
+        return !Collections.disjoint(currentStates, finalStates);
+    }
+
     @Override
     public ExecutionTrace execute(String input) {
         List<ExecutionStep> steps = new ArrayList<>();
@@ -38,7 +62,7 @@ public class NFA extends AbstractAutomaton {
             }
         }
 
-        boolean isAccepted = currentStates.stream().anyMatch(finalStates::contains);
+        boolean isAccepted = !Collections.disjoint(currentStates, finalStates);
         return new ExecutionTrace(input, steps, isAccepted);
     }
 

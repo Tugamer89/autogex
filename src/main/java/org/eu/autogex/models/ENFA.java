@@ -37,16 +37,44 @@ public class ENFA extends AbstractAutomaton {
             Map<Character, Set<State>> stateTransitions = transitionTable.get(currentState);
 
             // Look for transitions associated with null (ε)
-            if (stateTransitions != null && stateTransitions.containsKey(null)) {
-                for (State nextState : stateTransitions.get(null)) {
-                    // If not visited yet, add it to the closure and to the queue
-                    if (closure.add(nextState)) {
-                        queue.add(nextState);
+            if (stateTransitions != null) {
+                Set<State> epsilonTargets = stateTransitions.get(null);
+                if (epsilonTargets != null) {
+                    for (State nextState : epsilonTargets) {
+                        // If not visited yet, add it to the closure and to the queue
+                        if (closure.add(nextState)) {
+                            queue.add(nextState);
+                        }
                     }
                 }
             }
         }
         return closure;
+    }
+
+    /**
+     * Fast-path evaluation of an input string bypassing ExecutionTrace generation. Overrides the
+     * default method to minimize memory allocation and maximize performance.
+     *
+     * @param input The string to be evaluated.
+     * @return true if the string is accepted, false otherwise.
+     */
+    @Override
+    public boolean accepts(String input) {
+        Set<State> currentStates = epsilonClosure(Set.of(initialState));
+
+        for (int i = 0; i < input.length(); i++) {
+            char symbol = input.charAt(i);
+
+            Set<State> moveResult = computeNextStates(currentStates, symbol, transitionTable);
+            currentStates = epsilonClosure(moveResult);
+
+            if (currentStates.isEmpty()) {
+                return false;
+            }
+        }
+
+        return !Collections.disjoint(currentStates, finalStates);
     }
 
     @Override
@@ -69,7 +97,7 @@ public class ENFA extends AbstractAutomaton {
             }
         }
 
-        boolean isAccepted = currentStates.stream().anyMatch(finalStates::contains);
+        boolean isAccepted = !Collections.disjoint(currentStates, finalStates);
         return new ExecutionTrace(input, steps, isAccepted);
     }
 

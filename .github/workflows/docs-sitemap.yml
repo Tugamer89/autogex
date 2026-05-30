@@ -27,6 +27,10 @@ jobs:
           base-url-path: https://autogex.eu.org/
           additional-extensions: html
 
+      - name: Clean Sitemap URLs
+        run: |
+          sed -i 's|/index\.html</loc>|</loc>|g' sitemap.xml
+
       - name: Commit and Push Sitemap
         run: |
           git config --global user.name "github-actions[bot]"

@@ -253,4 +253,19 @@ class RegexParserTest {
                 exception.getMessage().contains("Unexpected character"),
                 "Should detect orphaned closing parenthesis");
     }
+
+    @Test
+    void testThrowsExceptionOnIncompleteEscapeSequence() {
+        IllegalArgumentException exception1 =
+                assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("\\"));
+        assertTrue(
+                exception1.getMessage().contains("Incomplete escape sequence"),
+                "Should detect incomplete escape sequence at the end of string");
+
+        IllegalArgumentException exception2 =
+                assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("[\\"));
+        assertTrue(
+                exception2.getMessage().contains("Incomplete escape sequence"),
+                "Should detect incomplete escape sequence inside character class");
+    }
 }

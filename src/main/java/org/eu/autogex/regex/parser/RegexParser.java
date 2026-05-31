@@ -29,8 +29,7 @@ public class RegexParser {
 
     /** Private constructor to enforce the use of the static parse method. */
     private RegexParser(String input) {
-        this.input =
-                removeWhitespaces(input); // Performance optimization: ~14x faster than replaceAll
+        this.input = removeWhitespaces(input);
         this.position = 0;
         this.depth = 0;
     }

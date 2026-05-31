@@ -19,15 +19,30 @@ public class RegexParser {
     /** Maximum allowed nesting depth to prevent StackOverflowError (DoS) */
     private static final int MAX_DEPTH = 500;
 
+    /** Cached set of digits for \d character class */
+    private static final Set<Character> DIGIT_SET =
+            Set.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+
     private final String input;
     private int position;
     private int depth;
 
     /** Private constructor to enforce the use of the static parse method. */
     private RegexParser(String input) {
-        this.input = input.replaceAll("\\s+", ""); // Remove whitespaces for simplicity
+        this.input = removeWhitespaces(input);
         this.position = 0;
         this.depth = 0;
+    }
+
+    private static String removeWhitespaces(String input) {
+        StringBuilder sb = new StringBuilder(input.length());
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -267,10 +282,6 @@ public class RegexParser {
     }
 
     private Set<Character> getDigitSet() {
-        Set<Character> digits = new HashSet<>();
-        for (char c = '0'; c <= '9'; c++) {
-            digits.add(c);
-        }
-        return digits;
+        return DIGIT_SET;
     }
 }

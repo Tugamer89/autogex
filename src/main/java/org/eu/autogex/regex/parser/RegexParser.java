@@ -169,6 +169,10 @@ public class RegexParser {
         }
 
         if (match('\\')) {
+            if (!hasNext()) {
+                throw new IllegalArgumentException(
+                        "Incomplete escape sequence at index " + position + ".");
+            }
             char escaped = next();
             if (escaped == 'd') {
                 return new CharClassNode(getDigitSet());
@@ -219,6 +223,10 @@ public class RegexParser {
      * @param chars The set of characters being populated.
      */
     private void parseEscapedCharInClass(Set<Character> chars) {
+        if (!hasNext()) {
+            throw new IllegalArgumentException(
+                    "Incomplete escape sequence at index " + position + ".");
+        }
         char escaped = next();
         if (escaped == 'd') {
             chars.addAll(getDigitSet());

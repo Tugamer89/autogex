@@ -91,4 +91,28 @@ class ExecutionTraceTest {
                 stepEpsilonEmpty.toString(),
                 "The epsilon with empty sets should be handled correctly");
     }
+
+    @Test
+    void testNFAExecutionTraceAccepted() {
+        org.eu.autogex.models.NFA nfa =
+                new org.eu.autogex.models.NFA.Builder()
+                        .addState("q0", true)
+                        .setInitialState("q0")
+                        .build();
+
+        ExecutionTrace trace = nfa.execute("a");
+        assertNotNull(trace, "Trace should be generated successfully for valid NFA input");
+    }
+
+    @Test
+    void testENFAExecutionTraceAccepted() {
+        org.eu.autogex.models.ENFA enfa =
+                new org.eu.autogex.models.ENFA.Builder()
+                        .addState("q0", true)
+                        .setInitialState("q0")
+                        .build();
+
+        ExecutionTrace trace = enfa.execute("a");
+        assertNotNull(trace, "Trace should be generated successfully for valid ENFA input");
+    }
 }

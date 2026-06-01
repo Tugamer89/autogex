@@ -9,6 +9,10 @@ import java.util.Set;
  * respective getters.
  */
 public abstract class AbstractAutomaton implements Automaton {
+
+    /** Maximum allowed input length for trace execution to prevent memory DoS. */
+    protected static final int MAX_EXECUTION_STEPS = 10000;
+
     protected final Set<State> states;
     protected final State initialState;
     protected final Set<State> finalStates;
@@ -58,5 +62,17 @@ public abstract class AbstractAutomaton implements Automaton {
             }
         }
         return nextStates;
+    }
+
+    /**
+     * Validates the input string for trace execution to prevent memory DoS.
+     *
+     * @param input The string to validate.
+     */
+    protected void validateExecutionInput(String input) {
+        if (input != null && input.length() > MAX_EXECUTION_STEPS) {
+            throw new IllegalArgumentException(
+                    "Input string exceeds maximum allowed length for trace execution (Security: DoS prevention).");
+        }
     }
 }

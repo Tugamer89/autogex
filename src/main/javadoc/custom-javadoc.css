@@ -129,3 +129,13 @@ pre:focus-visible {
 .code-snippet-wrapper:hover .copy-btn {
   opacity: 1;
 }
+
+.copy-btn:active {
+  transform: scale(0.95);
+}
+
+@media (hover: none) {
+  .copy-btn {
+    opacity: 1;
+  }
+}

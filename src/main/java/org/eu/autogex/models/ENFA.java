@@ -11,6 +11,9 @@ import org.eu.autogex.trace.ExecutionTrace;
 /** Non-Deterministic Finite Automaton with Epsilon Transitions (ε-NFA). */
 public class ENFA extends AbstractAutomaton {
 
+    /** Maximum allowed input length for trace execution to prevent memory DoS. */
+    private static final int MAX_EXECUTION_STEPS = 10000;
+
     // The 'null' character is used to represent an ε-transition
     private final Map<State, Map<Character, Set<State>>> transitionTable;
 
@@ -79,6 +82,11 @@ public class ENFA extends AbstractAutomaton {
 
     @Override
     public ExecutionTrace execute(String input) {
+        if (input != null && input.length() > MAX_EXECUTION_STEPS) {
+            throw new IllegalArgumentException(
+                    "Input string exceeds maximum allowed length for trace execution (Security: DoS prevention).");
+        }
+
         List<ExecutionStep> steps = new ArrayList<>();
 
         // Start from the ε-closure of the initial state

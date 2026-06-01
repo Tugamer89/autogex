@@ -112,11 +112,7 @@ class NFATest {
 
     @Test
     void testExecuteWithNullInputThrowsException() {
-        NFA nfa =
-                new NFA.Builder()
-                        .addState("q0", false)
-                        .setInitialState("q0")
-                        .build();
+        NFA nfa = new NFA.Builder().addState("q0", false).setInitialState("q0").build();
 
         assertThrows(NullPointerException.class, () -> nfa.execute(null));
     }

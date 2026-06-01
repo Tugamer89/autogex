@@ -85,7 +85,9 @@ public class ENFA extends AbstractAutomaton {
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
         steps.add(new ExecutionStep(Set.of(initialState), null, currentStates));
 
-        for (char symbol : input.toCharArray()) {
+        int length = input.length();
+        for (int i = 0; i < length; i++) {
+            char symbol = input.charAt(i);
             Set<State> moveResult = computeNextStates(currentStates, symbol, transitionTable);
             Set<State> nextStates = epsilonClosure(moveResult);
 

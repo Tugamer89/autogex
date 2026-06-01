@@ -54,7 +54,9 @@ public class DFA extends AbstractAutomaton {
         // Initial setup step
         steps.add(new ExecutionStep(Collections.emptySet(), null, currentStates));
 
-        for (char symbol : input.toCharArray()) {
+        int length = input.length();
+        for (int i = 0; i < length; i++) {
+            char symbol = input.charAt(i);
             State currentState = currentStates.iterator().next();
             Map<Character, State> stateTransitions = transitionTable.get(currentState);
 

@@ -128,8 +128,10 @@ class DFATest {
             sb.append('a');
         }
 
+        String longInput = sb.toString();
+
         IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> dfa.execute(sb.toString()));
+                assertThrows(IllegalArgumentException.class, () -> dfa.execute(longInput));
         assertTrue(
                 exception
                         .getMessage()

@@ -101,8 +101,10 @@ class NFATest {
             sb.append('a');
         }
 
+        String longInput = sb.toString();
+
         IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> nfa.execute(sb.toString()));
+                assertThrows(IllegalArgumentException.class, () -> nfa.execute(longInput));
         assertTrue(
                 exception
                         .getMessage()

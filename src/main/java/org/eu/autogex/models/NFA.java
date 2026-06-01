@@ -10,9 +10,6 @@ import org.eu.autogex.trace.ExecutionTrace;
 /** Non-Deterministic Finite Automaton (NFA). */
 public class NFA extends AbstractAutomaton {
 
-    /** Maximum allowed input length for trace execution to prevent memory DoS. */
-    private static final int MAX_EXECUTION_STEPS = 10000;
-
     // Map: Source State -> (Map: Character -> Set of Target States)
     private final Map<State, Map<Character, Set<State>>> transitionTable;
 
@@ -47,10 +44,7 @@ public class NFA extends AbstractAutomaton {
 
     @Override
     public ExecutionTrace execute(String input) {
-        if (input != null && input.length() > MAX_EXECUTION_STEPS) {
-            throw new IllegalArgumentException(
-                    "Input string exceeds maximum allowed length for trace execution (Security: DoS prevention).");
-        }
+        validateExecutionInput(input);
 
         List<ExecutionStep> steps = new ArrayList<>();
         Set<State> currentStates = Set.of(initialState);

@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.11.0](https://github.com/Tugamer89/autogex/compare/v1.10.0...v1.11.0) (2026-06-01)
+
+
+### Features
+
+* **ui:** add tooltip to copy code button in javadoc ([#122](https://github.com/Tugamer89/autogex/issues/122)) ([2eb7263](https://github.com/Tugamer89/autogex/commit/2eb72631e6b4e7204df3bb1e4668c279e12a07ab))
+* **ui:** improve code copy button accessibility and interaction feedback ([3509f9e](https://github.com/Tugamer89/autogex/commit/3509f9e4b51371f01267a1f1abeffc14de6fb8d8))
+* **ui:** improve copy button accessibility on mobile and add interaction feedback ([#127](https://github.com/Tugamer89/autogex/issues/127)) ([3509f9e](https://github.com/Tugamer89/autogex/commit/3509f9e4b51371f01267a1f1abeffc14de6fb8d8))
+
+
+### Bug Fixes
+
+* **security:** [MEDIUM] resolve DoS vulnerability in execution trace generation ([#126](https://github.com/Tugamer89/autogex/issues/126)) ([b333424](https://github.com/Tugamer89/autogex/commit/b333424d8d66865d58ce1889639117cacfa2e82e))
+* **security:** [MEDIUM] resolve out-of-bounds error in regex parsing ([#124](https://github.com/Tugamer89/autogex/issues/124)) ([101b74e](https://github.com/Tugamer89/autogex/commit/101b74e55c17c25158d8eca055aae89de4460e08))
+* **security:** implement input validation to prevent memory DoS in automata execution ([#129](https://github.com/Tugamer89/autogex/issues/129)) ([a70e3ce](https://github.com/Tugamer89/autogex/commit/a70e3cef90eb708606a4b34d24a1074f3eb6751d))
+
+
+### Performance Improvements
+
+* Optimize RegexParser whitespace removal and digit caching ([#123](https://github.com/Tugamer89/autogex/issues/123)) ([c8d698b](https://github.com/Tugamer89/autogex/commit/c8d698bdf28636ebf58e17df7006a1347ee5c08b))
+* optimize string iteration in execution trace ([#128](https://github.com/Tugamer89/autogex/issues/128)) ([c0e52e5](https://github.com/Tugamer89/autogex/commit/c0e52e523c7e6c6a962995b13feab5994ddd2c0a))
+
 ## [1.10.0](https://github.com/Tugamer89/autogex/compare/v1.9.0...v1.10.0) (2026-05-30)
 
 

@@ -58,7 +58,9 @@ public class NFA extends AbstractAutomaton {
         // Initial setup step
         steps.add(new ExecutionStep(Collections.emptySet(), null, currentStates));
 
-        for (char symbol : input.toCharArray()) {
+        int length = input.length();
+        for (int i = 0; i < length; i++) {
+            char symbol = input.charAt(i);
             Set<State> nextStates = computeNextStates(currentStates, symbol, transitionTable);
 
             steps.add(new ExecutionStep(currentStates, symbol, nextStates));

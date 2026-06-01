@@ -1,0 +1,3 @@
+Sitemap: https://autogex.eu.org/sitemap.xml
+User-agent: *
+Allow: /

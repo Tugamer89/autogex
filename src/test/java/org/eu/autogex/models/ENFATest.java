@@ -80,4 +80,25 @@ class ENFATest {
                 exception.getMessage().contains("initial state"),
                 "The error message must mention the initial state");
     }
+
+    @Test
+    void testExecutionTraceExceedsMaxLengthThrowsException() {
+        ENFA enfa =
+                new ENFA.Builder()
+                        .addState("q0", false)
+                        .setInitialState("q0")
+                        .addTransition("q0", 'a', "q0")
+                        .build();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 10001; i++) {
+            sb.append('a');
+        }
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> enfa.execute(sb.toString()));
+        assertTrue(
+                exception.getMessage().contains("exceeds maximum allowed length for trace execution"),
+                "Should prevent memory DoS on excessively long trace executions");
+    }
 }

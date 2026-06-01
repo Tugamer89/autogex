@@ -95,8 +95,10 @@ class ENFATest {
             sb.append('a');
         }
 
+        String longInput = sb.toString();
+
         IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> enfa.execute(sb.toString()));
+                assertThrows(IllegalArgumentException.class, () -> enfa.execute(longInput));
         assertTrue(
                 exception
                         .getMessage()

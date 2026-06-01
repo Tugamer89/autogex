@@ -103,4 +103,15 @@ class ENFATest {
                         .contains("exceeds maximum allowed length for trace execution"),
                 "Should prevent memory DoS on excessively long trace executions");
     }
+
+    @Test
+    void testExecuteWithNullInputThrowsException() {
+        ENFA enfa =
+                new ENFA.Builder()
+                        .addState("q0", false)
+                        .setInitialState("q0")
+                        .build();
+
+        assertThrows(NullPointerException.class, () -> enfa.execute(null));
+    }
 }

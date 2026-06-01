@@ -136,4 +136,15 @@ class DFATest {
                         .contains("exceeds maximum allowed length for trace execution"),
                 "Should prevent memory DoS on excessively long trace executions");
     }
+
+    @Test
+    void testExecuteWithNullInputThrowsException() {
+        DFA dfa =
+                new DFA.Builder()
+                        .addState("q0", false)
+                        .setInitialState("q0")
+                        .build();
+
+        assertThrows(NullPointerException.class, () -> dfa.execute(null));
+    }
 }

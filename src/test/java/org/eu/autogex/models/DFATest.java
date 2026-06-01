@@ -131,7 +131,9 @@ class DFATest {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> dfa.execute(sb.toString()));
         assertTrue(
-                exception.getMessage().contains("exceeds maximum allowed length for trace execution"),
+                exception
+                        .getMessage()
+                        .contains("exceeds maximum allowed length for trace execution"),
                 "Should prevent memory DoS on excessively long trace executions");
     }
 }

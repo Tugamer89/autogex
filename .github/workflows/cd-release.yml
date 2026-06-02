@@ -145,20 +145,6 @@ jobs:
           publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
           destination_dir: ${{ env.DOCS_VERSION }}
           keep_files: true
-      
-      - name: Optimize Root Assets
-        run: |
-          terser ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -o ${{ steps.find_folder.outputs.javadoc_path }}/version-switcher.js -c -m
-          svgo ${{ steps.find_folder.outputs.javadoc_path }}/logo.svg
-          svgo ${{ steps.find_folder.outputs.javadoc_path }}/favicon.svg
-
-      - name: Publish Latest Documentation to Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ steps.find_folder.outputs.javadoc_path }}
-          destination_dir: .
-          keep_files: true
 
   trigger-sitemap:
     name: Util - Trigger Sitemap Update

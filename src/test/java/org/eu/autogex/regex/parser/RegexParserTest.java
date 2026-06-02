@@ -255,6 +255,12 @@ class RegexParserTest {
     }
 
     @Test
+    void testCharClassMaxRangeDoSPrevention() {
+        // Should finish instantly without an infinite loop
+        assertDoesNotThrow(() -> RegexParser.parse("[\u0000-\uffff]"));
+    }
+
+    @Test
     void testThrowsExceptionOnIncompleteEscapeSequence() {
         IllegalArgumentException exception1 =
                 assertThrows(IllegalArgumentException.class, () -> RegexParser.parse("\\"));

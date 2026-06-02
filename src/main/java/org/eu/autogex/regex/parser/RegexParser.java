@@ -251,8 +251,8 @@ public class RegexParser {
                 && input.charAt(position + 1) != ']') {
             match('-'); // Consume '-'
             char endChar = next();
-            for (char c = startChar; c <= endChar; c++) {
-                chars.add(c);
+            for (int c = startChar; c <= endChar; c++) {
+                chars.add((char) c);
             }
         } else {
             chars.add(startChar);

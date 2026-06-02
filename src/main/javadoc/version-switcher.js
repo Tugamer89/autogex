@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentBase = getBase(currentPath);
     document.body.addEventListener('change', (e) => {
         if (e.target?.id === 'version-switcher') {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            if (selectedOption) {
+                selectedOption.text = 'Navigating...';
+            }
+
             e.target.disabled = true;
             e.target.setAttribute('aria-busy', 'true');
 

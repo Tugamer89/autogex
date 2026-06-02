@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.1](https://github.com/Tugamer89/autogex/compare/v1.11.0...v1.11.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* **security:** [CRITICAL] resolve DoS infinite loop in character class parsing ([#133](https://github.com/Tugamer89/autogex/issues/133)) ([78ce59c](https://github.com/Tugamer89/autogex/commit/78ce59c2a23667a70284b178541b2cb291c42017))
+
+
+### Performance Improvements
+
+* Defer HashSet allocation in computeNextStates for better performance ([#132](https://github.com/Tugamer89/autogex/issues/132)) ([4895b7a](https://github.com/Tugamer89/autogex/commit/4895b7a0de35732745c160344e51ad1b1f50bfbb))
+
 ## [1.11.0](https://github.com/Tugamer89/autogex/compare/v1.10.0...v1.11.0) (2026-06-01)
 
 

@@ -47,7 +47,11 @@ class NFATest {
         builder.setInitialState("q0");
         NFA nfa = builder.build();
 
-        assertFalse(nfa.accepts(null), "NFA should safely reject null inputs");
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> nfa.accepts(null));
+        assertTrue(
+                exception.getMessage().contains("cannot be null"),
+                "NFA should safely reject null inputs");
     }
 
     @Test

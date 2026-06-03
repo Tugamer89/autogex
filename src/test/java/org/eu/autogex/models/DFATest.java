@@ -50,7 +50,11 @@ class DFATest {
         builder.setInitialState("q0");
         DFA dfa = builder.build();
 
-        assertFalse(dfa.accepts(null), "DFA should safely reject null inputs");
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> dfa.accepts(null));
+        assertTrue(
+                exception.getMessage().contains("cannot be null"),
+                "DFA should safely reject null inputs");
     }
 
     @Test

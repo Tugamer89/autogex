@@ -15,7 +15,11 @@ class ENFATest {
         builder.setInitialState("q0");
         ENFA enfa = builder.build();
 
-        assertFalse(enfa.accepts(null), "ENFA should safely reject null inputs");
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> enfa.accepts(null));
+        assertTrue(
+                exception.getMessage().contains("cannot be null"),
+                "ENFA should safely reject null inputs");
     }
 
     @Test

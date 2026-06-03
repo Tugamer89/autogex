@@ -9,6 +9,20 @@ import org.junit.jupiter.api.Test;
 class ENFATest {
 
     @Test
+    void testAcceptsNull() {
+        ENFA.Builder builder = new ENFA.Builder();
+        builder.addState("q0", true);
+        builder.setInitialState("q0");
+        ENFA enfa = builder.build();
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> enfa.accepts(null));
+        assertTrue(
+                exception.getMessage().contains("cannot be null"),
+                "ENFA should safely reject null inputs");
+    }
+
+    @Test
     void testENFAWithEpsilonTransitions() {
         // Automaton that recognizes "a*b*" leveraging ε-transitions
         ENFA enfa =

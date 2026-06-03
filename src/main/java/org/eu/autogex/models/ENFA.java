@@ -60,6 +60,10 @@ public class ENFA extends AbstractAutomaton {
      */
     @Override
     public boolean accepts(String input) {
+        if (input == null) {
+            return false;
+        }
+
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
 
         for (int i = 0; i < input.length(); i++) {

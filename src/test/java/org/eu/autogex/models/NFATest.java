@@ -41,6 +41,16 @@ class NFATest {
     }
 
     @Test
+    void testAcceptsNull() {
+        NFA.Builder builder = new NFA.Builder();
+        builder.addState("q0", true);
+        builder.setInitialState("q0");
+        NFA nfa = builder.build();
+
+        assertFalse(nfa.accepts(null), "NFA should safely reject null inputs");
+    }
+
+    @Test
     void testNFAGetters() {
         // Tests the getter methods
         NFA nfa = new NFA.Builder().addState("q0", true).setInitialState("q0").build();

@@ -44,6 +44,16 @@ class DFATest {
     }
 
     @Test
+    void testAcceptsNull() {
+        DFA.Builder builder = new DFA.Builder();
+        builder.addState("q0", true);
+        builder.setInitialState("q0");
+        DFA dfa = builder.build();
+
+        assertFalse(dfa.accepts(null), "DFA should safely reject null inputs");
+    }
+
+    @Test
     void testDFAGetters() {
         // Tests the getter methods
         DFA dfa =

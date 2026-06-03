@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.11.2](https://github.com/Tugamer89/autogex/compare/v1.11.1...v1.11.2) (2026-06-03)
+
+
+### Bug Fixes
+
+* **security:** [MEDIUM] handle null inputs gracefully in accepts methods ([#135](https://github.com/Tugamer89/autogex/issues/135)) ([b7d3856](https://github.com/Tugamer89/autogex/commit/b7d385661ea159b94bd1f23700c9e2471e5aead0))
+* **ui:** improve accessibility and contrast of copy code button ([#136](https://github.com/Tugamer89/autogex/issues/136)) ([9e9d311](https://github.com/Tugamer89/autogex/commit/9e9d311e127d56462f80f04bc494462beb7ac56c))
+
+
+### Performance Improvements
+
+* optimize nfaToDfa inner map operations and collection allocations ([#137](https://github.com/Tugamer89/autogex/issues/137)) ([f73c2bc](https://github.com/Tugamer89/autogex/commit/f73c2bccd457b58e2e716f7fbea37d5142b4ebe0))
+
 ## [1.11.1](https://github.com/Tugamer89/autogex/compare/v1.11.0...v1.11.1) (2026-06-02)
 
 

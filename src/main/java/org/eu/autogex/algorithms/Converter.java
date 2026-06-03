@@ -91,11 +91,8 @@ public class Converter {
                 if (transitions != null) {
                     for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
                         Character symbol = entry.getKey();
-                        Set<State> targets = symbolToTargets.get(symbol);
-                        if (targets == null) {
-                            targets = new HashSet<>();
-                            symbolToTargets.put(symbol, targets);
-                        }
+                        Set<State> targets =
+                                symbolToTargets.computeIfAbsent(symbol, k -> new HashSet<>());
                         targets.addAll(entry.getValue());
                     }
                 }
@@ -105,17 +102,21 @@ public class Converter {
                 char symbol = entry.getKey();
                 Set<State> nextSuperState = entry.getValue();
 
-                String targetName = dfaStateNames.get(nextSuperState);
-                if (targetName == null) {
-                    if (dfaStateNames.size() >= MAX_DFA_STATES) {
-                        throw new IllegalStateException(
-                                "DFA state limit exceeded (Security: DoS prevention).");
-                    }
-                    targetName = "D" + dfaStateNames.size();
-                    builder.addState(targetName, isFinal(nextSuperState, nfa.getFinalStates()));
-                    dfaStateNames.put(nextSuperState, targetName);
-                    queue.add(nextSuperState);
-                }
+                String targetName =
+                        dfaStateNames.computeIfAbsent(
+                                nextSuperState,
+                                k -> {
+                                    if (dfaStateNames.size() >= MAX_DFA_STATES) {
+                                        throw new IllegalStateException(
+                                                "DFA state limit exceeded (Security: DoS prevention).");
+                                    }
+                                    String newTargetName = "D" + dfaStateNames.size();
+                                    builder.addState(
+                                            newTargetName,
+                                            isFinal(nextSuperState, nfa.getFinalStates()));
+                                    queue.add(nextSuperState);
+                                    return newTargetName;
+                                });
                 builder.addTransition(currentName, symbol, targetName);
             }
         }

@@ -1,5 +1,6 @@
 package org.eu.autogex.core;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +67,7 @@ public abstract class AbstractAutomaton implements Automaton {
                 }
             }
         }
-        return nextStates != null ? nextStates : new HashSet<>();
+        return nextStates != null ? nextStates : Collections.emptySet();
     }
 
     /**

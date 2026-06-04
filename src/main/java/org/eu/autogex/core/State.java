@@ -1,11 +1,10 @@
 package org.eu.autogex.core;
 
-import java.util.Objects;
-
 /** Represents a state (q) within an automaton. */
 public class State {
     private final String name;
     private final boolean isFinal;
+    private final int cachedHashCode;
 
     /**
      * Constructs a new State.
@@ -16,6 +15,13 @@ public class State {
     public State(String name, boolean isFinal) {
         this.name = name;
         this.isFinal = isFinal;
+
+        // Cache hash code to speed up frequent map/set lookups during transformations.
+        // Based on Objects.hash/Arrays.hashCode simplified for these two fields.
+        int result = 1;
+        result = 31 * result + (name == null ? 0 : name.hashCode());
+        result = 31 * result + (isFinal ? 1231 : 1237);
+        this.cachedHashCode = result;
     }
 
     /**
@@ -41,12 +47,15 @@ public class State {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         State state = (State) o;
-        return isFinal == state.isFinal && Objects.equals(name, state.name);
+
+        if (this.isFinal != state.isFinal) return false;
+        if (this.name == null) return state.name == null;
+        return this.name.equals(state.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, isFinal);
+        return cachedHashCode;
     }
 
     @Override

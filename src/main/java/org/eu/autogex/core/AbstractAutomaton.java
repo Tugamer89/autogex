@@ -76,7 +76,10 @@ public abstract class AbstractAutomaton implements Automaton {
      * @param input The string to validate.
      */
     protected void validateExecutionInput(String input) {
-        if (input != null && input.length() > MAX_EXECUTION_STEPS) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input string cannot be null.");
+        }
+        if (input.length() > MAX_EXECUTION_STEPS) {
             throw new IllegalArgumentException(
                     "Input string exceeds maximum allowed length for trace execution (Security: DoS prevention).");
         }

@@ -157,6 +157,6 @@ class DFATest {
     void testExecuteWithNullInputThrowsException() {
         DFA dfa = new DFA.Builder().addState("q0", false).setInitialState("q0").build();
 
-        assertThrows(NullPointerException.class, () -> dfa.execute(null));
+        assertThrows(IllegalArgumentException.class, () -> dfa.execute(null));
     }
 }

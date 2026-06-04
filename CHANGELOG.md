@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.11.3](https://github.com/Tugamer89/autogex/compare/v1.11.2...v1.11.3) (2026-06-04)
+
+
+### Bug Fixes
+
+* **ui:** improve keyboard accessibility in javadoc custom styles ([#139](https://github.com/Tugamer89/autogex/issues/139)) ([2b5f316](https://github.com/Tugamer89/autogex/commit/2b5f316d910abeb5365b44022887f94fc2a95053))
+
+
+### Performance Improvements
+
+* optimize State hashCode and equals for faster automaton conversions ([#140](https://github.com/Tugamer89/autogex/issues/140)) ([a9e7d82](https://github.com/Tugamer89/autogex/commit/a9e7d827a31b64cd4cec2208a784ddea1d7b1b64))
+
 ## [1.11.2](https://github.com/Tugamer89/autogex/compare/v1.11.1...v1.11.2) (2026-06-03)
 
 

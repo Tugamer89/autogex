@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.4](https://github.com/Tugamer89/autogex/compare/v1.11.3...v1.11.4) (2026-06-04)
+
+
+### Bug Fixes
+
+* **security:** [security improvement] ([#142](https://github.com/Tugamer89/autogex/issues/142)) ([2c1f09c](https://github.com/Tugamer89/autogex/commit/2c1f09c152979af38b78b76886a15e447ac2f8dc))
+
 ## [1.11.3](https://github.com/Tugamer89/autogex/compare/v1.11.2...v1.11.3) (2026-06-04)
 
 

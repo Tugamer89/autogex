@@ -55,7 +55,7 @@ select#version-switcher:hover {
   border-color: #ffffff;
 }
 
-select#version-switcher:focus {
+select#version-switcher:focus-visible {
   border-color: #005fcc;
   box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.3);
 }
@@ -126,7 +126,8 @@ pre:focus-visible {
   opacity: 1;
 }
 
-.code-snippet-wrapper:hover .copy-btn {
+.code-snippet-wrapper:hover .copy-btn,
+.code-snippet-wrapper:focus-within .copy-btn {
   opacity: 1;
 }
 

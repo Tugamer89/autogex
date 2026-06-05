@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.12.0](https://github.com/Tugamer89/autogex/compare/v1.11.4...v1.12.0) (2026-06-05)
+
+
+### Features
+
+* **ui:** improve accessibility for documentation version switcher and code copy buttons ([#145](https://github.com/Tugamer89/autogex/issues/145)) ([8941f26](https://github.com/Tugamer89/autogex/commit/8941f2605a99ec36727e51e0fdff142e4d5250aa))
+
+
+### Performance Improvements
+
+* avoid unnecessary string copy during regex parsing ([#144](https://github.com/Tugamer89/autogex/issues/144)) ([e2d64c5](https://github.com/Tugamer89/autogex/commit/e2d64c57c13977cb2fc8f863df4bd2f27413499b))
+
 ## [1.11.4](https://github.com/Tugamer89/autogex/compare/v1.11.3...v1.11.4) (2026-06-04)
 
 

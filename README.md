@@ -38,7 +38,7 @@ You can include Autogex in your Java project by adding this dependency to your `
 <dependency>
   <groupId>org.eu.autogex</groupId>
   <artifactId>autogex</artifactId>
-  <version>1.11.4</version>
+  <version>1.12.0</version>
 </dependency>
 ```
 <!-- x-release-please-end -->

@@ -35,6 +35,19 @@ public class RegexParser {
     }
 
     private static String removeWhitespaces(String input) {
+        boolean hasWhitespace = false;
+        for (int i = 0; i < input.length(); i++) {
+            if (Character.isWhitespace(input.charAt(i))) {
+                hasWhitespace = true;
+                break;
+            }
+        }
+
+        // Optimization: if no whitespace is found, avoid StringBuilder allocation and copying
+        if (!hasWhitespace) {
+            return input;
+        }
+
         StringBuilder sb = new StringBuilder(input.length());
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);

@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target?.id === 'version-switcher') {
             e.target.disabled = true;
             e.target.setAttribute('aria-busy', 'true');
+            e.target.setAttribute('title', 'Switching version...');
 
             const targetBase = e.target.value;
             

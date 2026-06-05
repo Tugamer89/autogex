@@ -50,7 +50,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           ACTOR: ${{ github.actor }}
         run: |
-          if [ "$ACTOR" != "dependabot[bot]" ]; then
+          if [ -n "$SONAR_TOKEN" ] && [ "$ACTOR" != "dependabot[bot]" ]; then
             mvn -B -T 1C verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar \
               -Dsonar.projectKey=Tugamer89_autogex \
               -Dmaven.javadoc.skip=true \

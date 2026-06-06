@@ -66,8 +66,6 @@ public class ENFA extends AbstractAutomaton {
 
         Set<State> currentStates = epsilonClosure(Set.of(initialState));
 
-        // Optimization: Extract input length to local variable to prevent re-evaluation on every
-        // iteration
         int length = input.length();
         for (int i = 0; i < length; i++) {
             char symbol = input.charAt(i);

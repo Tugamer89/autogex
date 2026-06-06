@@ -135,6 +135,28 @@ pre:focus-visible {
   transform: scale(0.95);
 }
 
+.copy-btn.copied::after {
+  content: "Copied!";
+  position: absolute;
+  right: 100%;
+  margin-right: 8px;
+  background-color: #24292f;
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(4px); }
+  10% { opacity: 1; transform: translateX(0); }
+  80% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(4px); }
+}
+
 @media (hover: none) {
   .copy-btn {
     opacity: 1;

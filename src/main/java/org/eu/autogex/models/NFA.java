@@ -27,9 +27,7 @@ public class NFA extends AbstractAutomaton {
      */
     @Override
     public boolean accepts(String input) {
-        if (input == null) {
-            throw new IllegalArgumentException("Input string cannot be null.");
-        }
+        validateExecutionInput(input);
 
         Set<State> currentStates = Set.of(initialState);
 

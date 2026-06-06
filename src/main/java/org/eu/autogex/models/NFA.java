@@ -31,7 +31,8 @@ public class NFA extends AbstractAutomaton {
 
         Set<State> currentStates = Set.of(initialState);
 
-        for (int i = 0; i < input.length(); i++) {
+        int length = input.length();
+        for (int i = 0; i < length; i++) {
             char symbol = input.charAt(i);
 
             currentStates = computeNextStates(currentStates, symbol, transitionTable);

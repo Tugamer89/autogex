@@ -120,9 +120,7 @@ class NFATest {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> nfa.execute(longInput));
         assertTrue(
-                exception
-                        .getMessage()
-                        .contains("exceeds maximum allowed length for execution"),
+                exception.getMessage().contains("exceeds maximum allowed length for execution"),
                 "Should prevent memory DoS on excessively long trace executions");
     }
 

@@ -114,9 +114,7 @@ class ENFATest {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> enfa.execute(longInput));
         assertTrue(
-                exception
-                        .getMessage()
-                        .contains("exceeds maximum allowed length for execution"),
+                exception.getMessage().contains("exceeds maximum allowed length for execution"),
                 "Should prevent memory DoS on excessively long trace executions");
     }
 

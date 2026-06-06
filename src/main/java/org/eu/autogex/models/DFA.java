@@ -27,9 +27,7 @@ public class DFA extends AbstractAutomaton {
      */
     @Override
     public boolean accepts(String input) {
-        if (input == null) {
-            throw new IllegalArgumentException("Input string cannot be null.");
-        }
+        validateExecutionInput(input);
 
         State currentState = initialState;
 

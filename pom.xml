@@ -243,6 +243,23 @@
                             });
                         </script>
                         <script src="/version-switcher.js"></script>
+                        <script>
+                            window.addEventListener('load', function() {
+                                var searchInput = document.getElementById('search-input');
+                                if (searchInput && !searchInput.placeholder.includes('/')) {
+                                    searchInput.placeholder = searchInput.placeholder + " (Press '/')";
+                                }
+                            });
+                            window.addEventListener('keydown', function(e) {
+                                if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                                    e.preventDefault();
+                                    var searchInput = document.getElementById('search-input');
+                                    if (searchInput) {
+                                        searchInput.focus();
+                                    }
+                                }
+                            });
+                        </script>
                         Copyright &#169; 2026 <a href="https://github.com/Tugamer89">Tugamer89</a>. All rights reserved.
                     ]]></bottom>
 

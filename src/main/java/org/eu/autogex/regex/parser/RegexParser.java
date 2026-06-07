@@ -35,21 +35,25 @@ public class RegexParser {
     }
 
     private static String removeWhitespaces(String input) {
-        boolean hasWhitespace = false;
-        for (int i = 0; i < input.length(); i++) {
+        int length = input.length();
+        int firstWhitespace = -1;
+        for (int i = 0; i < length; i++) {
             if (Character.isWhitespace(input.charAt(i))) {
-                hasWhitespace = true;
+                firstWhitespace = i;
                 break;
             }
         }
 
         // Optimization: if no whitespace is found, avoid StringBuilder allocation and copying
-        if (!hasWhitespace) {
+        if (firstWhitespace == -1) {
             return input;
         }
 
-        StringBuilder sb = new StringBuilder(input.length());
-        for (int i = 0; i < input.length(); i++) {
+        StringBuilder sb = new StringBuilder(length);
+        if (firstWhitespace > 0) {
+            sb.append(input, 0, firstWhitespace);
+        }
+        for (int i = firstWhitespace + 1; i < length; i++) {
             char c = input.charAt(i);
             if (!Character.isWhitespace(c)) {
                 sb.append(c);

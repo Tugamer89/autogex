@@ -133,15 +133,17 @@ public class Minimizer {
             int[] targets = new int[alphabetArray.length];
             Map<Character, State> transitions = dfa.getTransitionTable().get(s);
 
-            for (int i = 0; i < alphabetArray.length; i++) {
-                if (transitions == null) {
-                    targets[i] = -1;
-                    continue;
+            // Optimization: Hoist invariant null check out of the loop and use Arrays.fill for
+            // faster initialization
+            if (transitions == null) {
+                Arrays.fill(targets, -1);
+            } else {
+                for (int i = 0; i < alphabetArray.length; i++) {
+                    State destination = transitions.get(alphabetArray[i]);
+                    Integer targetPartitionId =
+                            destination != null ? stateToPartitionId.get(destination) : null;
+                    targets[i] = targetPartitionId != null ? targetPartitionId : -1;
                 }
-                State destination = transitions.get(alphabetArray[i]);
-                Integer targetPartitionId =
-                        destination != null ? stateToPartitionId.get(destination) : null;
-                targets[i] = targetPartitionId != null ? targetPartitionId : -1;
             }
             BehaviorSignature behaviorSignature = new BehaviorSignature(targets);
 

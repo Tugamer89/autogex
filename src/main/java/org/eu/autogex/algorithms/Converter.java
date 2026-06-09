@@ -46,22 +46,41 @@ public class Converter {
             Set<State> qClosure = epsilonClosures.get(q);
 
             for (State p : qClosure) {
-                Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
-                if (transitions != null) {
-                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
-                        Character a = entry.getKey();
-                        if (a == null) continue;
-
-                        for (State st : entry.getValue()) {
-                            for (State target : epsilonClosures.get(st)) {
-                                builder.addTransition(q.getName(), a, target.getName());
-                            }
-                        }
-                    }
-                }
+                addReachableTransitions(enfa, builder, epsilonClosures, q.getName(), p);
             }
         }
         return builder.build();
+    }
+
+    private static void addReachableTransitions(
+            ENFA enfa,
+            NFA.Builder builder,
+            Map<State, Set<State>> epsilonClosures,
+            String sourceName,
+            State p) {
+        Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
+        if (transitions != null) {
+            for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                Character a = entry.getKey();
+                if (a != null) {
+                    addTransitionsForSymbol(
+                            builder, epsilonClosures, sourceName, a, entry.getValue());
+                }
+            }
+        }
+    }
+
+    private static void addTransitionsForSymbol(
+            NFA.Builder builder,
+            Map<State, Set<State>> epsilonClosures,
+            String sourceName,
+            Character a,
+            Set<State> targetStates) {
+        for (State st : targetStates) {
+            for (State target : epsilonClosures.get(st)) {
+                builder.addTransition(sourceName, a, target.getName());
+            }
+        }
     }
 
     /**

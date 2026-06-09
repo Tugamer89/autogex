@@ -40,16 +40,24 @@ public class Converter {
         builder.setInitialState(enfa.getInitialState().getName());
 
         // 3. Compute new transitions for each state
+        // Optimization: Directly add transitions to the builder without allocating intermediate
+        // structures
         for (State q : enfa.getStates()) {
             Set<State> qClosure = epsilonClosures.get(q);
 
-            Map<Character, Set<State>> reachableTargets =
-                    computeReachableTargets(enfa, qClosure, epsilonClosures);
+            for (State p : qClosure) {
+                Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
+                if (transitions != null) {
+                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                        Character a = entry.getKey();
+                        if (a == null) continue;
 
-            for (Map.Entry<Character, Set<State>> entry : reachableTargets.entrySet()) {
-                char a = entry.getKey();
-                for (State target : entry.getValue()) {
-                    builder.addTransition(q.getName(), a, target.getName());
+                        for (State st : entry.getValue()) {
+                            for (State target : epsilonClosures.get(st)) {
+                                builder.addTransition(q.getName(), a, target.getName());
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -136,32 +144,6 @@ public class Converter {
     }
 
     // --- Helper Methods ---
-
-    /**
-     * Computes the mapping of reachable target states for each character transitioning out of an
-     * epsilon closure.
-     */
-    private static Map<Character, Set<State>> computeReachableTargets(
-            ENFA enfa, Set<State> qClosure, Map<State, Set<State>> epsilonClosures) {
-        Map<Character, Set<State>> reachableTargets = new HashMap<>();
-
-        for (State p : qClosure) {
-            Map<Character, Set<State>> transitions = enfa.getTransitionTable().get(p);
-            if (transitions != null) {
-                for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
-                    Character a = entry.getKey();
-                    if (a == null) continue;
-
-                    Set<State> targetsForA =
-                            reachableTargets.computeIfAbsent(a, k -> new HashSet<>());
-                    for (State st : entry.getValue()) {
-                        targetsForA.addAll(epsilonClosures.get(st));
-                    }
-                }
-            }
-        }
-        return reachableTargets;
-    }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
         return !Collections.disjoint(superState, finalStates);

@@ -81,4 +81,22 @@ class AbstractAutomatonBuilderTest {
 
         assertEquals("State not found. Add it first using addState.", exception.getMessage());
     }
+
+    @Test
+    void testAddState_MaxStatesLimitExceeded() {
+        TestBuilder builder = new TestBuilder();
+        for (int i = 0; i < AbstractAutomatonBuilder.MAX_STATES; i++) {
+            builder.addState("q" + i, false);
+        }
+
+        IllegalStateException exception =
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> {
+                            builder.addState("q_overflow", false);
+                        });
+
+        assertEquals(
+                "Maximum state limit exceeded (Security: DoS prevention).", exception.getMessage());
+    }
 }

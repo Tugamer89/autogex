@@ -162,3 +162,16 @@ pre:focus-visible {
     opacity: 1;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  select#version-switcher,
+  .header-logo-link,
+  .copy-btn,
+  .copy-btn.copied::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

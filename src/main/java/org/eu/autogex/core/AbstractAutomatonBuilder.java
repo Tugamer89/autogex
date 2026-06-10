@@ -13,6 +13,9 @@ import java.util.*;
 public abstract class AbstractAutomatonBuilder<
         B extends AbstractAutomatonBuilder<B, A>, A extends Automaton> {
 
+    /** Maximum allowed states in an Automaton to prevent memory DoS. */
+    protected static final int MAX_STATES = 10000;
+
     protected final Map<String, State> states = new HashMap<>();
     protected final Set<State> finalStates = new HashSet<>();
     protected State initialState;
@@ -39,6 +42,9 @@ public abstract class AbstractAutomatonBuilder<
      * @return The current builder instance.
      */
     public B addState(String name, boolean isFinal) {
+        if (states.size() >= MAX_STATES) {
+            throw new IllegalStateException("State limit exceeded (Security: DoS prevention).");
+        }
         State state = new State(name, isFinal);
         states.put(name, state);
         if (isFinal) {

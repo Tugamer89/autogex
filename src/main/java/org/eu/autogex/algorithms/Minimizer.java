@@ -60,7 +60,7 @@ public class Minimizer {
         }
 
         // 4. Rebuild the Minimized DFA
-        return buildMinimalDfa(dfa, partitions, alphabet, stateToPartitionId);
+        return buildMinimalDfa(dfa, partitions, stateToPartitionId);
     }
 
     private static void updateStateToPartitionMap(
@@ -127,21 +127,22 @@ public class Minimizer {
 
         // Maps the behavioral "signature" of a state to the subgroup of states sharing it
         Map<BehaviorSignature, Set<State>> subGroups = new HashMap<>();
+        Map<State, Map<Character, State>> transitionTable = dfa.getTransitionTable();
 
         for (State s : group) {
             // The signature is: "For each character, which partition do I end up in?"
             int[] targets = new int[alphabetArray.length];
-            Map<Character, State> transitions = dfa.getTransitionTable().get(s);
+            Map<Character, State> transitions = transitionTable.get(s);
 
-            for (int i = 0; i < alphabetArray.length; i++) {
-                if (transitions == null) {
-                    targets[i] = -1;
-                    continue;
+            if (transitions == null) {
+                Arrays.fill(targets, -1);
+            } else {
+                for (int i = 0; i < alphabetArray.length; i++) {
+                    State destination = transitions.get(alphabetArray[i]);
+                    Integer targetPartitionId =
+                            destination != null ? stateToPartitionId.get(destination) : null;
+                    targets[i] = targetPartitionId != null ? targetPartitionId : -1;
                 }
-                State destination = transitions.get(alphabetArray[i]);
-                Integer targetPartitionId =
-                        destination != null ? stateToPartitionId.get(destination) : null;
-                targets[i] = targetPartitionId != null ? targetPartitionId : -1;
             }
             BehaviorSignature behaviorSignature = new BehaviorSignature(targets);
 
@@ -152,10 +153,7 @@ public class Minimizer {
     }
 
     private static DFA buildMinimalDfa(
-            DFA originalDfa,
-            Set<Set<State>> partitions,
-            Set<Character> alphabet,
-            Map<State, Integer> stateToPartitionId) {
+            DFA originalDfa, Set<Set<State>> partitions, Map<State, Integer> stateToPartitionId) {
         DFA.Builder builder = new DFA.Builder();
         Map<Integer, String> partitionIdToName = new HashMap<>();
 
@@ -177,19 +175,24 @@ public class Minimizer {
         }
 
         // Create transitions (taking a "representative" element for each partition is sufficient)
+        Map<State, Map<Character, State>> transitionTable = originalDfa.getTransitionTable();
         for (Set<State> partition : partitions) {
             State representative = partition.iterator().next();
             int partId = stateToPartitionId.get(representative);
             String currentName = partitionIdToName.get(partId);
 
-            for (char symbol : alphabet) {
-                State dest = getDestination(originalDfa, representative, symbol);
-                Integer targetPartitionId = stateToPartitionId.get(dest);
+            Map<Character, State> transitions = transitionTable.get(representative);
+            if (transitions != null) {
+                for (Map.Entry<Character, State> entry : transitions.entrySet()) {
+                    char symbol = entry.getKey();
+                    State dest = entry.getValue();
+                    Integer targetPartitionId = stateToPartitionId.get(dest);
 
-                // Link the transition if valid
-                if (targetPartitionId != null) {
-                    builder.addTransition(
-                            currentName, symbol, partitionIdToName.get(targetPartitionId));
+                    // Link the transition if valid
+                    if (targetPartitionId != null) {
+                        builder.addTransition(
+                                currentName, symbol, partitionIdToName.get(targetPartitionId));
+                    }
                 }
             }
         }
@@ -219,11 +222,6 @@ public class Minimizer {
             }
         }
         return reachable;
-    }
-
-    private static State getDestination(DFA dfa, State source, char symbol) {
-        Map<Character, State> transitions = dfa.getTransitionTable().get(source);
-        return transitions != null ? transitions.get(symbol) : null;
     }
 
     private static Set<Character> getAlphabet(DFA dfa) {

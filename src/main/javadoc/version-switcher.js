@@ -76,4 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             updateSelects(options);
         });
+
+    globalThis.addEventListener('pageshow', (e) => {
+        if (e.persisted) {
+            document.querySelectorAll('select#version-switcher').forEach(switcher => {
+                switcher.removeAttribute('disabled');
+                switcher.removeAttribute('aria-busy');
+                switcher.setAttribute('title', 'Select documentation version');
+            });
+        }
+    });
 });

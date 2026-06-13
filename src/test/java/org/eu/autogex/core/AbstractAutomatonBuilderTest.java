@@ -25,6 +25,25 @@ class AbstractAutomatonBuilderTest {
     }
 
     @Test
+    void testMaxStatesLimit() {
+        TestBuilder builder = new TestBuilder();
+        for (int i = 0; i < 10000; i++) {
+            builder.addState("q" + i, false);
+        }
+
+        IllegalStateException exception =
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> {
+                            builder.addState("q10000", false);
+                        });
+
+        assertTrue(
+                exception.getMessage().contains("State limit exceeded"),
+                "Should detect state limit to prevent DoS");
+    }
+
+    @Test
     void testGetTransitionStatesOrThrow_BothExist() {
         TestBuilder builder = new TestBuilder();
         builder.addState("q0", false);

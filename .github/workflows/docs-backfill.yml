@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -84,7 +84,7 @@ jobs:
         
     steps:
       - name: Checkout Repository at Tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ matrix.tag }}
 
@@ -156,7 +156,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Trigger Sitemap Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

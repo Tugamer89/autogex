@@ -170,6 +170,19 @@ pre:focus-visible {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  select#version-switcher,
+  .header-logo-link,
+  .copy-btn,
+  .copy-btn.copied::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 a:focus-visible {
   outline: 2px solid #005fcc;
   outline-offset: 2px;

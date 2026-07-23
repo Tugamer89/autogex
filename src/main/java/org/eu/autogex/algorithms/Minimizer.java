@@ -133,8 +133,6 @@ public class Minimizer {
             int[] targets = new int[alphabetArray.length];
             Map<Character, State> transitions = dfa.getTransitionTable().get(s);
 
-            // Optimization: Hoist invariant null check out of the loop and use Arrays.fill for
-            // faster initialization
             if (transitions == null) {
                 Arrays.fill(targets, -1);
             } else {

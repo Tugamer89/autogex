@@ -128,7 +128,6 @@ public class Minimizer {
         // Maps the behavioral "signature" of a state to the subgroup of states sharing it
         Map<BehaviorSignature, Set<State>> subGroups = new HashMap<>();
 
-        // Optimization: Hoist map lookup and array length out of the loop
         Map<State, Map<Character, State>> transitionTable = dfa.getTransitionTable();
         int alphabetLen = alphabetArray.length;
 
@@ -137,7 +136,6 @@ public class Minimizer {
             int[] targets = new int[alphabetLen];
             Map<Character, State> transitions = transitionTable.get(s);
 
-            // Optimization: Unswitch condition for trap states and use fast array fill
             if (transitions == null) {
                 Arrays.fill(targets, -1);
             } else {

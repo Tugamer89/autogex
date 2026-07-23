@@ -128,15 +128,18 @@ public class Minimizer {
         // Maps the behavioral "signature" of a state to the subgroup of states sharing it
         Map<BehaviorSignature, Set<State>> subGroups = new HashMap<>();
 
+        Map<State, Map<Character, State>> transitionTable = dfa.getTransitionTable();
+        int alphabetLen = alphabetArray.length;
+
         for (State s : group) {
             // The signature is: "For each character, which partition do I end up in?"
-            int[] targets = new int[alphabetArray.length];
-            Map<Character, State> transitions = dfa.getTransitionTable().get(s);
+            int[] targets = new int[alphabetLen];
+            Map<Character, State> transitions = transitionTable.get(s);
 
             if (transitions == null) {
                 Arrays.fill(targets, -1);
             } else {
-                for (int i = 0; i < alphabetArray.length; i++) {
+                for (int i = 0; i < alphabetLen; i++) {
                     State destination = transitions.get(alphabetArray[i]);
                     Integer targetPartitionId =
                             destination != null ? stateToPartitionId.get(destination) : null;

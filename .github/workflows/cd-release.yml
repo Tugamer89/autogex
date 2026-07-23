@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Java Environment
         uses: actions/setup-java@v5
@@ -155,7 +155,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Trigger Sitemap Update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

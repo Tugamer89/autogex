@@ -40,8 +40,6 @@ public class Converter {
         builder.setInitialState(enfa.getInitialState().getName());
 
         // 3. Compute new transitions for each state
-        // Optimization: Directly add transitions to the builder without allocating intermediate
-        // structures
         for (State q : enfa.getStates()) {
             Set<State> qClosure = epsilonClosures.get(q);
 

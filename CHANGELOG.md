@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.13.0](https://github.com/Tugamer89/autogex/compare/v1.12.0...v1.13.0) (2026-07-23)
+
+
+### Features
+
+* **ui:** Add inline visual copy toast feedback ([#148](https://github.com/Tugamer89/autogex/issues/148)) ([6022070](https://github.com/Tugamer89/autogex/commit/60220702e320e4cfc77dec7f8570c8969ccb0852))
+* **ui:** add loading spinner to version switcher ([#156](https://github.com/Tugamer89/autogex/issues/156)) ([adfeb31](https://github.com/Tugamer89/autogex/commit/adfeb319869abd979b53e47134d6e79f056ba03a))
+
+
+### Bug Fixes
+
+* **security:** [security improvement] ([#147](https://github.com/Tugamer89/autogex/issues/147)) ([6e6ec99](https://github.com/Tugamer89/autogex/commit/6e6ec9910298fcd6daa771e08485655e46481c3d))
+* **security:** [security improvement] Add state limit to builder ([5c7167b](https://github.com/Tugamer89/autogex/commit/5c7167b42865250c8118f85c11394e81018fe5d6))
+* **security:** [security improvement] Add state limit to builder to prevent DoS ([#153](https://github.com/Tugamer89/autogex/issues/153)) ([5c7167b](https://github.com/Tugamer89/autogex/commit/5c7167b42865250c8118f85c11394e81018fe5d6))
+* **ui:** add focus visible outline for all documentation links ([#158](https://github.com/Tugamer89/autogex/issues/158)) ([87e1c07](https://github.com/Tugamer89/autogex/commit/87e1c0740b8baacd5ee55d2040c4c165cc5eeb12))
+* **ui:** add prefers-reduced-motion support for animations and smooth scrolling ([#164](https://github.com/Tugamer89/autogex/issues/164)) ([9fbcaa5](https://github.com/Tugamer89/autogex/commit/9fbcaa5231d39760bcc990a4004c95ffbdb1fbbc))
+* **ui:** improve screen reader feedback for code snippet copy action ([#167](https://github.com/Tugamer89/autogex/issues/167)) ([8d8d712](https://github.com/Tugamer89/autogex/commit/8d8d7121c4743383f5d26322f64479f74bef64e1))
+
+
+### Performance Improvements
+
+* apply loop unswitching and variable hoisting in Minimizer ([#163](https://github.com/Tugamer89/autogex/issues/163)) ([be200ba](https://github.com/Tugamer89/autogex/commit/be200ba1064117b23d6c997c8b6d54fa6a0785d6))
+* Inline reachable target map allocation in enfaToNfa ([#159](https://github.com/Tugamer89/autogex/issues/159)) ([d7284b7](https://github.com/Tugamer89/autogex/commit/d7284b7b0da765a2d821c4bb56788a565f6f22a2))
+* loop variable hoisting in Minimizer ([#155](https://github.com/Tugamer89/autogex/issues/155)) ([a400ab0](https://github.com/Tugamer89/autogex/commit/a400ab03533bc03408465462414cadb675900ce9))
+* optimize accepts evaluation loops ([#150](https://github.com/Tugamer89/autogex/issues/150)) ([c3779c3](https://github.com/Tugamer89/autogex/commit/c3779c380a8910c9e6c03789c1771739ee2deaa1))
+* Optimize whitespace removal in RegexParser ([#151](https://github.com/Tugamer89/autogex/issues/151)) ([4e0df4d](https://github.com/Tugamer89/autogex/commit/4e0df4d94759d563e3c86cf368273fd21e941f74))
+
 ## [1.12.0](https://github.com/Tugamer89/autogex/compare/v1.11.4...v1.12.0) (2026-06-05)
 
 

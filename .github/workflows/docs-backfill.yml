@@ -89,7 +89,7 @@ jobs:
           ref: ${{ matrix.tag }}
 
       - name: Setup Java Environment
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           java-version: '25'
           distribution: 'temurin'

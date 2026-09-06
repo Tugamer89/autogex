@@ -38,9 +38,22 @@ public class Minimizer {
         boolean changed = true;
         while (changed) {
             changed = false;
+
+            // Optimization: If every reachable state is in its own partition,
+            // no further refinement is mathematically possible. We've reached the fixed point.
+            if (partitions.size() == reachableStates.size()) {
+                break;
+            }
+
             Set<Set<State>> newPartitions = new HashSet<>();
 
             for (Set<State> group : partitions) {
+                // Optimization: Partitions of size 1 cannot be split further.
+                if (group.size() <= 1) {
+                    newPartitions.add(group);
+                    continue;
+                }
+
                 // Split the group based on behavior (transition destinations)
                 Map<BehaviorSignature, Set<State>> subGroups =
                         splitGroup(dfa, group, alphabetArray, stateToPartitionId);

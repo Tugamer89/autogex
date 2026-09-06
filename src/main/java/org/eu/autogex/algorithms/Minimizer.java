@@ -132,26 +132,36 @@ public class Minimizer {
         int alphabetLen = alphabetArray.length;
 
         for (State s : group) {
-            // The signature is: "For each character, which partition do I end up in?"
-            int[] targets = new int[alphabetLen];
-            Map<Character, State> transitions = transitionTable.get(s);
-
-            if (transitions == null) {
-                Arrays.fill(targets, -1);
-            } else {
-                for (int i = 0; i < alphabetLen; i++) {
-                    State destination = transitions.get(alphabetArray[i]);
-                    Integer targetPartitionId =
-                            destination != null ? stateToPartitionId.get(destination) : null;
-                    targets[i] = targetPartitionId != null ? targetPartitionId : -1;
-                }
-            }
-            BehaviorSignature behaviorSignature = new BehaviorSignature(targets);
-
+            BehaviorSignature behaviorSignature =
+                    computeSignature(
+                            s, alphabetArray, alphabetLen, transitionTable, stateToPartitionId);
             subGroups.computeIfAbsent(behaviorSignature, k -> new HashSet<>()).add(s);
         }
 
         return subGroups;
+    }
+
+    private static BehaviorSignature computeSignature(
+            State s,
+            char[] alphabetArray,
+            int alphabetLen,
+            Map<State, Map<Character, State>> transitionTable,
+            Map<State, Integer> stateToPartitionId) {
+        // The signature is: "For each character, which partition do I end up in?"
+        int[] targets = new int[alphabetLen];
+        Map<Character, State> transitions = transitionTable.get(s);
+
+        if (transitions == null) {
+            Arrays.fill(targets, -1);
+        } else {
+            for (int i = 0; i < alphabetLen; i++) {
+                State destination = transitions.get(alphabetArray[i]);
+                Integer targetPartitionId =
+                        destination != null ? stateToPartitionId.get(destination) : null;
+                targets[i] = targetPartitionId != null ? targetPartitionId : -1;
+            }
+        }
+        return new BehaviorSignature(targets);
     }
 
     private static DFA buildMinimalDfa(

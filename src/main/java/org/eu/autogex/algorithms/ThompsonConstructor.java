@@ -57,7 +57,7 @@ public class ThompsonConstructor {
             case PlusNode plus -> handlePlus(plus);
             case OptionalNode opt -> handleOptional(opt);
             case CharClassNode charClass -> handleCharClass(charClass);
-            case WildcardNode wildcard -> handleWildcard();
+            case WildcardNode _ -> handleWildcard();
             default -> throw new IllegalArgumentException("Unsupported RegexNode type");
         };
     }

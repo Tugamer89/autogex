@@ -39,8 +39,6 @@ public class Minimizer {
         while (changed) {
             changed = false;
 
-            // Optimization: If every reachable state is in its own partition,
-            // no further refinement is mathematically possible. We've reached the fixed point.
             if (partitions.size() == reachableStates.size()) {
                 break;
             }
@@ -48,7 +46,6 @@ public class Minimizer {
             Set<Set<State>> newPartitions = new HashSet<>();
 
             for (Set<State> group : partitions) {
-                // Optimization: Partitions of size 1 cannot be split further.
                 if (group.size() <= 1) {
                     newPartitions.add(group);
                     continue;

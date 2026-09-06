@@ -17,10 +17,17 @@ public class DFA extends AbstractAutomaton {
 
     // Map: Source State -> (Map: Character -> Target State)
     private final Map<State, Map<Character, State>> transitionTable;
+    private final Map<State, FastTransitions> fastTransitionTable;
 
     private DFA(Builder builder) {
         super(builder);
         this.transitionTable = Map.copyOf(builder.transitionTable);
+
+        Map<State, FastTransitions> fastTable = new HashMap<>();
+        for (Map.Entry<State, Map<Character, State>> entry : transitionTable.entrySet()) {
+            fastTable.put(entry.getKey(), new FastTransitions(entry.getValue()));
+        }
+        this.fastTransitionTable = Map.copyOf(fastTable);
     }
 
     /**
@@ -39,7 +46,7 @@ public class DFA extends AbstractAutomaton {
         int length = input.length();
         for (int i = 0; i < length; i++) {
             char symbol = input.charAt(i);
-            Map<Character, State> stateTransitions = transitionTable.get(currentState);
+            FastTransitions stateTransitions = fastTransitionTable.get(currentState);
 
             if (stateTransitions == null) {
                 return false;
@@ -68,7 +75,7 @@ public class DFA extends AbstractAutomaton {
         for (int i = 0; i < length; i++) {
             char symbol = input.charAt(i);
             State currentState = currentStates.iterator().next();
-            Map<Character, State> stateTransitions = transitionTable.get(currentState);
+            FastTransitions stateTransitions = fastTransitionTable.get(currentState);
 
             Set<State> nextStates = Collections.emptySet();
             if (stateTransitions != null) {
@@ -137,6 +144,35 @@ public class DFA extends AbstractAutomaton {
         public DFA build() {
             validate();
             return new DFA(this);
+        }
+    }
+
+    /**
+     * Array-backed transition table to avoid implicit char boxing in the fast-path evaluation loop.
+     */
+    private static final class FastTransitions {
+        private final char[] symbols;
+        private final State[] targetStates;
+
+        FastTransitions(Map<Character, State> transitions) {
+            int size = transitions.size();
+            this.symbols = new char[size];
+            this.targetStates = new State[size];
+            int i = 0;
+            for (Map.Entry<Character, State> entry : transitions.entrySet()) {
+                this.symbols[i] = entry.getKey();
+                this.targetStates[i] = entry.getValue();
+                i++;
+            }
+        }
+
+        State get(char symbol) {
+            for (int i = 0; i < symbols.length; i++) {
+                if (symbols[i] == symbol) {
+                    return targetStates[i];
+                }
+            }
+            return null;
         }
     }
 }

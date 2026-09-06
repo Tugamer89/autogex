@@ -107,13 +107,23 @@ class ConverterTest {
     }
 
     @Test
-    void testUtilityClassConstructorThrowsException() throws Exception {
+    void testUtilityClassConstructorThrowsException() throws NoSuchMethodException {
         Constructor<Converter> constructor = Converter.class.getDeclaredConstructor();
         assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
-
         constructor.setAccessible(true);
+
         InvocationTargetException exception =
-                assertThrows(InvocationTargetException.class, constructor::newInstance);
-        assertTrue(exception.getCause() instanceof UnsupportedOperationException);
+                assertThrows(
+                        InvocationTargetException.class,
+                        constructor::newInstance,
+                        "Instantiating the utility class should throw an exception");
+
+        assertTrue(
+                exception.getCause() instanceof UnsupportedOperationException,
+                "The cause should be an UnsupportedOperationException");
+
+        assertTrue(
+                exception.getCause().getMessage().contains("Utility class cannot be instantiated"),
+                "Exception message should mention utility class");
     }
 }

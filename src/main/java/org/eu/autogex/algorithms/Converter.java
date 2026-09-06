@@ -1,7 +1,15 @@
 package org.eu.autogex.algorithms;
 
-import java.util.*;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
@@ -9,9 +17,16 @@ import org.eu.autogex.models.NFA;
 
 /** Utility class for Finite State Automata conversion. */
 public class Converter {
-
     /** Maximum allowed states in a DFA to prevent state explosion (DoS). */
     private static final int MAX_DFA_STATES = 10000;
+
+    private static final String[] CACHED_STATE_NAMES = new String[MAX_DFA_STATES];
+
+    static {
+        for (int i = 0; i < MAX_DFA_STATES; i++) {
+            CACHED_STATE_NAMES[i] = "D" + i;
+        }
+    }
 
     private Converter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -26,12 +41,12 @@ public class Converter {
     public static NFA enfaToNfa(ENFA enfa) {
         NFA.Builder builder = new NFA.Builder();
 
-        Map<State, Set<State>> epsilonClosures = new HashMap<>();
+        // 1. Optimize epsilon closure computation using Tarjan's SCC globally
+        Map<State, Set<State>> epsilonClosures = computeEpsilonClosures(enfa);
 
-        // 1. & 2. Add states and recalculate final states based on closures
+        // 2. Add states and recalculate final states based on closures
         for (State s : enfa.getStates()) {
-            Set<State> closure = enfa.epsilonClosure(Set.of(s));
-            epsilonClosures.put(s, closure);
+            Set<State> closure = epsilonClosures.get(s);
             boolean isFinal = isFinal(closure, enfa.getFinalStates());
             builder.addState(s.getName(), isFinal);
         }
@@ -97,7 +112,7 @@ public class Converter {
 
         // The DFA initial state is the set containing only the NFA's initial state
         Set<State> initialSuperState = Set.of(nfa.getInitialState());
-        String initialName = "D0";
+        String initialName = CACHED_STATE_NAMES[0];
 
         builder.addState(initialName, isFinal(initialSuperState, nfa.getFinalStates()));
         builder.setInitialState(initialName);
@@ -110,40 +125,10 @@ public class Converter {
             Set<State> currentSuperState = queue.poll();
             String currentName = dfaStateNames.get(currentSuperState);
 
-            Map<Character, Set<State>> symbolToTargets = new HashMap<>();
-            for (State s : currentSuperState) {
-                Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
-                if (transitions != null) {
-                    for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
-                        Character symbol = entry.getKey();
-                        Set<State> targets =
-                                symbolToTargets.computeIfAbsent(symbol, k -> new HashSet<>());
-                        targets.addAll(entry.getValue());
-                    }
-                }
-            }
+            Map<Character, Set<State>> symbolToTargets =
+                    computeNextStateTransitions(nfa, currentSuperState);
 
-            for (Map.Entry<Character, Set<State>> entry : symbolToTargets.entrySet()) {
-                char symbol = entry.getKey();
-                Set<State> nextSuperState = entry.getValue();
-
-                String targetName =
-                        dfaStateNames.computeIfAbsent(
-                                nextSuperState,
-                                k -> {
-                                    if (dfaStateNames.size() >= MAX_DFA_STATES) {
-                                        throw new IllegalStateException(
-                                                "DFA state limit exceeded (Security: DoS prevention).");
-                                    }
-                                    String newTargetName = "D" + dfaStateNames.size();
-                                    builder.addState(
-                                            newTargetName,
-                                            isFinal(nextSuperState, nfa.getFinalStates()));
-                                    queue.add(nextSuperState);
-                                    return newTargetName;
-                                });
-                builder.addTransition(currentName, symbol, targetName);
-            }
+            processDfaTransitions(nfa, builder, dfaStateNames, queue, currentName, symbolToTargets);
         }
 
         return builder.build();
@@ -161,6 +146,164 @@ public class Converter {
     }
 
     // --- Helper Methods ---
+
+    /**
+     * Computes the epsilon closures for all states in an ENFA globally. Uses Tarjan's Strongly
+     * Connected Components algorithm to find a reverse topological sort, and propagates closures
+     * bottom-up. This avoids redundant graph traversals.
+     *
+     * @param enfa The source ENFA.
+     * @return A map of state to its epsilon closure set.
+     */
+    private static Map<State, Set<State>> computeEpsilonClosures(ENFA enfa) {
+        Set<State> states = enfa.getStates();
+        Map<State, Set<State>> epsGraph = buildEpsilonGraph(states, enfa.getTransitionTable());
+        List<Set<State>> sccs = findSCCs(states, epsGraph);
+        return propagateClosures(sccs, epsGraph);
+    }
+
+    private static Map<State, Set<State>> buildEpsilonGraph(
+            Set<State> states, Map<State, Map<Character, Set<State>>> transitionTable) {
+        Map<State, Set<State>> epsGraph = new HashMap<>();
+        for (State s : states) {
+            Map<Character, Set<State>> transitions = transitionTable.get(s);
+            if (transitions != null) {
+                Set<State> eps = transitions.get(null);
+                if (eps != null && !eps.isEmpty()) {
+                    epsGraph.put(s, eps);
+                }
+            }
+        }
+        return epsGraph;
+    }
+
+    private static List<Set<State>> findSCCs(Set<State> states, Map<State, Set<State>> epsGraph) {
+        Map<State, Integer> indices = new HashMap<>();
+        Map<State, Integer> lowlinks = new HashMap<>();
+        Deque<State> stack = new ArrayDeque<>();
+        Set<State> onStack = new HashSet<>();
+        List<Set<State>> sccs = new ArrayList<>();
+        int[] index = {0};
+
+        for (State v : states) {
+            if (!indices.containsKey(v)) {
+                strongconnect(v, epsGraph, indices, lowlinks, stack, onStack, sccs, index);
+            }
+        }
+        return sccs;
+    }
+
+    private static void strongconnect(
+            State v,
+            Map<State, Set<State>> epsGraph,
+            Map<State, Integer> indices,
+            Map<State, Integer> lowlinks,
+            Deque<State> stack,
+            Set<State> onStack,
+            List<Set<State>> sccs,
+            int[] index) {
+        indices.put(v, index[0]);
+        lowlinks.put(v, index[0]);
+        index[0]++;
+        stack.push(v);
+        onStack.add(v);
+
+        Set<State> edges = epsGraph.get(v);
+        if (edges != null) {
+            for (State w : edges) {
+                if (!indices.containsKey(w)) {
+                    strongconnect(w, epsGraph, indices, lowlinks, stack, onStack, sccs, index);
+                    lowlinks.put(v, Math.min(lowlinks.get(v), lowlinks.get(w)));
+                } else if (onStack.contains(w)) {
+                    lowlinks.put(v, Math.min(lowlinks.get(v), indices.get(w)));
+                }
+            }
+        }
+
+        if (lowlinks.get(v).equals(indices.get(v))) {
+            Set<State> scc = new HashSet<>();
+            State w;
+            do {
+                w = stack.pop();
+                onStack.remove(w);
+                scc.add(w);
+            } while (!w.equals(v));
+            sccs.add(scc);
+        }
+    }
+
+    private static Map<State, Set<State>> propagateClosures(
+            List<Set<State>> sccs, Map<State, Set<State>> epsGraph) {
+        Map<State, Set<State>> closures = new HashMap<>();
+        for (Set<State> scc : sccs) {
+            Set<State> sccClosure = new HashSet<>(scc);
+            for (State v : scc) {
+                Set<State> edges = epsGraph.get(v);
+                if (edges != null) {
+                    for (State w : edges) {
+                        if (!scc.contains(w)) {
+                            sccClosure.addAll(closures.get(w));
+                        }
+                    }
+                }
+            }
+            for (State v : scc) {
+                closures.put(v, sccClosure);
+            }
+        }
+        return closures;
+    }
+
+    private static Map<Character, Set<State>> computeNextStateTransitions(
+            NFA nfa, Set<State> currentSuperState) {
+        Map<Character, Set<State>> symbolToTargets = new HashMap<>();
+        for (State s : currentSuperState) {
+            Map<Character, Set<State>> transitions = nfa.getTransitionTable().get(s);
+            if (transitions != null) {
+                for (Map.Entry<Character, Set<State>> entry : transitions.entrySet()) {
+                    Character symbol = entry.getKey();
+                    Set<State> targets =
+                            symbolToTargets.computeIfAbsent(symbol, k -> new HashSet<>());
+                    targets.addAll(entry.getValue());
+                }
+            }
+        }
+        return symbolToTargets;
+    }
+
+    private static void processDfaTransitions(
+            NFA nfa,
+            DFA.Builder builder,
+            Map<Set<State>, String> dfaStateNames,
+            Queue<Set<State>> queue,
+            String currentName,
+            Map<Character, Set<State>> symbolToTargets) {
+        for (Map.Entry<Character, Set<State>> entry : symbolToTargets.entrySet()) {
+            char symbol = entry.getKey();
+            Set<State> nextSuperState = entry.getValue();
+
+            String targetName =
+                    dfaStateNames.computeIfAbsent(
+                            nextSuperState,
+                            k -> {
+                                if (dfaStateNames.size() >= MAX_DFA_STATES) {
+                                    throw new IllegalStateException(
+                                            "DFA state limit exceeded (Security: DoS prevention).");
+                                }
+                                int size = dfaStateNames.size();
+                                String newTargetName =
+                                        size < MAX_DFA_STATES
+                                                ? CACHED_STATE_NAMES[size]
+                                                : "D" + size;
+                                builder.addState(
+                                        newTargetName,
+                                        isFinal(nextSuperState, nfa.getFinalStates()));
+                                queue.add(nextSuperState);
+                                return newTargetName;
+                            });
+            builder.addTransition(currentName, symbol, targetName);
+        }
+    }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
         return !Collections.disjoint(superState, finalStates);

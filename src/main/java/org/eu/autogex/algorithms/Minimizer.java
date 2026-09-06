@@ -1,7 +1,13 @@
 package org.eu.autogex.algorithms;
 
-import java.util.*;
 import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 
@@ -38,9 +44,19 @@ public class Minimizer {
         boolean changed = true;
         while (changed) {
             changed = false;
+
+            if (partitions.size() == reachableStates.size()) {
+                break;
+            }
+
             Set<Set<State>> newPartitions = new HashSet<>();
 
             for (Set<State> group : partitions) {
+                if (group.size() <= 1) {
+                    newPartitions.add(group);
+                    continue;
+                }
+
                 // Split the group based on behavior (transition destinations)
                 Map<BehaviorSignature, Set<State>> subGroups =
                         splitGroup(dfa, group, alphabetArray, stateToPartitionId);
@@ -132,26 +148,35 @@ public class Minimizer {
         int alphabetLen = alphabetArray.length;
 
         for (State s : group) {
-            // The signature is: "For each character, which partition do I end up in?"
-            int[] targets = new int[alphabetLen];
-            Map<Character, State> transitions = transitionTable.get(s);
-
-            if (transitions == null) {
-                Arrays.fill(targets, -1);
-            } else {
-                for (int i = 0; i < alphabetLen; i++) {
-                    State destination = transitions.get(alphabetArray[i]);
-                    Integer targetPartitionId =
-                            destination != null ? stateToPartitionId.get(destination) : null;
-                    targets[i] = targetPartitionId != null ? targetPartitionId : -1;
-                }
-            }
-            BehaviorSignature behaviorSignature = new BehaviorSignature(targets);
-
+            BehaviorSignature behaviorSignature =
+                    computeBehaviorSignature(
+                            s, alphabetLen, alphabetArray, transitionTable, stateToPartitionId);
             subGroups.computeIfAbsent(behaviorSignature, k -> new HashSet<>()).add(s);
         }
 
         return subGroups;
+    }
+
+    private static BehaviorSignature computeBehaviorSignature(
+            State s,
+            int alphabetLen,
+            char[] alphabetArray,
+            Map<State, Map<Character, State>> transitionTable,
+            Map<State, Integer> stateToPartitionId) {
+        int[] targets = new int[alphabetLen];
+        Map<Character, State> transitions = transitionTable.get(s);
+
+        if (transitions == null) {
+            Arrays.fill(targets, -1);
+        } else {
+            for (int i = 0; i < alphabetLen; i++) {
+                State destination = transitions.get(alphabetArray[i]);
+                Integer targetPartitionId =
+                        destination != null ? stateToPartitionId.get(destination) : null;
+                targets[i] = targetPartitionId != null ? targetPartitionId : -1;
+            }
+        }
+        return new BehaviorSignature(targets);
     }
 
     private static DFA buildMinimalDfa(

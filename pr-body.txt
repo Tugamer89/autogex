@@ -1,5 +1,0 @@
-Summary: Add missing assertions for the exception message in the MermaidExporter utility class test.
-
-Test Cases: Verifies that instantiating MermaidExporter via reflection throws an InvocationTargetException containing an UnsupportedOperationException, and asserts that the message contains the phrase 'utility class' (case-insensitive).
-
-Verification: Ran `mvn clean test -Dmaven.compiler.source=21 -Dmaven.compiler.target=21 -Dmaven.compiler.release=21` and confirmed all tests passed.

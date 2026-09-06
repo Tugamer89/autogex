@@ -80,6 +80,9 @@ class GraphvizExporterTest {
         InvocationTargetException exception =
                 assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertTrue(exception.getCause() instanceof UnsupportedOperationException);
+        assertTrue(
+                exception.getCause().getMessage().toLowerCase().contains("utility class"),
+                "Exception message should mention utility class");
     }
 
     @Test

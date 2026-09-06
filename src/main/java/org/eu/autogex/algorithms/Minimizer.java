@@ -44,9 +44,19 @@ public class Minimizer {
         boolean changed = true;
         while (changed) {
             changed = false;
+
+            if (partitions.size() == reachableStates.size()) {
+                break;
+            }
+
             Set<Set<State>> newPartitions = new HashSet<>();
 
             for (Set<State> group : partitions) {
+                if (group.size() <= 1) {
+                    newPartitions.add(group);
+                    continue;
+                }
+
                 // Split the group based on behavior (transition destinations)
                 Map<BehaviorSignature, Set<State>> subGroups =
                         splitGroup(dfa, group, alphabetArray, stateToPartitionId);

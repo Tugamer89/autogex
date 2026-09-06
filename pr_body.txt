@@ -1,0 +1,7 @@
+**Summary:** Replaced the inner `AstVisitor` class in `ThompsonConstructor` with a pattern matching switch expression for improved code readability. Extracted specific node generation logic into separate `handle*` methods.
+
+**Motivation:** The visitor pattern was overly verbose for iterating through the AST to generate Epsilon-NFAs. Using Java 21's switch expressions simplifies the dispatch logic and improves maintainability by segregating the state-building logic into individual private handler methods rather than mixing them within an inner class. This change improves code hygiene without altering the external runtime behavior.
+
+**Verification:**
+- Ran `mvn spotless:check` to confirm formatting is pristine.
+- Executed `mvn test -Dmaven.compiler.source=21 -Dmaven.compiler.target=21 -Dmaven.compiler.release=21` to verify all unit tests pass, ensuring functional equivalence.

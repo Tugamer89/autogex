@@ -49,113 +49,107 @@ public class ThompsonConstructor {
     }
 
     private Fragment generateFragment(RegexNode node) {
-        return node.accept(new AstVisitor());
+        return switch (node) {
+            case LiteralNode lit -> handleLiteral(lit);
+            case ConcatNode concat -> handleConcat(concat);
+            case UnionNode union -> handleUnion(union);
+            case StarNode star -> handleStar(star);
+            case PlusNode plus -> handlePlus(plus);
+            case OptionalNode opt -> handleOptional(opt);
+            case CharClassNode charClass -> handleCharClass(charClass);
+            case WildcardNode wildcard -> handleWildcard(wildcard);
+            default -> throw new IllegalArgumentException("Unsupported RegexNode type");
+        };
     }
 
-    /** Visitor implementation to traverse the AST and build ENFA fragments using Polymorphism. */
-    private class AstVisitor implements RegexNode.Visitor<Fragment> {
+    private String addNonFinalState() {
+        String name = newStateName();
+        builder.addState(name, false);
+        return name;
+    }
 
-        private String addNonFinalState() {
-            String name = newStateName();
-            builder.addState(name, false);
-            return name;
+    private Fragment createEmptyFragment() {
+        return new Fragment(addNonFinalState(), addNonFinalState());
+    }
+
+    private Fragment handleLiteral(LiteralNode lit) {
+        Fragment f = createEmptyFragment();
+        builder.addTransition(f.start(), lit.symbol(), f.accept());
+        return f;
+    }
+
+    private Fragment handleConcat(ConcatNode concat) {
+        Fragment left = generateFragment(concat.left());
+        Fragment right = generateFragment(concat.right());
+        builder.addEpsilonTransition(left.accept(), right.start());
+        return new Fragment(left.start(), right.accept());
+    }
+
+    private Fragment handleUnion(UnionNode union) {
+        Fragment left = generateFragment(union.left());
+        Fragment right = generateFragment(union.right());
+
+        Fragment f = createEmptyFragment();
+
+        builder.addEpsilonTransition(f.start(), left.start());
+        builder.addEpsilonTransition(f.start(), right.start());
+        builder.addEpsilonTransition(left.accept(), f.accept());
+        builder.addEpsilonTransition(right.accept(), f.accept());
+
+        return f;
+    }
+
+    private Fragment handleStar(StarNode star) {
+        Fragment child = generateFragment(star.child());
+
+        Fragment f = createEmptyFragment();
+
+        builder.addEpsilonTransition(f.start(), child.start());
+        builder.addEpsilonTransition(f.start(), f.accept()); // Skip path (zero occurrences)
+        builder.addEpsilonTransition(child.accept(), child.start()); // Loop path
+        builder.addEpsilonTransition(child.accept(), f.accept());
+
+        return f;
+    }
+
+    private Fragment handlePlus(PlusNode plus) {
+        Fragment child = generateFragment(plus.child());
+
+        Fragment f = createEmptyFragment();
+
+        builder.addEpsilonTransition(f.start(), child.start());
+        builder.addEpsilonTransition(child.accept(), child.start()); // Loop path (one or more)
+        builder.addEpsilonTransition(child.accept(), f.accept());
+
+        return f;
+    }
+
+    private Fragment handleOptional(OptionalNode opt) {
+        Fragment child = generateFragment(opt.child());
+
+        Fragment f = createEmptyFragment();
+
+        builder.addEpsilonTransition(f.start(), child.start());
+        builder.addEpsilonTransition(f.start(), f.accept()); // Skip path (zero occurrences)
+        builder.addEpsilonTransition(child.accept(), f.accept());
+
+        return f;
+    }
+
+    private Fragment handleCharClass(CharClassNode charClass) {
+        Fragment f = createEmptyFragment();
+        for (char c : charClass.chars()) {
+            builder.addTransition(f.start(), c, f.accept());
         }
+        return f;
+    }
 
-        private Fragment createEmptyFragment() {
-            return new Fragment(addNonFinalState(), addNonFinalState());
+    private Fragment handleWildcard(WildcardNode wildcard) {
+        Fragment f = createEmptyFragment();
+        // Cover standard ASCII printable characters for the wildcard '.'
+        for (char c = 32; c <= 126; c++) {
+            builder.addTransition(f.start(), c, f.accept());
         }
-
-        @Override
-        public Fragment visit(LiteralNode lit) {
-            Fragment f = createEmptyFragment();
-            builder.addTransition(f.start(), lit.symbol(), f.accept());
-            return f;
-        }
-
-        @Override
-        public Fragment visit(ConcatNode concat) {
-            Fragment left = concat.left().accept(this);
-            Fragment right = concat.right().accept(this);
-            builder.addEpsilonTransition(left.accept(), right.start());
-            return new Fragment(left.start(), right.accept());
-        }
-
-        @Override
-        public Fragment visit(UnionNode union) {
-            Fragment left = union.left().accept(this);
-            Fragment right = union.right().accept(this);
-
-            Fragment f = createEmptyFragment();
-
-            builder.addEpsilonTransition(f.start(), left.start());
-            builder.addEpsilonTransition(f.start(), right.start());
-            builder.addEpsilonTransition(left.accept(), f.accept());
-            builder.addEpsilonTransition(right.accept(), f.accept());
-
-            return f;
-        }
-
-        @Override
-        public Fragment visit(StarNode star) {
-            Fragment child = star.child().accept(this);
-
-            Fragment f = createEmptyFragment();
-
-            builder.addEpsilonTransition(f.start(), child.start());
-            builder.addEpsilonTransition(f.start(), f.accept()); // Skip path (zero occurrences)
-            builder.addEpsilonTransition(child.accept(), child.start()); // Loop path
-            builder.addEpsilonTransition(child.accept(), f.accept());
-
-            return f;
-        }
-
-        @Override
-        public Fragment visit(PlusNode plus) {
-            Fragment child = plus.child().accept(this);
-
-            Fragment f = createEmptyFragment();
-
-            builder.addEpsilonTransition(f.start(), child.start());
-            builder.addEpsilonTransition(child.accept(), child.start()); // Loop path (one or more)
-            builder.addEpsilonTransition(child.accept(), f.accept());
-
-            return f;
-        }
-
-        @Override
-        public Fragment visit(OptionalNode opt) {
-            Fragment child = opt.child().accept(this);
-
-            Fragment f = createEmptyFragment();
-
-            builder.addEpsilonTransition(f.start(), child.start());
-            builder.addEpsilonTransition(f.start(), f.accept()); // Skip path (zero occurrences)
-            builder.addEpsilonTransition(child.accept(), f.accept());
-
-            return f;
-        }
-
-        @Override
-        public Fragment visit(CharClassNode charClass) {
-            Fragment f = createEmptyFragment();
-
-            for (char c : charClass.chars()) {
-                builder.addTransition(f.start(), c, f.accept());
-            }
-
-            return f;
-        }
-
-        @Override
-        public Fragment visit(WildcardNode wildcard) {
-            Fragment f = createEmptyFragment();
-
-            // Cover standard ASCII printable characters for the wildcard '.'
-            for (char c = 32; c <= 126; c++) {
-                builder.addTransition(f.start(), c, f.accept());
-            }
-
-            return f;
-        }
+        return f;
     }
 }

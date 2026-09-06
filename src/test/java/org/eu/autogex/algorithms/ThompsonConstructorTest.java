@@ -14,7 +14,7 @@ class ThompsonConstructorTest {
                 new RegexNode() {
                     @Override
                     public <T> T accept(Visitor<T> visitor) {
-                        throw new IllegalArgumentException("Unsupported RegexNode type");
+                        return null; // Not using visitor pattern anymore for fragments
                     }
 
                     @Override

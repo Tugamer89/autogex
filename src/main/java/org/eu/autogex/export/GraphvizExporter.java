@@ -32,7 +32,8 @@ public class GraphvizExporter {
         for (Map.Entry<State, Map<Character, State>> entry : dfa.getTransitionTable().entrySet()) {
             State source = entry.getKey();
             for (Map.Entry<Character, State> transition : entry.getValue().entrySet()) {
-                appendTransition(sb, source, transition.getKey().toString(), transition.getValue());
+                appendTransition(
+                        sb, source, String.valueOf(transition.getKey()), transition.getValue());
             }
         }
 
@@ -53,7 +54,7 @@ public class GraphvizExporter {
             State source = entry.getKey();
             for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
                 for (State target : transition.getValue()) {
-                    appendTransition(sb, source, transition.getKey().toString(), target);
+                    appendTransition(sb, source, String.valueOf(transition.getKey()), target);
                 }
             }
         }
@@ -78,7 +79,7 @@ public class GraphvizExporter {
                 String label =
                         transition.getKey() == null
                                 ? EPSILON_LABEL
-                                : transition.getKey().toString();
+                                : String.valueOf(transition.getKey());
                 for (State target : transition.getValue()) {
                     appendTransition(sb, source, label, target);
                 }

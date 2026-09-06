@@ -1,6 +1,9 @@
 package org.eu.autogex.core;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Abstract builder based on the Curiously Recurring Template Pattern (CRTP). Allows sharing state

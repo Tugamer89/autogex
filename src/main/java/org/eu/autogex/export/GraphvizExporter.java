@@ -135,6 +135,7 @@ public class GraphvizExporter {
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")
                 .replace("\r", "")
+                .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }

@@ -110,6 +110,7 @@ public class GraphvizExporter extends AbstractExporter {
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")
                 .replace("\r", "")
+                .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;");
     }

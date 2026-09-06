@@ -14,9 +14,16 @@ import org.eu.autogex.models.NFA;
 
 /** Utility class for Finite State Automata conversion. */
 public class Converter {
-
     /** Maximum allowed states in a DFA to prevent state explosion (DoS). */
     private static final int MAX_DFA_STATES = 10000;
+
+    private static final String[] CACHED_STATE_NAMES = new String[MAX_DFA_STATES];
+
+    static {
+        for (int i = 0; i < MAX_DFA_STATES; i++) {
+            CACHED_STATE_NAMES[i] = "D" + i;
+        }
+    }
 
     private Converter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -102,7 +109,7 @@ public class Converter {
 
         // The DFA initial state is the set containing only the NFA's initial state
         Set<State> initialSuperState = Set.of(nfa.getInitialState());
-        String initialName = "D0";
+        String initialName = CACHED_STATE_NAMES[0];
 
         builder.addState(initialName, isFinal(initialSuperState, nfa.getFinalStates()));
         builder.setInitialState(initialName);
@@ -173,7 +180,11 @@ public class Converter {
                                     throw new IllegalStateException(
                                             "DFA state limit exceeded (Security: DoS prevention).");
                                 }
-                                String newTargetName = "D" + dfaStateNames.size();
+                                int size = dfaStateNames.size();
+                                String newTargetName =
+                                        size < MAX_DFA_STATES
+                                                ? CACHED_STATE_NAMES[size]
+                                                : "D" + size;
                                 builder.addState(
                                         newTargetName,
                                         isFinal(nextSuperState, nfa.getFinalStates()));

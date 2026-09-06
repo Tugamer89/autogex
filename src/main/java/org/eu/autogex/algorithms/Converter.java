@@ -26,12 +26,12 @@ public class Converter {
     public static NFA enfaToNfa(ENFA enfa) {
         NFA.Builder builder = new NFA.Builder();
 
-        Map<State, Set<State>> epsilonClosures = new HashMap<>();
+        // 1. Optimize epsilon closure computation using Tarjan's SCC globally
+        Map<State, Set<State>> epsilonClosures = computeEpsilonClosures(enfa);
 
-        // 1. & 2. Add states and recalculate final states based on closures
+        // 2. Add states and recalculate final states based on closures
         for (State s : enfa.getStates()) {
-            Set<State> closure = enfa.epsilonClosure(Set.of(s));
-            epsilonClosures.put(s, closure);
+            Set<State> closure = epsilonClosures.get(s);
             boolean isFinal = isFinal(closure, enfa.getFinalStates());
             builder.addState(s.getName(), isFinal);
         }
@@ -161,6 +161,113 @@ public class Converter {
     }
 
     // --- Helper Methods ---
+
+    /**
+     * Computes the epsilon closures for all states in an ENFA globally. Uses Tarjan's Strongly
+     * Connected Components algorithm to find a reverse topological sort, and propagates closures
+     * bottom-up. This avoids redundant graph traversals.
+     *
+     * @param enfa The source ENFA.
+     * @return A map of state to its epsilon closure set.
+     */
+    private static Map<State, Set<State>> computeEpsilonClosures(ENFA enfa) {
+        Set<State> states = enfa.getStates();
+        Map<State, Set<State>> epsGraph = buildEpsilonGraph(states, enfa.getTransitionTable());
+        List<Set<State>> sccs = findSCCs(states, epsGraph);
+        return propagateClosures(sccs, epsGraph);
+    }
+
+    private static Map<State, Set<State>> buildEpsilonGraph(
+            Set<State> states, Map<State, Map<Character, Set<State>>> transitionTable) {
+        Map<State, Set<State>> epsGraph = new HashMap<>();
+        for (State s : states) {
+            Map<Character, Set<State>> transitions = transitionTable.get(s);
+            if (transitions != null) {
+                Set<State> eps = transitions.get(null);
+                if (eps != null && !eps.isEmpty()) {
+                    epsGraph.put(s, eps);
+                }
+            }
+        }
+        return epsGraph;
+    }
+
+    private static List<Set<State>> findSCCs(Set<State> states, Map<State, Set<State>> epsGraph) {
+        Map<State, Integer> indices = new HashMap<>();
+        Map<State, Integer> lowlinks = new HashMap<>();
+        Deque<State> stack = new ArrayDeque<>();
+        Set<State> onStack = new HashSet<>();
+        List<Set<State>> sccs = new ArrayList<>();
+        int[] index = {0};
+
+        for (State v : states) {
+            if (!indices.containsKey(v)) {
+                strongconnect(v, epsGraph, indices, lowlinks, stack, onStack, sccs, index);
+            }
+        }
+        return sccs;
+    }
+
+    private static void strongconnect(
+            State v,
+            Map<State, Set<State>> epsGraph,
+            Map<State, Integer> indices,
+            Map<State, Integer> lowlinks,
+            Deque<State> stack,
+            Set<State> onStack,
+            List<Set<State>> sccs,
+            int[] index) {
+        indices.put(v, index[0]);
+        lowlinks.put(v, index[0]);
+        index[0]++;
+        stack.push(v);
+        onStack.add(v);
+
+        Set<State> edges = epsGraph.get(v);
+        if (edges != null) {
+            for (State w : edges) {
+                if (!indices.containsKey(w)) {
+                    strongconnect(w, epsGraph, indices, lowlinks, stack, onStack, sccs, index);
+                    lowlinks.put(v, Math.min(lowlinks.get(v), lowlinks.get(w)));
+                } else if (onStack.contains(w)) {
+                    lowlinks.put(v, Math.min(lowlinks.get(v), indices.get(w)));
+                }
+            }
+        }
+
+        if (lowlinks.get(v).equals(indices.get(v))) {
+            Set<State> scc = new HashSet<>();
+            State w;
+            do {
+                w = stack.pop();
+                onStack.remove(w);
+                scc.add(w);
+            } while (!w.equals(v));
+            sccs.add(scc);
+        }
+    }
+
+    private static Map<State, Set<State>> propagateClosures(
+            List<Set<State>> sccs, Map<State, Set<State>> epsGraph) {
+        Map<State, Set<State>> closures = new HashMap<>();
+        for (Set<State> scc : sccs) {
+            Set<State> sccClosure = new HashSet<>(scc);
+            for (State v : scc) {
+                Set<State> edges = epsGraph.get(v);
+                if (edges != null) {
+                    for (State w : edges) {
+                        if (!scc.contains(w)) {
+                            sccClosure.addAll(closures.get(w));
+                        }
+                    }
+                }
+            }
+            for (State v : scc) {
+                closures.put(v, sccClosure);
+            }
+        }
+        return closures;
+    }
 
     private static boolean isFinal(Set<State> superState, Set<State> finalStates) {
         return !Collections.disjoint(superState, finalStates);

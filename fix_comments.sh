@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > src/main/java/org/eu/autogex/algorithms/ThompsonConstructor.java
 package org.eu.autogex.algorithms;
 
 import org.eu.autogex.models.ENFA;
@@ -153,3 +155,47 @@ public class ThompsonConstructor {
         return f;
     }
 }
+INNER_EOF
+
+cat << 'INNER_EOF' > src/test/java/org/eu/autogex/algorithms/ThompsonConstructorTest.java
+package org.eu.autogex.algorithms;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.eu.autogex.regex.ast.RegexNode;
+import org.junit.jupiter.api.Test;
+
+class ThompsonConstructorTest {
+
+    @Test
+    void testThrowsExceptionOnUnsupportedNode() {
+        // Create an anonymous class that implements RegexNode
+        RegexNode unsupportedNode =
+                new RegexNode() {
+                    @Override
+                    public <T> T accept(Visitor<T> visitor) {
+                        return null;
+                    }
+
+                    @Override
+                    public String toString() {
+                        return "UnsupportedDummyNode";
+                    }
+                };
+
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            ThompsonConstructor.construct(unsupportedNode);
+                        });
+
+        // Verify that the correct exception is thrown by the default switch branch
+        assertTrue(
+                exception.getMessage().contains("Unsupported RegexNode type"),
+                "The constructor should reject unknown AST node implementations");
+    }
+}
+INNER_EOF
+
+rm -f pr_body.txt

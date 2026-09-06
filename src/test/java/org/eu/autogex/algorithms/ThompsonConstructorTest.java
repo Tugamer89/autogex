@@ -14,7 +14,7 @@ class ThompsonConstructorTest {
                 new RegexNode() {
                     @Override
                     public <T> T accept(Visitor<T> visitor) {
-                        return null; // Not using visitor pattern anymore for fragments
+                        return null;
                     }
 
                     @Override

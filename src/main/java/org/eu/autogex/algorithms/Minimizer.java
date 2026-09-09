@@ -97,62 +97,42 @@ public class Minimizer {
         return partitions;
     }
 
-    private interface Signature {
-        int[] getTargets();
+    private abstract static class Signature {
+        public abstract int[] getTargets();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Signature)) return false;
+            Signature that = (Signature) o;
+            return Arrays.equals(getTargets(), that.getTargets());
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(getTargets());
+        }
     }
 
-    private static final class BehaviorSignature implements Signature {
+    private static final class BehaviorSignature extends Signature {
         private final int[] targets;
-        private final int hashCode;
 
         public BehaviorSignature(int[] targets) {
             this.targets = targets;
-            this.hashCode = Arrays.hashCode(targets);
         }
 
         @Override
         public int[] getTargets() {
             return targets;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Signature)) return false;
-            Signature that = (Signature) o;
-            return Arrays.equals(targets, that.getTargets());
-        }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
         }
     }
 
-    private static final class MutableSignature implements Signature {
+    private static final class MutableSignature extends Signature {
         public int[] targets;
-        private int hashCode;
-
-        public void update() {
-            this.hashCode = Arrays.hashCode(targets);
-        }
 
         @Override
         public int[] getTargets() {
             return targets;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Signature)) return false;
-            Signature that = (Signature) o;
-            return Arrays.equals(targets, that.getTargets());
-        }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
         }
     }
 
@@ -183,7 +163,6 @@ public class Minimizer {
                     searchKey.targets[i] = targetPartitionId != null ? targetPartitionId : -1;
                 }
             }
-            searchKey.update();
 
             Set<State> states = subGroups.get(searchKey);
             if (states == null) {

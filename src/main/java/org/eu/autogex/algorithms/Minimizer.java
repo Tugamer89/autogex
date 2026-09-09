@@ -97,42 +97,30 @@ public class Minimizer {
         return partitions;
     }
 
-    private abstract static class Signature {
-        public abstract int[] getTargets();
+    private static final class Signature {
+        public int[] targets;
+        private int hashCode;
+
+        public Signature(int[] targets) {
+            this.targets = targets;
+            this.hashCode = Arrays.hashCode(targets);
+        }
+
+        public void update() {
+            this.hashCode = Arrays.hashCode(targets);
+        }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Signature)) return false;
+            if (o == null || getClass() != o.getClass()) return false;
             Signature that = (Signature) o;
-            return Arrays.equals(getTargets(), that.getTargets());
+            return Arrays.equals(targets, that.targets);
         }
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(getTargets());
-        }
-    }
-
-    private static final class BehaviorSignature extends Signature {
-        private final int[] targets;
-
-        public BehaviorSignature(int[] targets) {
-            this.targets = targets;
-        }
-
-        @Override
-        public int[] getTargets() {
-            return targets;
-        }
-    }
-
-    private static final class MutableSignature extends Signature {
-        public int[] targets;
-
-        @Override
-        public int[] getTargets() {
-            return targets;
+            return hashCode;
         }
     }
 
@@ -142,12 +130,12 @@ public class Minimizer {
             char[] alphabetArray,
             Map<State, Integer> stateToPartitionId) {
 
-        Map<BehaviorSignature, Set<State>> subGroups = new HashMap<>();
+        Map<Signature, Set<State>> subGroups = new HashMap<>();
 
         Map<State, Map<Character, State>> transitionTable = dfa.getTransitionTable();
         int alphabetLen = alphabetArray.length;
 
-        MutableSignature searchKey = new MutableSignature();
+        Signature searchKey = new Signature(new int[0]);
         searchKey.targets = new int[alphabetLen];
 
         for (State s : group) {
@@ -163,10 +151,11 @@ public class Minimizer {
                     searchKey.targets[i] = targetPartitionId != null ? targetPartitionId : -1;
                 }
             }
+            searchKey.update();
 
             Set<State> states = subGroups.get(searchKey);
             if (states == null) {
-                BehaviorSignature newSig = new BehaviorSignature(searchKey.targets.clone());
+                Signature newSig = new Signature(searchKey.targets.clone());
                 states = new HashSet<>();
                 subGroups.put(newSig, states);
             }

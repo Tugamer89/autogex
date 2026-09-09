@@ -42,10 +42,10 @@ public class Minimizer {
 
             for (Set<State> group : partitions) {
                 // Split the group based on behavior (transition destinations)
-                Map<BehaviorSignature, Set<State>> subGroups =
+                Collection<Set<State>> subGroups =
                         splitGroup(dfa, group, alphabetArray, stateToPartitionId);
 
-                newPartitions.addAll(subGroups.values());
+                newPartitions.addAll(subGroups);
 
                 // If a group was split into 2 or more subgroups, the partition has changed
                 if (subGroups.size() > 1) {
@@ -108,9 +108,13 @@ public class Minimizer {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            BehaviorSignature that = (BehaviorSignature) o;
-            return Arrays.equals(targets, that.targets);
+            if (o instanceof BehaviorSignature) {
+                return Arrays.equals(targets, ((BehaviorSignature) o).targets);
+            }
+            if (o instanceof MutableSignature) {
+                return Arrays.equals(targets, ((MutableSignature) o).targets);
+            }
+            return false;
         }
 
         @Override
@@ -119,39 +123,71 @@ public class Minimizer {
         }
     }
 
-    private static Map<BehaviorSignature, Set<State>> splitGroup(
+    private static final class MutableSignature {
+        public int[] targets;
+        private int hashCode;
+
+        public void update() {
+            this.hashCode = Arrays.hashCode(targets);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o instanceof BehaviorSignature) {
+                return Arrays.equals(targets, ((BehaviorSignature) o).targets);
+            }
+            if (o instanceof MutableSignature) {
+                return Arrays.equals(targets, ((MutableSignature) o).targets);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+    }
+
+    private static Collection<Set<State>> splitGroup(
             DFA dfa,
             Set<State> group,
             char[] alphabetArray,
             Map<State, Integer> stateToPartitionId) {
 
-        // Maps the behavioral "signature" of a state to the subgroup of states sharing it
         Map<BehaviorSignature, Set<State>> subGroups = new HashMap<>();
 
         Map<State, Map<Character, State>> transitionTable = dfa.getTransitionTable();
         int alphabetLen = alphabetArray.length;
 
+        MutableSignature searchKey = new MutableSignature();
+        searchKey.targets = new int[alphabetLen];
+
         for (State s : group) {
-            // The signature is: "For each character, which partition do I end up in?"
-            int[] targets = new int[alphabetLen];
             Map<Character, State> transitions = transitionTable.get(s);
 
             if (transitions == null) {
-                Arrays.fill(targets, -1);
+                Arrays.fill(searchKey.targets, -1);
             } else {
                 for (int i = 0; i < alphabetLen; i++) {
                     State destination = transitions.get(alphabetArray[i]);
                     Integer targetPartitionId =
                             destination != null ? stateToPartitionId.get(destination) : null;
-                    targets[i] = targetPartitionId != null ? targetPartitionId : -1;
+                    searchKey.targets[i] = targetPartitionId != null ? targetPartitionId : -1;
                 }
             }
-            BehaviorSignature behaviorSignature = new BehaviorSignature(targets);
+            searchKey.update();
 
-            subGroups.computeIfAbsent(behaviorSignature, k -> new HashSet<>()).add(s);
+            Set<State> states = subGroups.get(searchKey);
+            if (states == null) {
+                BehaviorSignature newSig = new BehaviorSignature(searchKey.targets.clone());
+                states = new HashSet<>();
+                subGroups.put(newSig, states);
+            }
+            states.add(s);
         }
 
-        return subGroups;
+        return subGroups.values();
     }
 
     private static DFA buildMinimalDfa(

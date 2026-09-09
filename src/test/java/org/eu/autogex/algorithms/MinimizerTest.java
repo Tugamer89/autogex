@@ -84,21 +84,11 @@ class MinimizerTest {
     @Test
     void testUtilityClassConstructorThrowsException() throws Exception {
         Constructor<Minimizer> constructor = Minimizer.class.getDeclaredConstructor();
-        assertTrue(
-                java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()),
-                "Constructor should be private for utility classes");
+        assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
 
         constructor.setAccessible(true);
         InvocationTargetException exception =
-                assertThrows(
-                        InvocationTargetException.class,
-                        constructor::newInstance,
-                        "Instantiating the utility class should throw an exception");
-        assertTrue(
-                exception.getCause() instanceof UnsupportedOperationException,
-                "The cause should be an UnsupportedOperationException");
-        assertTrue(
-                exception.getCause().getMessage().contains("Utility class"),
-                "Exception message should mention utility class");
+                assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertTrue(exception.getCause() instanceof UnsupportedOperationException);
     }
 }

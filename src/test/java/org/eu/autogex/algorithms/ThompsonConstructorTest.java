@@ -14,7 +14,7 @@ class ThompsonConstructorTest {
                 new RegexNode() {
                     @Override
                     public <T> T accept(Visitor<T> visitor) {
-                        return null;
+                        throw new IllegalArgumentException("Unsupported RegexNode type");
                     }
 
                     @Override

@@ -97,7 +97,11 @@ public class Minimizer {
         return partitions;
     }
 
-    private static final class BehaviorSignature {
+    private interface Signature {
+        int[] getTargets();
+    }
+
+    private static final class BehaviorSignature implements Signature {
         private final int[] targets;
         private final int hashCode;
 
@@ -107,15 +111,16 @@ public class Minimizer {
         }
 
         @Override
+        public int[] getTargets() {
+            return targets;
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o instanceof BehaviorSignature) {
-                return Arrays.equals(targets, ((BehaviorSignature) o).targets);
-            }
-            if (o instanceof MutableSignature) {
-                return Arrays.equals(targets, ((MutableSignature) o).targets);
-            }
-            return false;
+            if (!(o instanceof Signature)) return false;
+            Signature that = (Signature) o;
+            return Arrays.equals(targets, that.getTargets());
         }
 
         @Override
@@ -124,7 +129,7 @@ public class Minimizer {
         }
     }
 
-    private static final class MutableSignature {
+    private static final class MutableSignature implements Signature {
         public int[] targets;
         private int hashCode;
 
@@ -133,15 +138,16 @@ public class Minimizer {
         }
 
         @Override
+        public int[] getTargets() {
+            return targets;
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o instanceof BehaviorSignature) {
-                return Arrays.equals(targets, ((BehaviorSignature) o).targets);
-            }
-            if (o instanceof MutableSignature) {
-                return Arrays.equals(targets, ((MutableSignature) o).targets);
-            }
-            return false;
+            if (!(o instanceof Signature)) return false;
+            Signature that = (Signature) o;
+            return Arrays.equals(targets, that.getTargets());
         }
 
         @Override

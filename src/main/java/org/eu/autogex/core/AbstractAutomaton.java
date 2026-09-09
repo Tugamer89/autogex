@@ -54,10 +54,11 @@ public abstract class AbstractAutomaton implements Automaton {
             Map<State, Map<Character, Set<State>>> transitionTable) {
         Set<State> nextStates = null;
 
+        Character boxedSymbol = Character.valueOf(symbol);
         for (State state : currentStates) {
             Map<Character, Set<State>> stateTransitions = transitionTable.get(state);
             if (stateTransitions != null) {
-                Set<State> targets = stateTransitions.get(symbol);
+                Set<State> targets = stateTransitions.get(boxedSymbol);
                 if (targets != null && !targets.isEmpty()) {
                     if (nextStates == null) {
                         nextStates = new HashSet<>(targets);

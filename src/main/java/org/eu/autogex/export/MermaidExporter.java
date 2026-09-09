@@ -1,6 +1,5 @@
 package org.eu.autogex.export;
 
-import java.util.Map;
 import java.util.Set;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
@@ -11,9 +10,7 @@ import org.eu.autogex.models.NFA;
  * Utility class for exporting automata to the Mermaid.js stateDiagram-v2 format. This enables
  * native visual rendering within GitHub Markdown and other compatible platforms.
  */
-public class MermaidExporter {
-
-    private static final String EPSILON_LABEL = "ε";
+public class MermaidExporter extends AbstractExporter {
 
     private MermaidExporter() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -29,16 +26,10 @@ public class MermaidExporter {
         StringBuilder sb =
                 buildHeader(dfa.getInitialState(), dfa.getFinalStates(), dfa.getStates());
 
-        for (Map.Entry<State, Map<Character, State>> entry : dfa.getTransitionTable().entrySet()) {
-            String sourceId = sanitizeId(entry.getKey());
-            for (Map.Entry<Character, State> transition : entry.getValue().entrySet()) {
-                appendTransition(
-                        sb,
-                        sourceId,
-                        transition.getKey().toString(),
-                        sanitizeId(transition.getValue()));
-            }
-        }
+        traverseTransitions(
+                dfa,
+                (source, label, target) ->
+                        appendTransition(sb, sanitizeId(source), label, sanitizeId(target)));
 
         return sb.toString();
     }
@@ -53,16 +44,10 @@ public class MermaidExporter {
         StringBuilder sb =
                 buildHeader(nfa.getInitialState(), nfa.getFinalStates(), nfa.getStates());
 
-        for (Map.Entry<State, Map<Character, Set<State>>> entry :
-                nfa.getTransitionTable().entrySet()) {
-            String sourceId = sanitizeId(entry.getKey());
-            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                for (State target : transition.getValue()) {
-                    appendTransition(
-                            sb, sourceId, transition.getKey().toString(), sanitizeId(target));
-                }
-            }
-        }
+        traverseTransitions(
+                nfa,
+                (source, label, target) ->
+                        appendTransition(sb, sanitizeId(source), label, sanitizeId(target)));
 
         return sb.toString();
     }
@@ -78,19 +63,10 @@ public class MermaidExporter {
         StringBuilder sb =
                 buildHeader(enfa.getInitialState(), enfa.getFinalStates(), enfa.getStates());
 
-        for (Map.Entry<State, Map<Character, Set<State>>> entry :
-                enfa.getTransitionTable().entrySet()) {
-            String sourceId = sanitizeId(entry.getKey());
-            for (Map.Entry<Character, Set<State>> transition : entry.getValue().entrySet()) {
-                String label =
-                        transition.getKey() == null
-                                ? EPSILON_LABEL
-                                : transition.getKey().toString();
-                for (State target : transition.getValue()) {
-                    appendTransition(sb, sourceId, label, sanitizeId(target));
-                }
-            }
-        }
+        traverseTransitions(
+                enfa,
+                (source, label, target) ->
+                        appendTransition(sb, sanitizeId(source), label, sanitizeId(target)));
 
         return sb.toString();
     }

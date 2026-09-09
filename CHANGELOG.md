@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.13.1](https://github.com/Tugamer89/autogex/compare/v1.13.0...v1.13.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* **security:** resolve cross-site scripting vulnerability in Graphviz DOT export ([#216](https://github.com/Tugamer89/autogex/issues/216)) ([f534388](https://github.com/Tugamer89/autogex/commit/f534388e86f4cfa266b543317d85230306c8a403))
+
+
+### Performance Improvements
+
+* **converter:** cache DFA state names to avoid allocation ([#214](https://github.com/Tugamer89/autogex/issues/214)) ([88dbfee](https://github.com/Tugamer89/autogex/commit/88dbfee8b43f2decaa4c452a6156010c7d58c170))
+* **converter:** optimize epsilon closure computation using tarjan scc ([#219](https://github.com/Tugamer89/autogex/issues/219)) ([0c9192a](https://github.com/Tugamer89/autogex/commit/0c9192a1337e4f8b2ef0c8880cd6a77bee98c568))
+* **core:** hoist character boxing outside computation loop ([#220](https://github.com/Tugamer89/autogex/issues/220)) ([da0271b](https://github.com/Tugamer89/autogex/commit/da0271b21ac637d3cedc92f0a9d084060f37281b))
+* **export:** use String.valueOf to reduce object allocation ([#209](https://github.com/Tugamer89/autogex/issues/209)) ([8e1c10a](https://github.com/Tugamer89/autogex/commit/8e1c10aada3302dfc8ef5e6bd345a65ef0caae64))
+* **minimizer:** optimize iterative partition refinement ([#215](https://github.com/Tugamer89/autogex/issues/215)) ([30539f9](https://github.com/Tugamer89/autogex/commit/30539f98415e036325b8874b816a926b2eca0834))
+* **models:** avoid char boxing in DFA evaluation loop ([#217](https://github.com/Tugamer89/autogex/issues/217)) ([391b862](https://github.com/Tugamer89/autogex/commit/391b8629a5455af5f80c0e20dc66661902b79070))
+
 ## [1.13.0](https://github.com/Tugamer89/autogex/compare/v1.12.0...v1.13.0) (2026-07-23)
 
 

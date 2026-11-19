@@ -30,6 +30,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Cache PITest history
+        uses: actions/cache@v6
+        with:
+          path: target/pit-history.txt
+          key: pitest-history-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            pitest-history-${{ github.ref_name }}-
+            pitest-history-main-
+
       - name: Setup Java Environment
         uses: actions/setup-java@v6.2.0
         with:

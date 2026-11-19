@@ -80,6 +80,7 @@
                 <executions>
                     <execution>
                         <id>get-mockito-agent</id>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>properties</goal>
                         </goals>
@@ -188,6 +189,11 @@
                         <param>org.eu.autogex.*</param>
                     </targetTests>
                     <mutationThreshold>80</mutationThreshold>
+                    <threads>4</threads>
+                    <timeoutConstant>1000</timeoutConstant>
+                    <timeoutFactor>1.15</timeoutFactor>
+                    <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                    <withHistory>true</withHistory>
                 </configuration>
             </plugin>
 

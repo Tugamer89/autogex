@@ -2,12 +2,17 @@ package org.eu.autogex;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+import java.util.Set;
+import org.eu.autogex.algorithms.AutomataOperations;
 import org.eu.autogex.algorithms.Converter;
+import org.eu.autogex.algorithms.LanguageGenerator;
 import org.eu.autogex.algorithms.Minimizer;
 import org.eu.autogex.export.GraphvizExporter;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.regex.Regex;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -74,5 +79,24 @@ class UsageExamplesTest {
         assertTrue(
                 originalGraph.contains("label=\"ε\""),
                 "The exported ENFA should contain epsilon transitions");
+    }
+
+    @Test
+    @DisplayName("Should perform DFA set operations and generate valid language strings")
+    void testSetOperationsAndLanguageGenerationExample() {
+        DFA containsAA = new Regex("(a|b)*aa(a|b)*").getAutomaton();
+        DFA endsWithB = new Regex("(a|b)*b").getAutomaton();
+
+        DFA intersection = AutomataOperations.intersection(containsAA, endsWithB);
+        DFA difference = AutomataOperations.difference(containsAA, endsWithB);
+        DFA complement = AutomataOperations.complement(endsWithB, Set.of('a', 'b'));
+
+        String randomSample = LanguageGenerator.generateRandom(intersection, 10);
+        List<String> allUpToLength4 = LanguageGenerator.generateAll(intersection, 4);
+
+        assertTrue(intersection.accepts(randomSample));
+        assertTrue(allUpToLength4.contains("aab"));
+        assertTrue(difference.accepts("aa"));
+        assertTrue(complement.accepts("a"));
     }
 }

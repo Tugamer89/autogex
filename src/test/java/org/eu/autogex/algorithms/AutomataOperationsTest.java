@@ -17,9 +17,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("AutomataOperations Set Operations & Closure Properties")
 class AutomataOperationsTest {
 
-    /**
-     * Builds a complete DFA over {'a', 'b'} accepting strings with an even number of 'a's.
-     */
+    /** Builds a complete DFA over {'a', 'b'} accepting strings with an even number of 'a's. */
     private DFA buildEvenAsDfa() {
         return new DFA.Builder()
                 .addState("q0", true)
@@ -32,9 +30,7 @@ class AutomataOperationsTest {
                 .build();
     }
 
-    /**
-     * Builds a complete DFA over {'a', 'b'} accepting strings ending with 'b'.
-     */
+    /** Builds a complete DFA over {'a', 'b'} accepting strings ending with 'b'. */
     private DFA buildEndsWithBDfa() {
         return new DFA.Builder()
                 .addState("p0", false)
@@ -48,7 +44,8 @@ class AutomataOperationsTest {
     }
 
     /**
-     * Generates all strings over alphabet {'a', 'b'} up to maxLength for exhaustive equivalence checks.
+     * Generates all strings over alphabet {'a', 'b'} up to maxLength for exhaustive equivalence
+     * checks.
      */
     private List<String> generateTestStrings(char[] alphabet, int maxLength) {
         List<String> result = new ArrayList<>();
@@ -80,9 +77,7 @@ class AutomataOperationsTest {
 
             for (String s : generateTestStrings(new char[] {'a', 'b'}, 5)) {
                 assertEquals(
-                        !evenAs.accepts(s),
-                        oddAs.accepts(s),
-                        "Mismatch on string: '" + s + "'");
+                        !evenAs.accepts(s), oddAs.accepts(s), "Mismatch on string: '" + s + "'");
             }
         }
 
@@ -209,7 +204,8 @@ class AutomataOperationsTest {
             DFA dfa2 = new Regex("b(a|b)*b").getAutomaton();
 
             // Law 1: complement(L1 ∪ L2) == complement(L1) ∩ complement(L2)
-            DFA lhs1 = AutomataOperations.complement(AutomataOperations.union(dfa1, dfa2), alphabet);
+            DFA lhs1 =
+                    AutomataOperations.complement(AutomataOperations.union(dfa1, dfa2), alphabet);
             DFA rhs1 =
                     AutomataOperations.intersection(
                             AutomataOperations.complement(dfa1, alphabet),
@@ -231,8 +227,10 @@ class AutomataOperationsTest {
                             dfa1, AutomataOperations.complement(dfa2, alphabet));
 
             for (String s : generateTestStrings(new char[] {'a', 'b'}, 5)) {
-                assertEquals(lhs1.accepts(s), rhs1.accepts(s), "De Morgan 1 failed on: '" + s + "'");
-                assertEquals(lhs2.accepts(s), rhs2.accepts(s), "De Morgan 2 failed on: '" + s + "'");
+                assertEquals(
+                        lhs1.accepts(s), rhs1.accepts(s), "De Morgan 1 failed on: '" + s + "'");
+                assertEquals(
+                        lhs2.accepts(s), rhs2.accepts(s), "De Morgan 2 failed on: '" + s + "'");
                 assertEquals(
                         diffDirect.accepts(s),
                         diffViaComplement.accepts(s),
@@ -252,24 +250,17 @@ class AutomataOperationsTest {
 
             assertThrows(NullPointerException.class, () -> AutomataOperations.complement(null));
             assertThrows(
-                    NullPointerException.class,
-                    () -> AutomataOperations.complement(valid, null));
+                    NullPointerException.class, () -> AutomataOperations.complement(valid, null));
             assertThrows(
-                    NullPointerException.class,
-                    () -> AutomataOperations.intersection(null, valid));
+                    NullPointerException.class, () -> AutomataOperations.intersection(null, valid));
             assertThrows(
-                    NullPointerException.class,
-                    () -> AutomataOperations.intersection(valid, null));
+                    NullPointerException.class, () -> AutomataOperations.intersection(valid, null));
+            assertThrows(NullPointerException.class, () -> AutomataOperations.union(null, valid));
+            assertThrows(NullPointerException.class, () -> AutomataOperations.union(valid, null));
             assertThrows(
-                    NullPointerException.class, () -> AutomataOperations.union(null, valid));
+                    NullPointerException.class, () -> AutomataOperations.difference(null, valid));
             assertThrows(
-                    NullPointerException.class, () -> AutomataOperations.union(valid, null));
-            assertThrows(
-                    NullPointerException.class,
-                    () -> AutomataOperations.difference(null, valid));
-            assertThrows(
-                    NullPointerException.class,
-                    () -> AutomataOperations.difference(valid, null));
+                    NullPointerException.class, () -> AutomataOperations.difference(valid, null));
         }
     }
 }

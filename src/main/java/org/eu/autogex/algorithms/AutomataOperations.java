@@ -16,8 +16,8 @@ import org.eu.autogex.models.DFA;
 
 /**
  * Utility class providing mathematical set operations on Deterministic Finite Automata (DFAs),
- * demonstrating the closure properties of regular languages under complement, intersection,
- * union, and set difference.
+ * demonstrating the closure properties of regular languages under complement, intersection, union,
+ * and set difference.
  */
 public final class AutomataOperations {
 
@@ -33,8 +33,8 @@ public final class AutomataOperations {
     }
 
     /**
-     * Computes the complement ({@code L̅}) of the language recognized by the given {@link DFA}
-     * over its derived transition alphabet.
+     * Computes the complement ({@code L̅}) of the language recognized by the given {@link DFA} over
+     * its derived transition alphabet.
      *
      * <p>If the input DFA has a partial transition function over its alphabet, an explicit sink
      * state is introduced prior to inverting accepting and non-accepting states so that all
@@ -50,8 +50,8 @@ public final class AutomataOperations {
     }
 
     /**
-     * Computes the complement ({@code L̅}) of the language recognized by the given {@link DFA}
-     * with respect to an explicit alphabet {@code alphabet}.
+     * Computes the complement ({@code L̅}) of the language recognized by the given {@link DFA} with
+     * respect to an explicit alphabet {@code alphabet}.
      *
      * @param dfa the input deterministic finite automaton
      * @param alphabet the reference alphabet over which to complete transitions
@@ -119,12 +119,13 @@ public final class AutomataOperations {
     }
 
     /**
-     * Computes the union ({@code L1 ∪ L2}) of two deterministic finite automata using the
-     * Cartesian product construction.
+     * Computes the union ({@code L1 ∪ L2}) of two deterministic finite automata using the Cartesian
+     * product construction.
      *
      * @param first the first DFA
      * @param second the second DFA
-     * @return a new {@link DFA} accepting strings accepted by {@code first}, {@code second}, or both
+     * @return a new {@link DFA} accepting strings accepted by {@code first}, {@code second}, or
+     *     both
      * @throws NullPointerException if either DFA is {@code null}
      */
     public static DFA union(DFA first, DFA second) {
@@ -139,7 +140,8 @@ public final class AutomataOperations {
      *
      * @param first the minuend DFA ({@code L1})
      * @param second the subtrahend DFA ({@code L2})
-     * @return a new {@link DFA} accepting strings accepted by {@code first} but rejected by {@code second}
+     * @return a new {@link DFA} accepting strings accepted by {@code first} but rejected by {@code
+     *     second}
      * @throws NullPointerException if either DFA is {@code null}
      */
     public static DFA difference(DFA first, DFA second) {

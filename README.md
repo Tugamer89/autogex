@@ -27,7 +27,9 @@
 - **Conversion:**  Subset construction algorithm (Rabin-Scott) and ε-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
 - **Visualization:** Export any automaton or compiled regex directly to the Graphviz DOT language or Mermaid.js format for native GitHub rendering.
-- **Execution Tracing (New!):** Detailed step-by-step visual debugging of an automaton's state traversal with `automaton.execute(input).getFormattedTrace()`.
+- **Execution Tracing:** Detailed step-by-step visual debugging of an automaton's state traversal with `automaton.execute(input).getFormattedTrace()`.
+- **DFA Set Operations (New!):** Compute complement ($\overline{L}$), intersection ($L_1 \cap L_2$), union ($L_1 \cup L_2$), and set difference ($L_1 \setminus L_2$) directly on DFAs via Cartesian product construction.
+- **Language Generation (New!):** Generate random valid strings for fuzz testing or enumerate all accepted strings up to length $N$ in canonical lexicographical order.
 
 ## Installation
 
@@ -52,20 +54,25 @@ For a complete overview of all classes and methods, see the [Official API docume
 The easiest way to use Autogex is through the `Regex` facade. It automatically parses the string, builds the AST, converts to a DFA, and minimizes it.
 
 ```java
+import java.util.List;
+import java.util.Set;
+import org.eu.autogex.algorithms.AutomataOperations;
+import org.eu.autogex.algorithms.LanguageGenerator;
+import org.eu.autogex.models.DFA;
 import org.eu.autogex.regex.Regex;
 
-// Compiles the regex into a theoretical Minimal DFA under the hood
-Regex regex = new Regex("(a|b)*abb");
+// Compile regular expressions into minimal DFAs
+DFA containsAA = new Regex("(a|b)*aa(a|b)*").getAutomaton();
+DFA endsWithB = new Regex("(a|b)*b").getAutomaton();
 
-System.out.println(regex.matches("abaabb")); // Output: true
+// Perform mathematical set operations on DFAs
+DFA intersection = AutomataOperations.intersection(containsAA, endsWithB);
+DFA difference = AutomataOperations.difference(containsAA, endsWithB);
+DFA complement = AutomataOperations.complement(endsWithB, Set.of('a', 'b'));
 
-// Export the internal Minimal DFA to Graphviz DOT format for rendering!
-String dotGraph = regex.toDotGraph();
-System.out.println(dotGraph);
-
-// Export the internal Minimal DFA to Mermaid format for native GitHub Markdown rendering!
-String mermaidGraph = regex.toMermaidGraph();
-System.out.println(mermaidGraph);
+// Generate valid strings from a DFA
+String randomSample = LanguageGenerator.generateRandom(intersection, 10);
+List<String> allUpToLength4 = LanguageGenerator.generateAll(intersection, 4);
 ```
 
 *(You can copy the generated `dotGraph` string and paste it into [WebGraphviz](http://www.webgraphviz.com/) to see your state machine!)*

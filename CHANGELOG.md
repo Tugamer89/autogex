@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.0](https://github.com/Tugamer89/autogex/compare/v1.13.1...v1.14.0) (2026-11-19)
+
+
+### Features
+
+* implement DFA language generator utilities ([#239](https://github.com/Tugamer89/autogex/issues/239)) ([fa50b15](https://github.com/Tugamer89/autogex/commit/fa50b15932bf5c268488b2a2f02c42d845fd8c81))
+* implement DFA set operations and product automaton ([#237](https://github.com/Tugamer89/autogex/issues/237)) ([ff295c8](https://github.com/Tugamer89/autogex/commit/ff295c8b9903f71448589393938e759d0121107f))
+
 ## [1.13.1](https://github.com/Tugamer89/autogex/compare/v1.13.0...v1.13.1) (2026-09-06)
 
 

@@ -3,5 +3,10 @@
         "connectionId": "tugamer89",
         "projectKey": "Tugamer89_autogex"
     },
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.test.config": {
+        "vmArgs": [
+            "-XX:+EnableDynamicAgentLoading"
+        ]
+    }
 }

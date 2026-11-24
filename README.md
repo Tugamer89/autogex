@@ -26,7 +26,7 @@
 - **Modeling:** Native support for `DFA` (Deterministic Finite Automata), `NFA` (Non-Deterministic), and `ENFA` (ε-NFA with silent transitions).
 - **Conversion:**  Subset construction algorithm (Rabin-Scott) and ε-transition elimination (`Converter`).
 - **Optimization:** DFA minimization using the Equivalence Classes algorithm (Moore's partitioning) with preemptive cleanup of unreachable states (`Minimizer`).
-- **Visualization:** Export any automaton or compiled regex directly to the Graphviz DOT language or Mermaid.js format for native GitHub rendering.
+- **Visualization:** Export any automaton or compiled regex directly to the Graphviz DOT language, Mermaid.js format for native GitHub rendering, or a Markdown state-transition table (`MarkdownTableExporter.toMarkdownTable(automaton)`).
 - **Execution Tracing:** Detailed step-by-step visual debugging of an automaton's state traversal with `automaton.execute(input).getFormattedTrace()`.
 - **DFA Set Operations (New!):** Compute complement ($\overline{L}$), intersection ($L_1 \cap L_2$), union ($L_1 \cup L_2$), and set difference ($L_1 \setminus L_2$) directly on DFAs via Cartesian product construction.
 - **Language Generation (New!):** Generate random valid strings for fuzz testing or enumerate all accepted strings up to length $N$ in canonical lexicographical order.

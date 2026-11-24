@@ -104,5 +104,9 @@ class AutoGexTest {
         assertTrue(AutoGex.toGraphviz(dfaB).contains("digraph"));
         assertTrue(AutoGex.toGraphviz(nfa).contains("digraph"));
         assertTrue(AutoGex.toGraphviz(enfa).contains("digraph"));
+
+        assertTrue(AutoGex.toMarkdownTable(dfaB).contains("| State |"));
+        assertTrue(AutoGex.toMarkdownTable(nfa).contains("| State |"));
+        assertTrue(AutoGex.toMarkdownTable(enfa).contains("| State |"));
     }
 }

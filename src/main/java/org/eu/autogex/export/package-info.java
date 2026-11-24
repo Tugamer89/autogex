@@ -1,9 +1,10 @@
 /**
- * Diagram and graph exporters for visualizing finite state automata.
+ * Diagram and table exporters for visualizing finite state automata.
  *
  * <p>Provides static utility exporters for Graphviz DOT ({@link
- * org.eu.autogex.export.GraphvizExporter}) and Mermaid.js ({@link
- * org.eu.autogex.export.MermaidExporter}) supporting {@code DFA}, {@code NFA}, and {@code ENFA}
- * models.
+ * org.eu.autogex.export.GraphvizExporter}), Mermaid.js ({@link
+ * org.eu.autogex.export.MermaidExporter}), and GitHub-flavored Markdown state-transition tables
+ * ({@link org.eu.autogex.export.MarkdownTableExporter}) supporting {@code DFA}, {@code NFA}, and
+ * {@code ENFA} models.
  */
 package org.eu.autogex.export;

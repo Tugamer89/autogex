@@ -1,9 +1,8 @@
 /**
- * AutoGex root package.
+ * Root package and top-level facade for the AutoGex library.
  *
- * <p>This package serves as the primary namespace for the AutoGex library. It contains the main
- * entry points for regex compilation and automation management. The presence of this file ensures
- * the package is recognized by the Java Module System (JPMS) even when it only contains
- * sub-packages.
+ * <p>Provides {@link org.eu.autogex.AutoGex}, the main convenience entry point for compiling
+ * regular expressions, converting and minimizing finite state automata, performing formal language
+ * set operations, and exporting state diagrams, alongside runtime library metadata.
  */
 package org.eu.autogex;

@@ -30,7 +30,7 @@ import org.eu.autogex.models.DFA;
 import org.eu.autogex.regex.Regex;
 
 DFA dfa = new Regex("(a|b)*abb").getAutomaton();
-String mermaid = new MermaidExporter().export(dfa);
+String mermaid = MermaidExporter.toMermaid(dfa);
 ```
 
 ```mermaid
@@ -125,11 +125,11 @@ ENFA enfa = new ENFA.Builder()
 DFA minimalDfa = Minimizer.minimize(Converter.enfaToDfa(enfa));
 ExecutionTrace trace = minimalDfa.execute("aaabbb");
 
-System.out.println(trace.isAccepted());       // true
+System.out.println(trace.isAccepted());        // true
 System.out.println(trace.getFormattedTrace()); // Step-by-step state transitions
 
 // Export to Graphviz DOT format
-String dotGraph = new GraphvizExporter().export(minimalDfa);
+String dotGraph = GraphvizExporter.toDot(minimalDfa);
 ```
 
 ## Module & Package Overview

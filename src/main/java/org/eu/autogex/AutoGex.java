@@ -5,6 +5,7 @@ import org.eu.autogex.algorithms.AutomataOperations;
 import org.eu.autogex.algorithms.Converter;
 import org.eu.autogex.algorithms.Minimizer;
 import org.eu.autogex.export.GraphvizExporter;
+import org.eu.autogex.export.MarkdownTableExporter;
 import org.eu.autogex.export.MermaidExporter;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
@@ -183,6 +184,36 @@ public final class AutoGex {
      */
     public static String toGraphviz(ENFA enfa) {
         return GraphvizExporter.toDot(enfa);
+    }
+
+    /**
+     * Exports a {@link DFA} as a GitHub-flavored Markdown state-transition table.
+     *
+     * @param dfa the deterministic finite automaton to render
+     * @return the Markdown transition table string
+     */
+    public static String toMarkdownTable(DFA dfa) {
+        return MarkdownTableExporter.toMarkdownTable(dfa);
+    }
+
+    /**
+     * Exports an {@link NFA} as a GitHub-flavored Markdown state-transition table.
+     *
+     * @param nfa the non-deterministic finite automaton to render
+     * @return the Markdown transition table string
+     */
+    public static String toMarkdownTable(NFA nfa) {
+        return MarkdownTableExporter.toMarkdownTable(nfa);
+    }
+
+    /**
+     * Exports an {@link ENFA} as a GitHub-flavored Markdown state-transition table.
+     *
+     * @param enfa the epsilon-NFA to render
+     * @return the Markdown transition table string
+     */
+    public static String toMarkdownTable(ENFA enfa) {
+        return MarkdownTableExporter.toMarkdownTable(enfa);
     }
 
     /**

@@ -6,5 +6,4 @@ org.eu.autogex.export
 org.eu.autogex.models
 org.eu.autogex.regex
 org.eu.autogex.regex.ast
-org.eu.autogex.regex.parser
 org.eu.autogex.trace

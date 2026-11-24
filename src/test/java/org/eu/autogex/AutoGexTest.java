@@ -1,12 +1,17 @@
 package org.eu.autogex;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
+import org.eu.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.models.NFA;
 import org.junit.jupiter.api.Test;
 
 class AutoGexTest {
@@ -57,5 +62,47 @@ class AutoGexTest {
         assertTrue(
                 exception.getCause().getMessage().contains("utility class"),
                 "Exception message should mention utility class");
+    }
+
+    @Test
+    void testFacadeOperations() {
+        DFA dfaA = AutoGex.compile("a+b*");
+        DFA dfaB = AutoGex.compile("ab");
+
+        assertTrue(AutoGex.matches("a+b*", "aaabb"));
+        assertFalse(AutoGex.matches("a+b*", "b"));
+
+        assertEquals(dfaA.getStates().size(), AutoGex.minimize(dfaA).getStates().size());
+
+        NFA nfa =
+                new NFA.Builder()
+                        .addState("q0", false)
+                        .addState("q1", true)
+                        .setInitialState("q0")
+                        .addTransition("q0", 'a', "q1")
+                        .build();
+
+        ENFA enfa =
+                new ENFA.Builder()
+                        .addState("q0", false)
+                        .addState("q1", true)
+                        .setInitialState("q0")
+                        .addTransition("q0", 'a', "q1")
+                        .build();
+
+        assertTrue(AutoGex.toMinimalDfa(enfa).accepts("a"));
+
+        assertTrue(AutoGex.union(dfaA, dfaB).accepts("ab"));
+        assertTrue(AutoGex.intersection(dfaA, dfaB).accepts("ab"));
+        assertFalse(AutoGex.difference(dfaA, dfaB).accepts("ab"));
+        assertFalse(AutoGex.complement(dfaB, Set.of('a', 'b')).accepts("ab"));
+
+        assertTrue(AutoGex.toMermaid(dfaB).contains("stateDiagram-v2"));
+        assertTrue(AutoGex.toMermaid(nfa).contains("stateDiagram-v2"));
+        assertTrue(AutoGex.toMermaid(enfa).contains("stateDiagram-v2"));
+
+        assertTrue(AutoGex.toGraphviz(dfaB).contains("digraph"));
+        assertTrue(AutoGex.toGraphviz(nfa).contains("digraph"));
+        assertTrue(AutoGex.toGraphviz(enfa).contains("digraph"));
     }
 }

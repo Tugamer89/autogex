@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.15.0](https://github.com/Tugamer89/autogex/compare/v1.14.0...v1.15.0) (2026-11-24)
+
+
+### Features
+
+* add convenience facade methods to AutoGex and improve module/package docs ([#255](https://github.com/Tugamer89/autogex/issues/255)) ([41fda6e](https://github.com/Tugamer89/autogex/commit/41fda6e102609a8b1756beb450bd31d2f4e4f177))
+* add Markdown state-transition table exporter ([#254](https://github.com/Tugamer89/autogex/issues/254)) ([2d881e1](https://github.com/Tugamer89/autogex/commit/2d881e1c9961ad38f191c04e426c58e4b588aaf1))
+
 ## [1.14.0](https://github.com/Tugamer89/autogex/compare/v1.13.1...v1.14.0) (2026-11-19)
 
 

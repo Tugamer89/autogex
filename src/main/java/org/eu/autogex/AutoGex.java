@@ -1,9 +1,11 @@
 package org.eu.autogex;
 
+import java.util.Objects;
 import java.util.Set;
 import org.eu.autogex.algorithms.AutomataOperations;
 import org.eu.autogex.algorithms.Converter;
 import org.eu.autogex.algorithms.Minimizer;
+import org.eu.autogex.core.Automaton;
 import org.eu.autogex.export.GraphvizExporter;
 import org.eu.autogex.export.MarkdownTableExporter;
 import org.eu.autogex.export.MermaidExporter;
@@ -38,6 +40,28 @@ public final class AutoGex {
     private AutoGex() {
         throw new UnsupportedOperationException(
                 "This is a utility class and cannot be instantiated");
+    }
+
+    /**
+     * Checks whether two finite automata recognize the exact same regular language.
+     *
+     * <p>Delegates to {@link AutomataOperations#areEquivalent(Automaton, Automaton)}.
+     *
+     * <p><b>Example:</b>
+     *
+     * <pre>{@code
+     * boolean equivalent = AutoGex.areEquivalent(firstAutomaton, secondAutomaton);
+     * }</pre>
+     *
+     * @param a1 the first finite automaton, must not be {@code null}
+     * @param a2 the second finite automaton, must not be {@code null}
+     * @return {@code true} if both automata recognize the same language, {@code false} otherwise
+     * @throws NullPointerException if {@code a1} or {@code a2} is {@code null}
+     */
+    public static boolean areEquivalent(Automaton a1, Automaton a2) {
+        Objects.requireNonNull(a1, "a1 must not be null");
+        Objects.requireNonNull(a2, "a2 must not be null");
+        return AutomataOperations.areEquivalent(a1, a2);
     }
 
     /**

@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.eu.autogex.AutoGex;
 import org.eu.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.models.NFA;
 import org.eu.autogex.regex.Regex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +19,127 @@ import org.junit.jupiter.api.Test;
 
 @DisplayName("AutomataOperations Set Operations & Closure Properties")
 class AutomataOperationsTest {
+
+    @Nested
+    @DisplayName("Language Equivalence (areEquivalent)")
+    class EquivalenceTests {
+
+        @Test
+        @DisplayName("Should throw NullPointerException on null arguments")
+        void testNullArguments() {
+            DFA valid = buildEvenAsDfa();
+
+            assertThrows(
+                    NullPointerException.class,
+                    () -> AutomataOperations.areEquivalent(null, valid));
+            assertThrows(
+                    NullPointerException.class,
+                    () -> AutomataOperations.areEquivalent(valid, null));
+            assertThrows(NullPointerException.class, () -> AutoGex.areEquivalent(null, valid));
+            assertThrows(NullPointerException.class, () -> AutoGex.areEquivalent(valid, null));
+        }
+
+        @Test
+        @DisplayName("Should return true for equivalent DFAs, NFAs, and ENFAs")
+        void testEquivalentAutomataAcrossTypes() {
+            DFA dfaEvenAs = buildEvenAsDfa();
+            DFA minimizedEvenAs = Minimizer.minimize(dfaEvenAs);
+
+            NFA nfaEvenAs =
+                    new NFA.Builder()
+                            .addState("q0", true)
+                            .addState("q1", false)
+                            .setInitialState("q0")
+                            .addTransition("q0", 'a', "q1")
+                            .addTransition("q0", 'b', "q0")
+                            .addTransition("q1", 'a', "q0")
+                            .addTransition("q1", 'b', "q1")
+                            .build();
+
+            ENFA enfaEvenAs =
+                    new ENFA.Builder()
+                            .addState("e0", false)
+                            .addState("e1", true)
+                            .addState("e2", false)
+                            .setInitialState("e0")
+                            .addTransition("e0", null, "e1") // epsilon move to even state
+                            .addTransition("e1", 'a', "e2")
+                            .addTransition("e1", 'b', "e1")
+                            .addTransition("e2", 'a', "e1")
+                            .addTransition("e2", 'b', "e2")
+                            .build();
+
+            assertTrue(AutomataOperations.areEquivalent(dfaEvenAs, minimizedEvenAs));
+            assertTrue(AutomataOperations.areEquivalent(dfaEvenAs, nfaEvenAs));
+            assertTrue(AutomataOperations.areEquivalent(nfaEvenAs, enfaEvenAs));
+            assertTrue(AutoGex.areEquivalent(dfaEvenAs, enfaEvenAs));
+        }
+
+        @Test
+        @DisplayName("Should return false for non-equivalent automata")
+        void testNonEquivalentAutomata() {
+            DFA evenAs = buildEvenAsDfa();
+            DFA endsWithB = buildEndsWithBDfa();
+
+            // Differ even when one language is a subset of the other
+            DFA aStar = new Regex("a*").getAutomaton();
+            DFA aPlus = new Regex("a+").getAutomaton();
+
+            assertFalse(AutomataOperations.areEquivalent(evenAs, endsWithB));
+            assertFalse(AutomataOperations.areEquivalent(aStar, aPlus));
+            assertFalse(AutomataOperations.areEquivalent(aPlus, aStar));
+            assertFalse(AutoGex.areEquivalent(aStar, aPlus));
+        }
+
+        @Test
+        @DisplayName("Should handle empty languages accurately")
+        void testEmptyLanguages() {
+            DFA emptyDfa1 =
+                    new DFA.Builder()
+                            .addState("q0", false)
+                            .setInitialState("q0")
+                            .addTransition("q0", 'a', "q0")
+                            .build();
+            DFA emptyDfa2 =
+                    new DFA.Builder()
+                            .addState("s0", false)
+                            .addState("s1", false)
+                            .setInitialState("s0")
+                            .addTransition("s0", 'b', "s1")
+                            .build();
+            DFA epsilonOnly = new DFA.Builder().addState("q0", true).setInitialState("q0").build();
+
+            assertTrue(AutomataOperations.areEquivalent(emptyDfa1, emptyDfa2));
+            assertFalse(AutomataOperations.areEquivalent(emptyDfa1, epsilonOnly));
+            assertFalse(AutomataOperations.areEquivalent(epsilonOnly, emptyDfa1));
+        }
+
+        @Test
+        @DisplayName("Should handle differing alphabets recognizing the same language")
+        void testDifferingAlphabetsSameLanguage() {
+            DFA overSingleSymbol =
+                    new DFA.Builder()
+                            .addState("q0", true)
+                            .setInitialState("q0")
+                            .addTransition("q0", 'a', "q0")
+                            .build();
+
+            // Alphabet {'a', 'b'} accepting only a* (any 'b' transitions to a non-accepting sink)
+            DFA overTwoSymbolsSameLang =
+                    new DFA.Builder()
+                            .addState("p0", true)
+                            .addState("p_dead", false)
+                            .setInitialState("p0")
+                            .addTransition("p0", 'a', "p0")
+                            .addTransition("p0", 'b', "p_dead")
+                            .addTransition("p_dead", 'a', "p_dead")
+                            .addTransition("p_dead", 'b', "p_dead")
+                            .build();
+
+            assertTrue(AutomataOperations.areEquivalent(overSingleSymbol, overTwoSymbolsSameLang));
+            assertTrue(AutoGex.areEquivalent(overSingleSymbol, overTwoSymbolsSameLang));
+        }
+    }
 
     /** Builds a complete DFA over {'a', 'b'} accepting strings with an even number of 'a's. */
     private DFA buildEvenAsDfa() {
@@ -44,7 +168,7 @@ class AutomataOperationsTest {
     }
 
     /**
-     * Generates all strings over alphabet {'a', 'b'} up to maxLength for exhaustive equivalence
+     * - Generates all strings over alphabet {'a', 'b'} up to maxLength for exhaustive equivalence -
      * checks.
      */
     private List<String> generateTestStrings(char[] alphabet, int maxLength) {

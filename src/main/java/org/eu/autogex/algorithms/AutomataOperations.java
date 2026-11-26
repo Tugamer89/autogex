@@ -11,8 +11,11 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
+import org.eu.autogex.core.Automaton;
 import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
+import org.eu.autogex.models.ENFA;
+import org.eu.autogex.models.NFA;
 
 /**
  * Utility class providing mathematical set operations on Deterministic Finite Automata (DFAs),
@@ -30,6 +33,103 @@ public final class AutomataOperations {
 
     private AutomataOperations() {
         throw new UnsupportedOperationException("Utility class");
+    }
+
+    private static DFA toDfa(Automaton automaton) {
+        return switch (automaton) {
+            case DFA dfa -> dfa;
+            case NFA nfa -> Converter.nfaToDfa(nfa);
+            case ENFA enfa -> Converter.enfaToDfa(enfa);
+            default ->
+                    throw new IllegalArgumentException(
+                            "Unsupported automaton type: " + automaton.getClass().getName());
+        };
+    }
+
+    /**
+     * Checks whether two finite automata recognize the exact same regular language over the union
+     * of their alphabets.
+     *
+     * <p>Two automata {@code a1} and {@code a2} are equivalent if and only if their symmetric
+     * difference is empty: {@code (L(a1) \ L(a2)) U (L(a2) \ L(a1)) = empty}. Inputs of type {@link
+     * DFA}, {@link NFA}, or {@link ENFA} are normalized to {@link DFA} instances, evaluated across
+     * the combined alphabet, and minimized so emptiness is determined by {@code
+     * minimized.getFinalStates().isEmpty()}.
+     *
+     * <p><b>Complexity:</b> Worst-case time and space complexity are exponential in the number of
+     * states when converting {@link NFA} or {@link ENFA} inputs to {@link DFA} via subset
+     * construction; for already-deterministic inputs, operations scale polynomially with state
+     * count and alphabet size.
+     *
+     * <p><b>Example:</b>
+     *
+     * <pre>{@code
+     * boolean sameLanguage = AutomataOperations.areEquivalent(dfa1, nfa2);
+     * }</pre>
+     *
+     * @param a1 the first finite automaton, must not be {@code null}
+     * @param a2 the second finite automaton, must not be {@code null}
+     * @return {@code true} if {@code a1} and {@code a2} accept the exact same language, {@code
+     *     false} otherwise
+     * @throws NullPointerException if {@code a1} or {@code a2} is {@code null}
+     */
+    public static boolean areEquivalent(Automaton a1, Automaton a2) {
+        Objects.requireNonNull(a1, "a1 must not be null");
+        Objects.requireNonNull(a2, "a2 must not be null");
+
+        DFA dfa1 = toDfa(a1);
+        DFA dfa2 = toDfa(a2);
+
+        Set<Character> combinedAlphabet = new LinkedHashSet<>(extractAlphabet(dfa1));
+        combinedAlphabet.addAll(extractAlphabet(dfa2));
+
+        DFA completed1 = completeWithDeadState(dfa1, combinedAlphabet);
+        DFA completed2 = completeWithDeadState(dfa2, combinedAlphabet);
+
+        DFA diff1 = difference(completed1, completed2);
+        DFA diff2 = difference(completed2, completed1);
+        DFA symmetricDifference = union(diff1, diff2);
+
+        DFA minimizedDiff = Minimizer.minimize(symmetricDifference);
+        return minimizedDiff.getFinalStates().isEmpty();
+    }
+
+    private static DFA completeWithDeadState(DFA dfa, Set<Character> alphabet) {
+        Map<State, Map<Character, State>> transitions = dfa.getTransitionTable();
+        boolean needsDeadState = hasMissingTransitions(dfa.getStates(), transitions, alphabet);
+
+        DFA.Builder builder = new DFA.Builder();
+        for (State state : dfa.getStates()) {
+            builder.addState(state.getName(), state.isFinal());
+        }
+        builder.setInitialState(dfa.getInitialState().getName());
+
+        String deadName = null;
+        if (needsDeadState) {
+            deadName = generateUniqueSinkName(dfa.getStates());
+            builder.addState(deadName, false);
+        }
+
+        for (State state : dfa.getStates()) {
+            Map<Character, State> stateTransitions =
+                    transitions.getOrDefault(state, Collections.emptyMap());
+            for (char symbol : alphabet) {
+                State target = stateTransitions.get(symbol);
+                if (target != null) {
+                    builder.addTransition(state.getName(), symbol, target.getName());
+                } else if (deadName != null) {
+                    builder.addTransition(state.getName(), symbol, deadName);
+                }
+            }
+        }
+
+        if (deadName != null) {
+            for (char symbol : alphabet) {
+                builder.addTransition(deadName, symbol, deadName);
+            }
+        }
+
+        return builder.build();
     }
 
     /**

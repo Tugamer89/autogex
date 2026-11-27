@@ -27,6 +27,9 @@ module org.eu.autogex {
     // Diagram exporters (Graphviz DOT and Mermaid.js)
     exports org.eu.autogex.export;
 
+    // Serialization and persistence utilities (JSON)
+    exports org.eu.autogex.io;
+
     // Step-by-step execution tracing diagnostics
     exports org.eu.autogex.trace;
 }

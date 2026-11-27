@@ -94,32 +94,12 @@ public class MarkdownTableExporter extends AbstractExporter {
             Map<State, Map<Character, Set<State>>> table,
             boolean withEpsilon,
             boolean deterministic) {
-        Set<Character> alphabet = new TreeSet<>();
-        for (Map<Character, Set<State>> row : table.values()) {
-            for (Character symbol : row.keySet()) {
-                if (symbol != null) {
-                    alphabet.add(symbol);
-                }
-            }
-        }
+        Set<Character> alphabet = extractSortedAlphabet(table);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("| State |");
-        for (Character symbol : alphabet) {
-            sb.append(' ').append(escapeCell(symbol.toString())).append(" |");
-        }
-        if (withEpsilon) {
-            sb.append(' ').append(EPSILON_LABEL).append(" |");
-        }
-        sb.append('\n');
+        appendHeader(sb, alphabet, withEpsilon);
 
-        sb.append("| --- |");
-        for (int i = 0; i < alphabet.size() + (withEpsilon ? 1 : 0); i++) {
-            sb.append(" --- |");
-        }
-        sb.append('\n');
-
-        List<State> sortedStates = states.stream().sorted(BY_NAME).collect(Collectors.toList());
+        List<State> sortedStates = states.stream().sorted(BY_NAME).toList();
         for (State state : sortedStates) {
             Map<Character, Set<State>> row = table.getOrDefault(state, Collections.emptyMap());
             sb.append("| ").append(rowLabel(state, initialState, finalStates)).append(" |");
@@ -132,6 +112,34 @@ public class MarkdownTableExporter extends AbstractExporter {
             sb.append('\n');
         }
         return sb.toString();
+    }
+
+    private static Set<Character> extractSortedAlphabet(
+            Map<State, Map<Character, Set<State>>> table) {
+        Set<Character> alphabet = new TreeSet<>();
+        for (Map<Character, Set<State>> row : table.values()) {
+            for (Character symbol : row.keySet()) {
+                if (symbol != null) {
+                    alphabet.add(symbol);
+                }
+            }
+        }
+        return alphabet;
+    }
+
+    private static void appendHeader(
+            StringBuilder sb, Set<Character> alphabet, boolean withEpsilon) {
+        sb.append("| State |");
+        for (Character symbol : alphabet) {
+            sb.append(' ').append(escapeCell(symbol.toString())).append(" |");
+        }
+        if (withEpsilon) {
+            sb.append(' ').append(EPSILON_LABEL).append(" |");
+        }
+        sb.append('\n');
+
+        int columnCount = alphabet.size() + (withEpsilon ? 1 : 0);
+        sb.append("| --- |").append(" --- |".repeat(columnCount)).append('\n');
     }
 
     private static String rowLabel(State state, State initialState, Set<State> finalStates) {

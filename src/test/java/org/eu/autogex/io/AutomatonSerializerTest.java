@@ -2,17 +2,24 @@ package org.eu.autogex.io;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import org.eu.autogex.algorithms.AutomataOperations;
+import org.eu.autogex.algorithms.LanguageGenerator;
 import org.eu.autogex.core.Automaton;
+import org.eu.autogex.core.State;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.models.NFA;
+import org.eu.autogex.regex.Regex;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("AutomatonSerializer JSON Serialization")
@@ -265,5 +272,430 @@ class AutomatonSerializerTest {
                 assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertTrue(exception.getCause() instanceof UnsupportedOperationException);
         assertTrue(exception.getCause().getMessage().contains("Utility class"));
+    }
+
+    @Nested
+    @DisplayName("Cyclic I/O & Deserialization (fromJson)")
+    class DeserializationAndCyclicIoTests {
+
+        @Test
+        @DisplayName(
+                "Should round-trip a compiled Regex DFA with deep equality and language equivalence")
+        void testCyclicIoCompiledRegexDfa() {
+            DFA original = new Regex("(a|b)*abb").getAutomaton();
+
+            String json = AutomatonSerializer.toJson(original);
+            Automaton deserialized = AutomatonSerializer.fromJson(json);
+
+            DFA restored = assertInstanceOf(DFA.class, deserialized);
+            assertNotSame(original, restored);
+            assertEquals(original.getStates(), restored.getStates());
+            assertEquals(original.getInitialState(), restored.getInitialState());
+            assertEquals(original.getFinalStates(), restored.getFinalStates());
+            assertEquals(original.getTransitionTable(), restored.getTransitionTable());
+            assertEquals(json, AutomatonSerializer.toJson(restored));
+            assertTrue(AutomataOperations.areEquivalent(original, restored));
+
+            for (String sample : LanguageGenerator.generateAll(original, 6)) {
+                assertTrue(restored.accepts(sample));
+            }
+            assertFalse(restored.accepts("abba"));
+            assertFalse(restored.accepts(""));
+        }
+
+        @Test
+        @DisplayName("Should round-trip an NFA with deep equality and language equivalence")
+        void testCyclicIoNfa() {
+            NFA original =
+                    new NFA.Builder()
+                            .addState("q0", false)
+                            .addState("q1", false)
+                            .addState("q2", true)
+                            .setInitialState("q0")
+                            .addTransition("q0", '0', "q0")
+                            .addTransition("q0", '1', "q0")
+                            .addTransition("q0", '0', "q1")
+                            .addTransition("q1", '1', "q2")
+                            .build();
+
+            String json = AutomatonSerializer.toJson(original);
+            NFA restored = assertInstanceOf(NFA.class, AutomatonSerializer.fromJson(json));
+
+            assertEquals(original.getStates(), restored.getStates());
+            assertEquals(original.getInitialState(), restored.getInitialState());
+            assertEquals(original.getFinalStates(), restored.getFinalStates());
+            assertEquals(original.getTransitionTable(), restored.getTransitionTable());
+            assertEquals(json, AutomatonSerializer.toJson(restored));
+            assertTrue(AutomataOperations.areEquivalent(original, restored));
+        }
+
+        @Test
+        @DisplayName("Should round-trip an ENFA with epsilon transitions and literal 'ε' symbols")
+        void testCyclicIoEnfa() {
+            ENFA original =
+                    new ENFA.Builder()
+                            .addState("q0", false)
+                            .addState("q1", true)
+                            .addState("q2", false)
+                            .setInitialState("q0")
+                            .addTransition("q0", 'a', "q0")
+                            .addEpsilonTransition("q0", "q1")
+                            .addTransition("q1", 'b', "q1")
+                            .addTransition("q1", 'ε', "q2")
+                            .build();
+
+            String json = AutomatonSerializer.toJson(original);
+            ENFA restored = assertInstanceOf(ENFA.class, AutomatonSerializer.fromJson(json));
+
+            assertEquals(original.getStates(), restored.getStates());
+            assertEquals(original.getInitialState(), restored.getInitialState());
+            assertEquals(original.getFinalStates(), restored.getFinalStates());
+            assertEquals(original.getTransitionTable(), restored.getTransitionTable());
+            assertEquals(json, AutomatonSerializer.toJson(restored));
+            assertTrue(AutomataOperations.areEquivalent(original, restored));
+        }
+
+        @Test
+        @DisplayName(
+                "Should round-trip state names containing special, unicode, and escaped characters")
+        void testCyclicIoSpecialCharactersAndUnicodeEscapes() {
+            String trickyState = "q\"\\/\b\f\n\r\t\u0001<tag>&";
+            DFA original =
+                    new DFA.Builder()
+                            .addState(trickyState, true)
+                            .setInitialState(trickyState)
+                            .addTransition(trickyState, '"', trickyState)
+                            .build();
+
+            String json = AutomatonSerializer.toJson(original);
+            DFA restored = assertInstanceOf(DFA.class, AutomatonSerializer.fromJson(json));
+
+            assertEquals(original.getStates(), restored.getStates());
+            assertEquals(original.getInitialState(), restored.getInitialState());
+            assertEquals(original.getTransitionTable(), restored.getTransitionTable());
+            assertTrue(restored.accepts("\"\""));
+        }
+
+        @Test
+        @DisplayName("Should enforce immutability on deserialized automata collections")
+        void testDeserializedAutomatonIsImmutable() {
+            DFA original = new Regex("a+").getAutomaton();
+            DFA restored =
+                    assertInstanceOf(
+                            DFA.class,
+                            AutomatonSerializer.fromJson(AutomatonSerializer.toJson(original)));
+
+            State dummy = new State("x", false);
+            assertThrows(
+                    UnsupportedOperationException.class, () -> restored.getStates().add(dummy));
+            assertThrows(
+                    UnsupportedOperationException.class,
+                    () -> restored.getFinalStates().add(dummy));
+            assertThrows(
+                    UnsupportedOperationException.class,
+                    () -> restored.getTransitionTable().clear());
+        }
+    }
+
+    @Nested
+    @DisplayName("Deserialization Error Handling & Security Validation")
+    class DeserializationValidationTests {
+
+        @Test
+        @DisplayName("Should reject null, blank, or oversized JSON inputs")
+        void testNullBlankAndOversizedInputs() {
+            assertThrows(NullPointerException.class, () -> AutomatonSerializer.fromJson(null));
+            assertThrows(IllegalArgumentException.class, () -> AutomatonSerializer.fromJson(""));
+            assertThrows(
+                    IllegalArgumentException.class, () -> AutomatonSerializer.fromJson("   \n\t "));
+
+            String oversized = "{".repeat(5_000_001);
+            IllegalArgumentException ex =
+                    assertThrows(
+                            IllegalArgumentException.class,
+                            () -> AutomatonSerializer.fromJson(oversized));
+            assertTrue(ex.getMessage().contains("exceeds maximum allowed length"));
+        }
+
+        @Test
+        @DisplayName("Should reject malformed JSON syntax, trailing tokens, and deep nesting")
+        void testMalformedJsonSyntax() {
+            assertThrows(IllegalArgumentException.class, () -> AutomatonSerializer.fromJson("[]"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"DFA\""));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"DFA\",}"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"DFA\"} trailing"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"unterminated}"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"bad\\escape\"}"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"bad\\u12\"}"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"bad\\u12GZ\"}"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": \"line\nbreak\"}"));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> AutomatonSerializer.fromJson("{\"type\": @}"));
+
+            String deeplyNested = "{\"a\": " + "[".repeat(40) + "]".repeat(40) + "}";
+            IllegalArgumentException depthEx =
+                    assertThrows(
+                            IllegalArgumentException.class,
+                            () -> AutomatonSerializer.fromJson(deeplyNested));
+            assertTrue(depthEx.getMessage().contains("nesting depth"));
+        }
+
+        @Test
+        @DisplayName("Should reject missing, duplicate, unknown, or mistyped JSON fields")
+        void testSchemaFieldValidation() {
+            // Missing required field
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Unknown root field
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": [],
+                                      "extra": true
+                                    }
+                                    """));
+
+            // Duplicate JSON key
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "type": "NFA",
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Wrong field types (numbers/booleans/objects instead of expected strings/arrays)
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": 123,
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": false,
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+        }
+
+        @Test
+        @DisplayName("Should reject invalid automaton semantics and Builder constraint violations")
+        void testSemanticValidation() {
+            // Unsupported automaton type
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "PDA",
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Empty states array
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": [],
+                                      "states": [],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Undeclared initialState
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "initialState": "q_missing",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Undeclared accepting state
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": [],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": ["q_missing"],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Multi-character alphabet symbol
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": ["ab"],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": []
+                                    }
+                                    """));
+
+            // Epsilon transition in non-ENFA automaton
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": [],
+                                      "states": ["q0", "q1"],
+                                      "initialState": "q0",
+                                      "acceptingStates": ["q1"],
+                                      "transitions": [
+                                        {"from": "q0", "symbol": null, "to": "q1"}
+                                      ]
+                                    }
+                                    """));
+
+            // Transition referencing undeclared target state (caught by Builder)
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": ["a"],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": [
+                                        {"from": "q0", "symbol": "a", "to": "q_unknown"}
+                                      ]
+                                    }
+                                    """));
+
+            // Transition symbol not in declared alphabet
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": ["a"],
+                                      "states": ["q0"],
+                                      "initialState": "q0",
+                                      "acceptingStates": [],
+                                      "transitions": [
+                                        {"from": "q0", "symbol": "b", "to": "q0"}
+                                      ]
+                                    }
+                                    """));
+
+            // Non-deterministic duplicate (from, symbol) transition in DFA
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            AutomatonSerializer.fromJson(
+                                    """
+                                    {
+                                      "type": "DFA",
+                                      "alphabet": ["a"],
+                                      "states": ["q0", "q1"],
+                                      "initialState": "q0",
+                                      "acceptingStates": ["q1"],
+                                      "transitions": [
+                                        {"from": "q0", "symbol": "a", "to": "q0"},
+                                        {"from": "q0", "symbol": "a", "to": "q1"}
+                                      ]
+                                    }
+                                    """));
+        }
     }
 }

@@ -8,7 +8,9 @@ import org.eu.autogex.algorithms.AutomataOperations;
 import org.eu.autogex.algorithms.Converter;
 import org.eu.autogex.algorithms.LanguageGenerator;
 import org.eu.autogex.algorithms.Minimizer;
+import org.eu.autogex.core.Automaton;
 import org.eu.autogex.export.GraphvizExporter;
+import org.eu.autogex.io.AutomatonSerializer;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.regex.Regex;
@@ -98,5 +100,17 @@ class UsageExamplesTest {
         assertTrue(allUpToLength4.contains("aab"));
         assertTrue(difference.accepts("aa"));
         assertTrue(complement.accepts("a"));
+    }
+
+    @Test
+    @DisplayName("Should serialize and deserialize an automaton using canonical JSON")
+    void testJsonSerializationAndDeserializationExample() {
+        DFA compiled = new Regex("(a|b)*abb").getAutomaton();
+
+        String json = AutomatonSerializer.toJson(compiled);
+        Automaton reloaded = AutomatonSerializer.fromJson(json);
+
+        assertTrue(reloaded.accepts("aabb"));
+        assertFalse(reloaded.accepts("abba"));
     }
 }

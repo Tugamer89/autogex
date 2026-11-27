@@ -386,14 +386,13 @@ class AutomatonSerializerTest {
                             AutomatonSerializer.fromJson(AutomatonSerializer.toJson(original)));
 
             State dummy = new State("x", false);
-            assertThrows(
-                    UnsupportedOperationException.class, () -> restored.getStates().add(dummy));
-            assertThrows(
-                    UnsupportedOperationException.class,
-                    () -> restored.getFinalStates().add(dummy));
-            assertThrows(
-                    UnsupportedOperationException.class,
-                    () -> restored.getTransitionTable().clear());
+            var states = restored.getStates();
+            var finalStates = restored.getFinalStates();
+            var transitionTable = restored.getTransitionTable();
+
+            assertThrows(UnsupportedOperationException.class, () -> states.add(dummy));
+            assertThrows(UnsupportedOperationException.class, () -> finalStates.add(dummy));
+            assertThrows(UnsupportedOperationException.class, transitionTable::clear);
         }
     }
 

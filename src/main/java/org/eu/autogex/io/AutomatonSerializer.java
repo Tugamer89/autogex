@@ -584,7 +584,7 @@ public final class AutomatonSerializer {
                 return map;
             }
 
-            while (true) {
+            do {
                 skipWhitespace();
                 String key = parseString();
                 skipWhitespace();
@@ -595,13 +595,9 @@ public final class AutomatonSerializer {
                     throw new IllegalArgumentException("Duplicate JSON key: '" + key + "'");
                 }
                 skipWhitespace();
-                if (match(',')) {
-                    continue;
-                }
-                expect('}');
-                break;
-            }
+            } while (match(','));
 
+            expect('}');
             exitContainer();
             return map;
         }
@@ -617,17 +613,13 @@ public final class AutomatonSerializer {
                 return list;
             }
 
-            while (true) {
+            do {
                 skipWhitespace();
                 list.add(parseValue());
                 skipWhitespace();
-                if (match(',')) {
-                    continue;
-                }
-                expect(']');
-                break;
-            }
+            } while (match(','));
 
+            expect(']');
             exitContainer();
             return list;
         }

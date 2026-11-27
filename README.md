@@ -143,6 +143,7 @@ String dotGraph = GraphvizExporter.toDot(minimalDfa);
 | `org.eu.autogex.regex` | High-level `Regex` facade for parsing, compiling, and matching regular expressions. |
 | `org.eu.autogex.regex.ast` | Immutable Abstract Syntax Tree (`RegexNode`) representations for regular expressions. |
 | `org.eu.autogex.export` | Exporters for Graphviz DOT (`GraphvizExporter`), Mermaid.js (`MermaidExporter`), and Markdown tables (`MarkdownTableExporter`). |
+| `org.eu.autogex.io` | Canonical JSON serialization utilities (`AutomatonSerializer`). |
 | `org.eu.autogex.trace` | Step-by-step simulation records (`ExecutionTrace` and `ExecutionStep`). |
 
 ## Contributing

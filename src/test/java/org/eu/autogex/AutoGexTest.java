@@ -108,5 +108,10 @@ class AutoGexTest {
         assertTrue(AutoGex.toMarkdownTable(dfaB).contains("| State |"));
         assertTrue(AutoGex.toMarkdownTable(nfa).contains("| State |"));
         assertTrue(AutoGex.toMarkdownTable(enfa).contains("| State |"));
+
+        assertTrue(AutoGex.toJson(dfaB).contains("\"type\": \"DFA\""));
+        assertTrue(AutoGex.toJson(nfa).contains("\"type\": \"NFA\""));
+        assertTrue(AutoGex.toJson(enfa).contains("\"type\": \"ENFA\""));
+        assertThrows(NullPointerException.class, () -> AutoGex.toJson(null));
     }
 }

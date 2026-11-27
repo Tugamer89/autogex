@@ -9,6 +9,7 @@ import org.eu.autogex.core.Automaton;
 import org.eu.autogex.export.GraphvizExporter;
 import org.eu.autogex.export.MarkdownTableExporter;
 import org.eu.autogex.export.MermaidExporter;
+import org.eu.autogex.io.AutomatonSerializer;
 import org.eu.autogex.models.DFA;
 import org.eu.autogex.models.ENFA;
 import org.eu.autogex.models.NFA;
@@ -238,6 +239,21 @@ public final class AutoGex {
      */
     public static String toMarkdownTable(ENFA enfa) {
         return MarkdownTableExporter.toMarkdownTable(enfa);
+    }
+
+    /**
+     * Serializes a finite automaton ({@link DFA}, {@link NFA}, or {@link ENFA}) into its canonical,
+     * deterministic JSON representation.
+     *
+     * <p>Delegates to {@link AutomatonSerializer#toJson(Automaton)}.
+     *
+     * @param automaton the finite automaton to serialize, must not be {@code null}
+     * @return a deterministic JSON string representing {@code automaton}
+     * @throws NullPointerException if {@code automaton} is {@code null}
+     */
+    public static String toJson(Automaton automaton) {
+        Objects.requireNonNull(automaton, "automaton must not be null");
+        return AutomatonSerializer.toJson(automaton);
     }
 
     /**

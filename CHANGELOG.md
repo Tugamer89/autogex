@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.16.0](https://github.com/Tugamer89/autogex/compare/v1.15.0...v1.16.0) (2026-11-27)
+
+
+### Features
+
+* **algorithms:** implement language equivalence check ([#258](https://github.com/Tugamer89/autogex/issues/258)) ([cc95853](https://github.com/Tugamer89/autogex/commit/cc95853773e858787f4018ee30480d4340877eaa))
+* **io:** implement AutomatonSerializer.fromJson with Builder validation and cyclic I/O tests ([#261](https://github.com/Tugamer89/autogex/issues/261)) ([9dc02f9](https://github.com/Tugamer89/autogex/commit/9dc02f9ada1f57754715ab843ed9564b86988782))
+* **io:** implement canonical JSON schema and AutomatonSerializer.toJson ([#260](https://github.com/Tugamer89/autogex/issues/260)) ([58ce02b](https://github.com/Tugamer89/autogex/commit/58ce02b5097092a908158b1347bd18ae9bbf3303))
+
 ## [1.15.0](https://github.com/Tugamer89/autogex/compare/v1.14.0...v1.15.0) (2026-11-24)
 
 

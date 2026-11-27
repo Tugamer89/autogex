@@ -58,6 +58,7 @@ stateDiagram-v2
 - **Language Generation (`LanguageGenerator`):** Random accepted string sampling for property/fuzz testing and canonical lexicographical enumeration up to length `N`.
 - **Execution Tracing (`ExecutionTrace`):** Step-by-step inspection and formatted visual debugging of input runs via `automaton.execute(input).getFormattedTrace()`.
 - **Diagram Exporters:** Native export to **Mermaid.js** (`MermaidExporter`) and **Graphviz DOT** (`GraphvizExporter`).
+- **JSON Serialization (`AutomatonSerializer`):** Deterministic, zero-dependency RFC 8259 JSON export (`toJson`) and validated reconstruction (`fromJson`) for `DFA`, `NFA`, and `ENFA`.
 
 ## Installation
 
@@ -132,6 +133,24 @@ System.out.println(trace.getFormattedTrace()); // Step-by-step state transitions
 String dotGraph = GraphvizExporter.toDot(minimalDfa);
 ```
 
+### 3. JSON Serialization & Deserialization
+
+```java
+import org.eu.autogex.core.Automaton;
+import org.eu.autogex.io.AutomatonSerializer;
+import org.eu.autogex.models.DFA;
+import org.eu.autogex.regex.Regex;
+
+DFA compiled = new Regex("(a|b)*abb").getAutomaton();
+
+// Serialize to canonical, deterministic JSON
+String json = AutomatonSerializer.toJson(compiled);
+
+// Reload into an immutable, validated automaton
+Automaton restored = AutomatonSerializer.fromJson(json);
+System.out.println(restored.accepts("aabb")); // true
+```
+
 ## Module & Package Overview
 
 | Package | Responsibility |
@@ -143,7 +162,7 @@ String dotGraph = GraphvizExporter.toDot(minimalDfa);
 | `org.eu.autogex.regex` | High-level `Regex` facade for parsing, compiling, and matching regular expressions. |
 | `org.eu.autogex.regex.ast` | Immutable Abstract Syntax Tree (`RegexNode`) representations for regular expressions. |
 | `org.eu.autogex.export` | Exporters for Graphviz DOT (`GraphvizExporter`), Mermaid.js (`MermaidExporter`), and Markdown tables (`MarkdownTableExporter`). |
-| `org.eu.autogex.io` | Canonical JSON serialization utilities (`AutomatonSerializer`). |
+| `org.eu.autogex.io` | Canonical JSON serialization and deserialization utilities (`AutomatonSerializer`). |
 | `org.eu.autogex.trace` | Step-by-step simulation records (`ExecutionTrace` and `ExecutionStep`). |
 
 ## Contributing

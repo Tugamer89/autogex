@@ -222,10 +222,12 @@ public final class LanguageGenerator {
             State current = queue.poll();
             int nextDist = distances.get(current) + 1;
             for (State predecessor : reverseEdges.getOrDefault(current, Collections.emptySet())) {
-                if (!distances.containsKey(predecessor)) {
-                    distances.put(predecessor, nextDist);
-                    queue.add(predecessor);
-                }
+                distances.computeIfAbsent(
+                        predecessor,
+                        k -> {
+                            queue.add(k);
+                            return nextDist;
+                        });
             }
         }
 

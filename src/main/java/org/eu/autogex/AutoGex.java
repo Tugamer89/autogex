@@ -257,6 +257,22 @@ public final class AutoGex {
     }
 
     /**
+     * Deserializes a finite automaton ({@link DFA}, {@link NFA}, or {@link ENFA}) from its
+     * canonical JSON representation.
+     *
+     * <p>Delegates to {@link AutomatonSerializer#fromJson(String)}.
+     *
+     * @param json the JSON string representing a serialized automaton, must not be {@code null}
+     * @return an immutable {@link DFA}, {@link NFA}, or {@link ENFA} instance
+     * @throws NullPointerException if {@code json} is {@code null}
+     * @throws IllegalArgumentException if {@code json} is malformed or structurally invalid
+     */
+    public static Automaton fromJson(String json) {
+        Objects.requireNonNull(json, "json must not be null");
+        return AutomatonSerializer.fromJson(json);
+    }
+
+    /**
      * Dynamically resolves the library version from the package metadata.
      *
      * @param implementationVersion The version string retrieved from the package manifest, or null.

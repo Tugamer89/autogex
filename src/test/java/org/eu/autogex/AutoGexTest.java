@@ -113,5 +113,10 @@ class AutoGexTest {
         assertTrue(AutoGex.toJson(nfa).contains("\"type\": \"NFA\""));
         assertTrue(AutoGex.toJson(enfa).contains("\"type\": \"ENFA\""));
         assertThrows(NullPointerException.class, () -> AutoGex.toJson(null));
+
+        assertTrue(AutoGex.fromJson(AutoGex.toJson(dfaB)).accepts("ab"));
+        assertTrue(AutoGex.fromJson(AutoGex.toJson(nfa)).accepts("a"));
+        assertTrue(AutoGex.fromJson(AutoGex.toJson(enfa)).accepts("a"));
+        assertThrows(NullPointerException.class, () -> AutoGex.fromJson(null));
     }
 }

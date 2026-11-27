@@ -23,10 +23,12 @@ class MarkdownTableExporterTest {
                         .build();
 
         String expected =
-                "| State | a | b |\n"
-                        + "| --- | --- | --- |\n"
-                        + "| -> q0 | q1 | - |\n"
-                        + "| *q1 | - | q0 |\n";
+                """
+                | State | a | b |
+                | --- | --- | --- |
+                | -> q0 | q1 | - |
+                | *q1 | - | q0 |
+                """;
 
         assertEquals(expected, MarkdownTableExporter.toMarkdownTable(dfa));
     }
@@ -71,10 +73,12 @@ class MarkdownTableExporterTest {
                         .build();
 
         String expected =
-                "| State | 0 |\n"
-                        + "| --- | --- |\n"
-                        + "| *end | ∅ |\n"
-                        + "| -> start | {end, start} |\n";
+                """
+                | State | 0 |
+                | --- | --- |
+                | *end | ∅ |
+                | -> start | {end, start} |
+                """;
 
         assertEquals(expected, MarkdownTableExporter.toMarkdownTable(nfa));
     }
@@ -93,11 +97,13 @@ class MarkdownTableExporterTest {
                         .build();
 
         String expected =
-                "| State | a | ε |\n"
-                        + "| --- | --- | --- |\n"
-                        + "| -> A | ∅ | {B, C} |\n"
-                        + "| *B | {C} | ∅ |\n"
-                        + "| C | ∅ | ∅ |\n";
+                """
+                | State | a | ε |
+                | --- | --- | --- |
+                | -> A | ∅ | {B, C} |
+                | *B | {C} | ∅ |
+                | C | ∅ | ∅ |
+                """;
 
         assertEquals(expected, MarkdownTableExporter.toMarkdownTable(enfa));
     }

@@ -2,6 +2,8 @@ package org.eu.autogex.io;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,8 +16,9 @@ import org.eu.autogex.models.ENFA;
 import org.eu.autogex.models.NFA;
 
 /**
- * Utility class for serializing finite state automata ({@link DFA}, {@link NFA}, and {@link ENFA})
- * into a canonical, deterministic JSON representation with zero external dependencies.
+ * Utility class for serializing and deserializing finite state automata ({@link DFA}, {@link NFA},
+ * and {@link ENFA}) using a canonical, deterministic JSON representation with zero external
+ * dependencies.
  *
  * <h2>Canonical JSON Schema</h2>
  *
@@ -44,39 +47,47 @@ import org.eu.autogex.models.NFA;
  *       </ul>
  * </ul>
  *
- * <h2>Example Output</h2>
+ * <h2>Usage Example</h2>
  *
  * <pre>{@code
- * {
- *   "type": "DFA",
- *   "alphabet": [
- *     "a",
- *     "b"
- *   ],
- *   "states": [
- *     "q0",
- *     "q1"
- *   ],
- *   "initialState": "q0",
- *   "acceptingStates": [
- *     "q1"
- *   ],
- *   "transitions": [
- *     {
- *       "from": "q0",
- *       "symbol": "a",
- *       "to": "q1"
- *     },
- *     {
- *       "from": "q1",
- *       "symbol": "b",
- *       "to": "q0"
- *     }
- *   ]
- * }
+ * DFA dfa = new Regex("(a|b)*abb").getAutomaton();
+ * String json = AutomatonSerializer.toJson(dfa);
+ *
+ * Automaton restored = AutomatonSerializer.fromJson(json);
+ * boolean accepted = restored.accepts("aabb"); // true
  * }</pre>
  */
 public final class AutomatonSerializer {
+
+    /** Maximum allowed JSON payload length in characters to prevent memory DoS. */
+    private static final int MAX_JSON_LENGTH = 5_000_000;
+
+    /** Maximum allowed JSON nesting depth to prevent StackOverflowError DoS. */
+    private static final int MAX_NESTING_DEPTH = 32;
+
+    /** Sentinel representing an explicit JSON {@code null} value inside parsed maps. */
+    private static final Object JSON_NULL = new Object();
+
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_ALPHABET = "alphabet";
+    private static final String KEY_STATES = "states";
+    private static final String KEY_INITIAL_STATE = "initialState";
+    private static final String KEY_ACCEPTING_STATES = "acceptingStates";
+    private static final String KEY_TRANSITIONS = "transitions";
+    private static final String KEY_FROM = "from";
+    private static final String KEY_SYMBOL = "symbol";
+    private static final String KEY_TO = "to";
+
+    private static final Set<String> ROOT_KEYS =
+            Set.of(
+                    KEY_TYPE,
+                    KEY_ALPHABET,
+                    KEY_STATES,
+                    KEY_INITIAL_STATE,
+                    KEY_ACCEPTING_STATES,
+                    KEY_TRANSITIONS);
+
+    private static final Set<String> TRANSITION_KEYS = Set.of(KEY_FROM, KEY_SYMBOL, KEY_TO);
 
     private static final Comparator<SerializedTransition> TRANSITION_COMPARATOR =
             Comparator.comparing(SerializedTransition::from)
@@ -86,6 +97,8 @@ public final class AutomatonSerializer {
                     .thenComparing(SerializedTransition::to);
 
     private record SerializedTransition(String from, Character symbol, String to) {}
+
+    private record StateSymbol(String state, char symbol) {}
 
     private AutomatonSerializer() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
@@ -136,6 +149,257 @@ public final class AutomatonSerializer {
         String initialState = automaton.getInitialState().getName();
 
         return renderJson(type, alphabet, states, initialState, acceptingStates, transitions);
+    }
+
+    /**
+     * Deserializes a finite automaton ({@link DFA}, {@link NFA}, or {@link ENFA}) from its
+     * canonical JSON representation.
+     *
+     * <p>Reconstructs the target model exclusively through {@link DFA.Builder}, {@link
+     * NFA.Builder}, or {@link ENFA.Builder} so all immutability guarantees and structural
+     * invariants remain strictly enforced.
+     *
+     * @param json the JSON string representing a serialized automaton, must not be {@code null}
+     * @return an immutable {@link DFA}, {@link NFA}, or {@link ENFA} instance
+     * @throws NullPointerException if {@code json} is {@code null}
+     * @throws IllegalArgumentException if {@code json} is malformed, exceeds safety limits, misses
+     *     required fields, or violates automaton invariants
+     */
+    public static Automaton fromJson(String json) {
+        Objects.requireNonNull(json, "JSON string cannot be null");
+        if (json.length() > MAX_JSON_LENGTH) {
+            throw new IllegalArgumentException(
+                    "JSON payload exceeds maximum allowed length of "
+                            + MAX_JSON_LENGTH
+                            + " characters (Security: DoS prevention).");
+        }
+        if (json.isBlank()) {
+            throw new IllegalArgumentException("JSON string cannot be blank");
+        }
+
+        Map<String, Object> root = new JsonParser(json).parseRootObject();
+        validateAllowedKeys(root, ROOT_KEYS, "root object");
+
+        String type = requireString(root, KEY_TYPE);
+        Set<Character> alphabet = parseAlphabet(requireArray(root, KEY_ALPHABET));
+        List<String> states = parseUniqueStringList(requireArray(root, KEY_STATES), KEY_STATES);
+        if (states.isEmpty()) {
+            throw new IllegalArgumentException("Field 'states' must contain at least one state");
+        }
+
+        Set<String> stateSet = new HashSet<>(states);
+        String initialState = requireString(root, KEY_INITIAL_STATE);
+        if (!stateSet.contains(initialState)) {
+            throw new IllegalArgumentException(
+                    "Initial state '" + initialState + "' is not declared in 'states'");
+        }
+
+        List<String> acceptingList =
+                parseUniqueStringList(
+                        requireArray(root, KEY_ACCEPTING_STATES), KEY_ACCEPTING_STATES);
+        for (String accepting : acceptingList) {
+            if (!stateSet.contains(accepting)) {
+                throw new IllegalArgumentException(
+                        "Accepting state '" + accepting + "' is not declared in 'states'");
+            }
+        }
+        Set<String> acceptingSet = new HashSet<>(acceptingList);
+
+        List<SerializedTransition> transitions =
+                parseTransitions(requireArray(root, KEY_TRANSITIONS), alphabet, type);
+
+        return buildAutomaton(type, states, initialState, acceptingSet, transitions);
+    }
+
+    private static Automaton buildAutomaton(
+            String type,
+            List<String> states,
+            String initialState,
+            Set<String> acceptingSet,
+            List<SerializedTransition> transitions) {
+        return switch (type) {
+            case "DFA" -> buildDfa(states, initialState, acceptingSet, transitions);
+            case "NFA" -> buildNfa(states, initialState, acceptingSet, transitions);
+            case "ENFA" -> buildEnfa(states, initialState, acceptingSet, transitions);
+            default -> throw new IllegalArgumentException("Unsupported automaton type: " + type);
+        };
+    }
+
+    private static DFA buildDfa(
+            List<String> states,
+            String initialState,
+            Set<String> acceptingSet,
+            List<SerializedTransition> transitions) {
+        DFA.Builder builder = new DFA.Builder();
+        for (String state : states) {
+            builder.addState(state, acceptingSet.contains(state));
+        }
+        builder.setInitialState(initialState);
+
+        Set<StateSymbol> seen = new HashSet<>();
+        for (SerializedTransition t : transitions) {
+            char symbol = t.symbol();
+            if (!seen.add(new StateSymbol(t.from(), symbol))) {
+                throw new IllegalArgumentException(
+                        "Duplicate transition for state '"
+                                + t.from()
+                                + "' on symbol '"
+                                + symbol
+                                + "' in DFA");
+            }
+            builder.addTransition(t.from(), symbol, t.to());
+        }
+        return builder.build();
+    }
+
+    private static NFA buildNfa(
+            List<String> states,
+            String initialState,
+            Set<String> acceptingSet,
+            List<SerializedTransition> transitions) {
+        NFA.Builder builder = new NFA.Builder();
+        for (String state : states) {
+            builder.addState(state, acceptingSet.contains(state));
+        }
+        builder.setInitialState(initialState);
+
+        for (SerializedTransition t : transitions) {
+            builder.addTransition(t.from(), t.symbol(), t.to());
+        }
+        return builder.build();
+    }
+
+    private static ENFA buildEnfa(
+            List<String> states,
+            String initialState,
+            Set<String> acceptingSet,
+            List<SerializedTransition> transitions) {
+        ENFA.Builder builder = new ENFA.Builder();
+        for (String state : states) {
+            builder.addState(state, acceptingSet.contains(state));
+        }
+        builder.setInitialState(initialState);
+
+        for (SerializedTransition t : transitions) {
+            if (t.symbol() == null) {
+                builder.addEpsilonTransition(t.from(), t.to());
+            } else {
+                builder.addTransition(t.from(), t.symbol(), t.to());
+            }
+        }
+        return builder.build();
+    }
+
+    private static void validateAllowedKeys(
+            Map<String, Object> obj, Set<String> allowedKeys, String context) {
+        for (String key : obj.keySet()) {
+            if (!allowedKeys.contains(key)) {
+                throw new IllegalArgumentException(
+                        "Unknown JSON field '" + key + "' in " + context);
+            }
+        }
+    }
+
+    private static String requireString(Map<String, Object> obj, String key) {
+        Object value = obj.get(key);
+        if (value == null) {
+            throw new IllegalArgumentException("Missing required JSON field: '" + key + "'");
+        }
+        if (!(value instanceof String str)) {
+            throw new IllegalArgumentException("JSON field '" + key + "' must be a string");
+        }
+        return str;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Object> requireArray(Map<String, Object> obj, String key) {
+        Object value = obj.get(key);
+        if (value == null) {
+            throw new IllegalArgumentException("Missing required JSON field: '" + key + "'");
+        }
+        if (!(value instanceof List<?> list)) {
+            throw new IllegalArgumentException("JSON field '" + key + "' must be an array");
+        }
+        return (List<Object>) list;
+    }
+
+    private static Set<Character> parseAlphabet(List<Object> rawAlphabet) {
+        Set<Character> alphabet = new HashSet<>();
+        for (Object item : rawAlphabet) {
+            if (!(item instanceof String str) || str.length() != 1) {
+                throw new IllegalArgumentException(
+                        "Entries in 'alphabet' must be single-character strings");
+            }
+            char symbol = str.charAt(0);
+            if (!alphabet.add(symbol)) {
+                throw new IllegalArgumentException(
+                        "Duplicate symbol '" + symbol + "' in 'alphabet'");
+            }
+        }
+        return alphabet;
+    }
+
+    private static List<String> parseUniqueStringList(List<Object> rawList, String fieldName) {
+        List<String> result = new ArrayList<>(rawList.size());
+        Set<String> seen = new HashSet<>();
+        for (Object item : rawList) {
+            if (!(item instanceof String str)) {
+                throw new IllegalArgumentException(
+                        "Entries in '" + fieldName + "' must be strings");
+            }
+            if (!seen.add(str)) {
+                throw new IllegalArgumentException(
+                        "Duplicate entry '" + str + "' in '" + fieldName + "'");
+            }
+            result.add(str);
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<SerializedTransition> parseTransitions(
+            List<Object> rawTransitions, Set<Character> alphabet, String type) {
+        List<SerializedTransition> result = new ArrayList<>(rawTransitions.size());
+        for (Object item : rawTransitions) {
+            if (!(item instanceof Map<?, ?> rawMap)) {
+                throw new IllegalArgumentException("Entries in 'transitions' must be JSON objects");
+            }
+            Map<String, Object> transitionObj = (Map<String, Object>) rawMap;
+            validateAllowedKeys(transitionObj, TRANSITION_KEYS, "transition object");
+
+            String from = requireString(transitionObj, KEY_FROM);
+            String to = requireString(transitionObj, KEY_TO);
+            Character symbol = parseTransitionSymbol(transitionObj, alphabet, type);
+
+            result.add(new SerializedTransition(from, symbol, to));
+        }
+        return result;
+    }
+
+    private static Character parseTransitionSymbol(
+            Map<String, Object> transitionObj, Set<Character> alphabet, String type) {
+        Object rawSymbol = transitionObj.get(KEY_SYMBOL);
+        if (rawSymbol == null) {
+            throw new IllegalArgumentException(
+                    "Missing required JSON field: 'symbol' in transition object");
+        }
+        if (rawSymbol == JSON_NULL) {
+            if (!"ENFA".equals(type)) {
+                throw new IllegalArgumentException(
+                        "Epsilon transitions (symbol: null) are only supported for ENFA");
+            }
+            return null;
+        }
+        if (!(rawSymbol instanceof String str) || str.length() != 1) {
+            throw new IllegalArgumentException(
+                    "Transition 'symbol' must be a single-character string or null");
+        }
+        char symbol = str.charAt(0);
+        if (!alphabet.contains(symbol)) {
+            throw new IllegalArgumentException(
+                    "Transition symbol '" + symbol + "' is not declared in 'alphabet'");
+        }
+        return symbol;
     }
 
     private static void collectDfaTransitions(
@@ -195,15 +459,15 @@ public final class AutomatonSerializer {
         sb.append("  \"type\": \"").append(escapeJsonString(type)).append("\",\n");
 
         List<String> alphabetStrings = alphabet.stream().map(String::valueOf).toList();
-        appendStringArray(sb, "alphabet", alphabetStrings);
+        appendStringArray(sb, KEY_ALPHABET, alphabetStrings);
         sb.append(",\n");
 
-        appendStringArray(sb, "states", states);
+        appendStringArray(sb, KEY_STATES, states);
         sb.append(",\n");
 
         sb.append("  \"initialState\": \"").append(escapeJsonString(initialState)).append("\",\n");
 
-        appendStringArray(sb, "acceptingStates", acceptingStates);
+        appendStringArray(sb, KEY_ACCEPTING_STATES, acceptingStates);
         sb.append(",\n");
 
         appendTransitionsArray(sb, transitions);
@@ -283,5 +547,269 @@ public final class AutomatonSerializer {
             }
         }
         return sb.toString();
+    }
+
+    /** Lightweight, zero-dependency recursive-descent parser compliant with RFC 8259. */
+    private static final class JsonParser {
+
+        private final String input;
+        private int pos;
+        private int depth;
+
+        JsonParser(String input) {
+            this.input = input;
+            this.pos = 0;
+            this.depth = 0;
+        }
+
+        Map<String, Object> parseRootObject() {
+            skipWhitespace();
+            Map<String, Object> root = parseObject();
+            skipWhitespace();
+            if (pos != input.length()) {
+                throw new IllegalArgumentException(
+                        "Unexpected trailing character at index " + pos + ": '" + peek() + "'");
+            }
+            return root;
+        }
+
+        private Map<String, Object> parseObject() {
+            expect('{');
+            enterContainer();
+            skipWhitespace();
+
+            Map<String, Object> map = new LinkedHashMap<>();
+            if (match('}')) {
+                exitContainer();
+                return map;
+            }
+
+            do {
+                skipWhitespace();
+                String key = parseString();
+                skipWhitespace();
+                expect(':');
+                skipWhitespace();
+                Object value = parseValue();
+                if (map.put(key, value) != null) {
+                    throw new IllegalArgumentException("Duplicate JSON key: '" + key + "'");
+                }
+                skipWhitespace();
+            } while (match(','));
+
+            expect('}');
+            exitContainer();
+            return map;
+        }
+
+        private List<Object> parseArray() {
+            expect('[');
+            enterContainer();
+            skipWhitespace();
+
+            List<Object> list = new ArrayList<>();
+            if (match(']')) {
+                exitContainer();
+                return list;
+            }
+
+            do {
+                skipWhitespace();
+                list.add(parseValue());
+                skipWhitespace();
+            } while (match(','));
+
+            expect(']');
+            exitContainer();
+            return list;
+        }
+
+        private Object parseValue() {
+            if (!hasNext()) {
+                throw new IllegalArgumentException("Unexpected end of JSON input at index " + pos);
+            }
+            char c = peek();
+            return switch (c) {
+                case '{' -> parseObject();
+                case '[' -> parseArray();
+                case '"' -> parseString();
+                case 'n' -> parseNull();
+                case 't', 'f' -> parseBoolean();
+                default -> {
+                    if (c == '-' || (c >= '0' && c <= '9')) {
+                        yield parseNumber();
+                    }
+                    throw new IllegalArgumentException(
+                            "Unexpected JSON token at index " + pos + ": '" + c + "'");
+                }
+            };
+        }
+
+        private String parseString() {
+            expect('"');
+            StringBuilder sb = new StringBuilder();
+            while (hasNext()) {
+                char c = next();
+                if (c == '"') {
+                    return sb.toString();
+                }
+                if (c == '\\') {
+                    sb.append(parseEscapeSequence());
+                } else if (c < 0x20) {
+                    throw new IllegalArgumentException(
+                            "Unescaped control character in JSON string at index " + (pos - 1));
+                } else {
+                    sb.append(c);
+                }
+            }
+            throw new IllegalArgumentException("Unterminated JSON string");
+        }
+
+        private char parseEscapeSequence() {
+            if (!hasNext()) {
+                throw new IllegalArgumentException(
+                        "Incomplete escape sequence at end of JSON input");
+            }
+            char escaped = next();
+            return switch (escaped) {
+                case '"' -> '"';
+                case '\\' -> '\\';
+                case '/' -> '/';
+                case 'b' -> '\b';
+                case 'f' -> '\f';
+                case 'n' -> '\n';
+                case 'r' -> '\r';
+                case 't' -> '\t';
+                case 'u' -> parseUnicodeEscape();
+                default ->
+                        throw new IllegalArgumentException(
+                                "Invalid escape sequence '\\"
+                                        + escaped
+                                        + "' at index "
+                                        + (pos - 1));
+            };
+        }
+
+        private char parseUnicodeEscape() {
+            if (pos + 4 > input.length()) {
+                throw new IllegalArgumentException(
+                        "Incomplete unicode escape sequence at index " + pos);
+            }
+            int codeUnit = 0;
+            for (int i = 0; i < 4; i++) {
+                char hex = next();
+                int digit = Character.digit(hex, 16);
+                if (digit < 0) {
+                    throw new IllegalArgumentException(
+                            "Invalid hex digit '" + hex + "' in unicode escape");
+                }
+                codeUnit = (codeUnit << 4) | digit;
+            }
+            return (char) codeUnit;
+        }
+
+        private Object parseNull() {
+            expectLiteral("null");
+            return JSON_NULL;
+        }
+
+        private Boolean parseBoolean() {
+            if (peek() == 't') {
+                expectLiteral("true");
+                return Boolean.TRUE;
+            }
+            expectLiteral("false");
+            return Boolean.FALSE;
+        }
+
+        private Number parseNumber() {
+            int start = pos;
+            match('-');
+            consumeDigits();
+            if (match('.')) {
+                consumeDigits();
+            }
+            if (match('e') || match('E')) {
+                if (!match('+')) {
+                    match('-');
+                }
+                consumeDigits();
+            }
+            String token = input.substring(start, pos);
+            try {
+                return Double.valueOf(token);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid JSON number: '" + token + "'", ex);
+            }
+        }
+
+        private void consumeDigits() {
+            int start = pos;
+            while (hasNext() && peek() >= '0' && peek() <= '9') {
+                pos++;
+            }
+            if (pos == start) {
+                throw new IllegalArgumentException("Expected digit at index " + pos);
+            }
+        }
+
+        private void expectLiteral(String literal) {
+            if (!input.startsWith(literal, pos)) {
+                throw new IllegalArgumentException("Expected '" + literal + "' at index " + pos);
+            }
+            pos += literal.length();
+        }
+
+        private void enterContainer() {
+            depth++;
+            if (depth > MAX_NESTING_DEPTH) {
+                throw new IllegalArgumentException(
+                        "JSON nesting depth exceeds maximum allowed depth of "
+                                + MAX_NESTING_DEPTH
+                                + " (Security: DoS prevention).");
+            }
+        }
+
+        private void exitContainer() {
+            depth--;
+        }
+
+        private void skipWhitespace() {
+            while (hasNext()) {
+                char c = peek();
+                if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+                    pos++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        private boolean hasNext() {
+            return pos < input.length();
+        }
+
+        private char peek() {
+            return input.charAt(pos);
+        }
+
+        private char next() {
+            return input.charAt(pos++);
+        }
+
+        private boolean match(char expected) {
+            if (hasNext() && peek() == expected) {
+                pos++;
+                return true;
+            }
+            return false;
+        }
+
+        private void expect(char expected) {
+            if (!hasNext() || peek() != expected) {
+                throw new IllegalArgumentException("Expected '" + expected + "' at index " + pos);
+            }
+            pos++;
+        }
     }
 }

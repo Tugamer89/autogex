@@ -69,7 +69,7 @@ Add Autogex to your Maven `pom.xml` (zero external runtime dependencies):
 <dependency>
   <groupId>org.eu.autogex</groupId>
   <artifactId>autogex</artifactId>
-  <version>1.15.0</version>
+  <version>1.16.0</version>
 </dependency>
 ```
 <!-- x-release-please-end -->
